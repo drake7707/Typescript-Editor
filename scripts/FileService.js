@@ -8,7 +8,7 @@ define(["require", "exports"], function(require, exports) {
                 type: "GET",
                 url: path,
                 success: cb,
-                dataType:"script",
+                dataType: "text",
                 error: (function (jqXHR, textStatus) {
                     return console.log(textStatus);
                 })
