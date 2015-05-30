@@ -1416,6 +1416,9 @@ define(function (require, exports, module) {
                 });
                 saveObj("entries", entries);
 
+                updateHeader(entry.Name, entry.LastMilestone, entry.Description);
+                setHash(entry.Name + "-" + entry.LastMilestone);
+
                 showNotification("Milestone " + entry.LastMilestone + " created", "info");
             }
             catch (e) {
