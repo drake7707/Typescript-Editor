@@ -1,6 +1,7 @@
 # Typescript-Editor
 Scratchpad for testing out typescript snippets
 
+Test it out on: http://drake7707.github.io/Typescript-Editor/ (it will download an example if it's not available in the local storage)
 
 The entries are currently saved to window.localStorage (HTML5 storage) so it's completely client side. 
 I initially wrote a server side to run on my rpi and save the entries in a database and store the output of the seperate editors milestone per milestone in a repo directory, which is why you'll find the RestServices class in main.js
