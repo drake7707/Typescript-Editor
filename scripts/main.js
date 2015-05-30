@@ -1265,9 +1265,10 @@ define(function (require, exports, module) {
                     }]
                 };
 
+                /* Don't pollute the localstorage with the same new templates
                 var entries = loadObj("entries");
                 entries[entry.Name] = entry;
-                saveObj("entries", entries);
+                saveObj("entries", entries);*/
 
                 var milestone = entry.Milestones[entry.LastMilestone-1];
 
@@ -1329,6 +1330,21 @@ define(function (require, exports, module) {
             try {
                 var entries = loadObj("entries");
                 var entry = entries[name];
+                if (typeof entry === "undefined") {
+                    var entry = {
+                        Name: name,
+                        LastMilestone: 1,
+                        Description: "",
+                        Milestones: [
+                            {
+                                HTML: "",
+                                CSS: "",
+                                Typescript: "",
+                                Comments: ""
+                            }]
+                    };
+                    entries[name] = entry;
+                }
 
                 var milestone = entry.Milestones[entry.LastMilestone-1];
                 milestone.HTML = html;
