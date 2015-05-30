@@ -1,0 +1,207 @@
+﻿<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Typescript editor</title>
+    <meta name="description" content="Typescript editor" />
+    <meta>
+
+    <link type="text/css" rel="stylesheet" href="stylesheets/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="stylesheets/style.css" />
+</head>
+<body>
+    <div class="notification">
+        <span id="lblNotification"></span>
+    </div>
+
+    <div class="fluid-container" style="padding:5px">
+        <div>
+            <h1>TypeScript Editor <span id="lblFilename"></span></h1>
+            <p><span id="txtHeaderDescription"></span><a id="lnkUpdateDescription" href="#" title="Edit description of current file"><i class="icon-pencil"></i></a></p>
+
+
+            <div class="btn-toolbar">
+                <div class="btn-group">
+                    <a class="btn" href="#" id="lnkNew">
+                        <i class="icon-star"></i> New
+                    </a>
+                    <a class="btn" href="#" id="lnkOpen">
+                        <i class="icon-folder-open"></i> Open
+                    </a>
+                    <a class="btn" href="#" id="lnkSave">
+                        <i class="icon-hdd"></i> Save
+                    </a>
+                    <a class="btn" href="#" id="lnkCreateMilestone">
+                        <i class="icon-tag"></i> Create milestone
+                    </a>
+                    <a class="btn" href="#" id="lnkShortcuts" data-toggle="modal" data-target="#modalShortcuts">
+                        <i class="icon-info-sign"></i> Shortcuts
+                    </a>
+                </div>
+
+                <div class="btn-group pull-right">
+                    <!--<label><input type="checkbox" id="chkRunJavascript" />Run javascript in output pane</label>-->
+                    <button type="button" class="btn" data-toggle="button" id="chkMoveCursorToError">
+                        Move cursor on runtime error
+                    </button>
+                    <button type="button" class="btn" data-toggle="button" id="chkRunJavascript">
+                        Run javascript in output pane
+                    </button>
+                    <a class="btn" href="#" id="lnkRunExternalWindow">
+                        <i class="icon-play"></i> Run in seperate window
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="editor-area">
+            <div class="editor-tabs">
+                <ul class="nav nav-tabs">
+                    <li class="tab active" data-target="tab-html"><a>HTML</a></li>
+                    <li class="tab" data-target="tab-css"><a>CSS</a></li>
+                    <li class="tab active" data-target="tab-typescript"><a>Typescript</a></li>
+                    <li class="tab" data-target="tab-javascript"><a>Javascript</a></li>
+                    <li class="tab" data-target="tab-console"><a>Console</a></li>
+                    <li class="tab" data-target="tab-output"><a>Output</a></li>
+                </ul>
+            </div>
+            <div class="warp-container" id="tab-html">
+                <div class="editor-container">
+                    <div id="editorHTML">
+                    </div>
+                </div>
+            </div>
+            <div class="warp-container" id="tab-css">
+                <div class="editor-container">
+                    <div id="editorCSS">
+                    </div>
+                </div>
+
+            </div>
+            <div class="warp-container" id="tab-typescript">
+                <div class="editor-container">
+                    <div id="editorTypescript">
+                    </div>
+                </div>
+            </div>
+
+            <div class="warp-container" id="tab-javascript">
+                <div class="editor-container">
+                    <div id="editorJavascript">
+                    </div>
+                </div>
+            </div>
+
+            <div class="warp-container" id="tab-console">
+                <div class="editor-container">
+                    <div class="console" id="txtConsole">
+                    </div>
+                </div>
+            </div>
+            <div class="warp-container" id="tab-output">
+                <div class="editor-container">
+                    <div id="outputFrame">
+                        <iframe id="outputIFrame"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalFiles" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Available files</h4>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs nav-stacked" id="lstFiles"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <!--<button type="button" id="btnLoadFile"class="btn btn-primary"></button>-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="modalUpdateDescription" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Update description</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="txtDescription" style="width:100%" placeholder=" description..">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="btnUpdateDescription" class="btn btn-primary">Update description</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalCreateMilestone" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Create a new milestone</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="txtMilestoneComments" style="width:100%" placeholder="Comments..">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="btnCreateMilestone" class="btn btn-primary">Create milestone</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="modalShortcuts" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Available shortcuts (only for the typescript pane)</h4>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        <li>[Ctrl-Space] : AutoComplete</li>
+                        <li>[F2] : Rename</li>
+                        <li>[Ctrl-D] : Format document</li>
+                        <li>[F12] : Go to definition</li>
+                        <li>[Shift-F12] : Go back to previous position</li>
+                        <li>[Alt-0] : Fold all</li>
+                        <li>[Alt-Shift-0] : Unfold all</li>
+                        <li>[Ctrl-/] : Comment/uncomment line</li>
+                        <li>[Ctrl-Alt-Up/Down] : Multiple cursors</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<!--DEVEL-->
+<script type="text/javascript">
+    var require = {
+        // The base path for all require calls. If this is absent it is assumed to be same as the location of require.js
+        baseUrl: window.location.protocol + "//" + window.location.host + window.location.pathname.split("/").slice(0, -1).join("/") + '/scripts',
+        paths: {
+            ace: "./lib/ace" // path of ace relative to baseUrl
+        }
+    };
+</script>
+<script type="text/javascript" src="./scripts/lib/jquery.js"></script>
+<script type="text/javascript" src="./scripts/lib/bootstrap.js"></script>
+<script src="./scripts/lib/require.js" data-main="main" type="text/javascript"></script>
+
+</html>

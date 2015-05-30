@@ -1,0 +1,204 @@
+body {
+}
+
+.item .description {
+    color: gray;
+    padding-left: 5px;
+}
+
+.item .date {
+    color: #AAAAAA;
+    padding-right: 5px;
+    margin-top: -2px;
+}
+
+.notification {
+    position: absolute;
+    right: 0px;
+    width: 30%;
+    height: 30px;
+    padding: 3px;
+    padding-top: 8px;
+    text-align: center;
+    border-bottom: 1px solid #AAAAAA;
+    border-left: 1px solid #AAAAAA;
+    display: none;
+}
+
+.warp-container {
+    float: left;
+}
+
+.console {
+    height: 100%;
+    overflow-y: scroll;
+}
+
+.console-entry {
+    border-bottom: 1px solid #eee;
+}
+
+.editor-container {
+    position: relative;
+    /* padding:20px; */
+    height: 100%;
+    width: 99%;
+    float: left;
+}
+
+#editorHTML, #editorCSS, #editorJavascript, #editorTypescript {
+    position: absolute;
+    max-height: 10000px;
+    top: 6px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.tab.active {
+    background-color: lightgrey;
+}
+
+.editor-area {
+    height: auto;
+    padding-bottom: 50px;
+    height: 80%;
+    /* margin-bottom:20px; */
+}
+
+.typescript-ref {
+    position: absolute;
+    border: 1px solid white;
+    opacity: 0.7;
+}
+
+.typescript-error {
+    position: absolute;
+    border-bottom: 1px solid red;
+}
+
+.typescript-runtime-error {
+    position: absolute;
+    background-color: #FFEE62;
+    z-index: 10;
+}
+
+
+.langauge-title h2 {
+    padding: 5px 10px;
+    font-size: 14pt;
+    background: #eee;
+    border: 1px solid black;
+    display: block;
+    margin: 0px;
+    height: 30px;
+    line-height: 30px;
+}
+
+#javascript-run {
+    margin: 0px;
+    margin-top: 10px;
+    padding: 5px;
+    background: #999;
+    color: white;
+}
+
+.ace_autocomplete {
+    height: 226px;
+    background: white;
+    overflow: hidden;
+    border: 1px solid #ccc;
+}
+
+    .ace_autocomplete ul {
+        width: 400px;
+        margin: 0px;
+        padding: 2px;
+    }
+
+    .ace_autocomplete li:hover {
+    }
+
+    .ace_autocomplete li {
+        padding: 1px;
+        line-height: 1.2em;
+        height: 1.2em;
+        overflow: hidden;
+    }
+
+.ace_autocomplete_selected {
+    background: #eee;
+}
+
+    .ace_autocomplete_selected .label-name {
+        font-weight: bold;
+    }
+
+.label-kind {
+    /*background:#666;*/
+    color: white;
+    width: 16px;
+    height: 100%;
+    position: absolute;
+    background-repeat: no-repeat;
+}
+
+.label-name {
+    margin-left: 20px;
+}
+
+.ace_autocomplete li[data-name] {
+    position: relative;
+}
+
+.label-kind-property {
+    background-image: url('./icons/property.png');
+}
+
+.label-kind-method {
+    background-image: url('./icons/method.png');
+}
+
+.label-kind-interface {
+    background: #666;
+}
+
+.label-kind-variable {
+    background-image: url('./icons/field.png');
+}
+
+.label-overlay {
+    position: absolute;
+    width: 16px;
+    height: 100%;
+    left: 0px;
+    background-repeat: no-repeat;
+}
+
+.label-modifier-public {
+    background-image: url('./icons/overlayPrivate.png');
+}
+
+.label-modifier-protected {
+    background-image: url('./icons/overlayProtected.png');
+}
+
+.label-modifier-private {
+    background-image: url('./icons/overlayPrivate.png');
+}
+
+.label-type {
+    padding-left: 10px;
+    color: lightgrey;
+}
+
+.ace_autocomplete_selected .label-type {
+    color: blue;
+    visibility: visible;
+}
+
+#outputIFrame {
+    width: 100%;
+    height: 100%;
+    border-width: 0px;
+}

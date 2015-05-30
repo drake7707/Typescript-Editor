@@ -1,0 +1,19 @@
+body {
+margin:0px;
+  font-family:Verdana;
+}
+
+.timeBar {
+  height: 10px;
+  padding:1px;
+  background-color:#CCCCCC;
+  width:600px;
+}
+
+.curTime {
+  position:absolute;
+  width:10px;
+  height:10px;
+  border-radius:10px;
+  background-color:#333333;
+}

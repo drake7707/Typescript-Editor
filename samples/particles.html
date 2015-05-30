@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
+    <meta charset="utf-8">
+    <title>Particle editor</title>
+    <!--%CSS%-->
+    <!--%Javascript%-->
+</head>
+<body>
+    <div style="float:left;">
+        <canvas id="c" width="600" height="600"></canvas>
+        <div class="timeBar">
+            <div class="curTime"></div>
+        </div>
+        <input type="checkbox" id="chkTraceLines" data-var="traceLines" checked/>Trace lines
+        <input type="checkbox" id="chkTrail" data-var="applyTrail" checked />Apply trail
+        <input type="checkbox" id="chkConnectEndStart" data-var="connectEndToStart" checked />Connect end to start
+        <input type="checkbox" id="chkDrawGrid" data-var="applyGrid" />Draw grid
+        <br />
+    </div>
+    <div style="float:left;width:50%;height:50%;">        
+        <input id="btnError" type="button" value="Press button to generate a javascript error" />
+          
+        <span id="lblError" style="color:red" class="error"></span>
+    </div>
+</body>
+</html>
