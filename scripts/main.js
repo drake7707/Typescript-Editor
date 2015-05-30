@@ -1326,26 +1326,33 @@ define(function (require, exports, module) {
         }
         self.listFiles = listFiles;
 
+        function createEntryIfNotExists(name) {
+            var entries = loadObj("entries");
+            var entry = entries[name];
+            if (typeof entry === "undefined") {
+                var entry = {
+                    Name: name,
+                    LastMilestone: 1,
+                    Description: "",
+                    Milestones: [
+                        {
+                            HTML: "",
+                            CSS: "",
+                            Typescript: "",
+                            Comments: ""
+                        }]
+                };
+                entries[name] = entry;
+                saveObj("entries", entries);
+            }
+        }
+
         function saveFile(name, html, css, typescript) {
             try {
+                createEntryIfNotExists(name);
                 var entries = loadObj("entries");
                 var entry = entries[name];
-                if (typeof entry === "undefined") {
-                    var entry = {
-                        Name: name,
-                        LastMilestone: 1,
-                        Description: "",
-                        Milestones: [
-                            {
-                                HTML: "",
-                                CSS: "",
-                                Typescript: "",
-                                Comments: ""
-                            }]
-                    };
-                    entries[name] = entry;
-                }
-
+            
                 var milestone = entry.Milestones[entry.LastMilestone-1];
                 milestone.HTML = html;
                 milestone.CSS = css;
@@ -1360,25 +1367,14 @@ define(function (require, exports, module) {
         }
         self.saveFile = saveFile;
 
+    
         function deleteFile(name, onsuccess) {
             try {
                 var entries = loadObj("entries");
                 var entry = entries[name];
-                if (typeof entry === "undefined") {
-                    var entry = {
-                        Name: name,
-                        LastMilestone: 1,
-                        Description: "",
-                        Milestones: [
-                            {
-                                HTML: "",
-                                CSS: "",
-                                Typescript: "",
-                                Comments: ""
-                            }]
-                    };
-                    entries[name] = entry;
-                }
+                if (typeof entry === "undefined")
+                    return;
+                   
 
                 if (entry.LastMilestone > 1) {
                     entry.Milestones.pop();
@@ -1404,6 +1400,7 @@ define(function (require, exports, module) {
 
         function createMilestone(name, html, css, typescript, comments) {
             try {
+                createEntryIfNotExists(name);
                 var entries = loadObj("entries");
                 var entry = entries[name];
 
@@ -1428,6 +1425,7 @@ define(function (require, exports, module) {
         self.createMilestone = createMilestone;
 
         function updateDescription(name, description) {
+            createEntryIfNotExists(name);
             var entries = loadObj("entries");
             var entry = entries[name];
             entry.Description = description;
