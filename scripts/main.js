@@ -1432,6 +1432,9 @@ define(function (require, exports, module) {
             var entry = entries[name];
             entry.Description = description;
             saveObj("entries", entries);
+
+            showNotification("Description updated", "info");
+            $("#txtHeaderDescription").text(description);
         }
         self.updateDescription = updateDescription;
     }
