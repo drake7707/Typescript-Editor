@@ -1364,6 +1364,21 @@ define(function (require, exports, module) {
             try {
                 var entries = loadObj("entries");
                 var entry = entries[name];
+                if (typeof entry === "undefined") {
+                    var entry = {
+                        Name: name,
+                        LastMilestone: 1,
+                        Description: "",
+                        Milestones: [
+                            {
+                                HTML: "",
+                                CSS: "",
+                                Typescript: "",
+                                Comments: ""
+                            }]
+                    };
+                    entries[name] = entry;
+                }
 
                 if (entry.LastMilestone > 1) {
                     entry.Milestones.pop();
