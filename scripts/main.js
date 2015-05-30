@@ -1200,7 +1200,7 @@ define(function (require, exports, module) {
                 saveObj("entries", entries);
                 exampleReady++;
                 checkExampleReady();
-            }, "script");
+            }, "text");
         }
         
         function generateNewName() {
