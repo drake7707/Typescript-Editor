@@ -696,9 +696,8 @@ define(function (require, exports, module) {
         }
 
         wnd.document.open();
-        wnd.document.write(html);
-        wnd.document.close();
-
+        
+        // register onerror and console.log before closing the document, or the code will run in the window before the handlers are registered
         if (wnd.onerror == null) {
             wnd.onerror = function (errorMsg, url, lineNumber, column, errorObj) {
                 if (errorMsg.indexOf('Script error.') > -1) {
@@ -709,7 +708,7 @@ define(function (require, exports, module) {
                         column = 0;
 
                     if ($.browser.mozilla) {
-                        lineNumber = lineNumber - lineNumberOffsetOnPage;
+                        lineNumber = lineNumber - lineNumberOffsetOnPage + 1;
                     }
                     handleRuntimeError(errorMsg, url, lineNumber, column, errorObj);
                 }
@@ -719,6 +718,9 @@ define(function (require, exports, module) {
         wnd.console.log = function (message) {
             addConsoleLog(message);
         }
+
+        wnd.document.write(html);
+        wnd.document.close();
     }
 
     function addConsoleLog(message) {
@@ -759,7 +761,11 @@ define(function (require, exports, module) {
                 
         }
 
-        var typescriptPos = getPositionInTypescriptFromJavascript(lineNumber, column, javascriptSourceMap);
+        var tsLineNumber = lineNumber;
+        if (column == 0)
+            tsLineNumber++;
+
+        var typescriptPos = getPositionInTypescriptFromJavascript(tsLineNumber, column, javascriptSourceMap);
         if (typescriptPos != null) {
             var range = new AceRange(typescriptPos.sourceRow, typescriptPos.sourceCol, typescriptPos.sourceRow, typescriptPos.sourceColEnd);
             runtimeErrorMarkers.push(session.addMarker(range, "typescript-error", "line", true));
@@ -818,6 +824,8 @@ define(function (require, exports, module) {
         var javascriptText = "<script>" + editorJavascript.getSession().doc.getValue() + "</script>";
         var cssText = "<style>" + editorCSS.getSession().doc.getValue() + "</style>";
 
+        htmlText = htmlText.replace("<!--%CSS%-->", cssText);
+
         if (includeJavascript) {
             var idx = htmlText.indexOf("<!--%Javascript%-->");
             if (idx != -1) {
@@ -826,8 +834,7 @@ define(function (require, exports, module) {
             }
             htmlText = htmlText.replace("<!--%Javascript%-->", javascriptText);
         }
-
-        htmlText = htmlText.replace("<!--%CSS%-->", cssText);
+        
         return htmlText;
     }
 
