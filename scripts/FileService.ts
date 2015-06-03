@@ -6,14 +6,33 @@ export class FileService{
 
     constructor(public ajaxHost){}
 
-    readFile(path,cb){
+    public readFile(path,cb){
         this.ajaxHost.ajax({
             type: "GET",
             url: path,
             success: cb,
+            dataType: "text",
             error :((jqXHR, textStatus) =>
                 console.log(textStatus)
                 )}
             );
         }
+}
+
+export class OperatingSystemService {
+
+    public EOL: string = "\r\n";
+
+    public platform(): string {
+        return "browser";
+    }
+
+
+}
+
+export class PathService {
+
+    public resolve(path:string): string {
+        return "/dummy/" + path;
+    }
 }

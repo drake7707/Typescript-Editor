@@ -28,7 +28,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-define(function(require, exports, module) {
+define(function (require, exports, module) {
     "no use strict";
 
     var oop = require("../lib/oop");
@@ -36,30 +36,29 @@ define(function(require, exports, module) {
     var lang = require("../lib/lang");
     var Document = require("../document").Document;
     var DocumentPositionUtil = require('./typescript/DocumentPositionUtil').DocumentPositionUtil;
-    var Services = require('./typescript/typescriptServices').Services;
-    var TypeScript = require('./typescript/typescriptServices').TypeScript;
+
+    var ts = require('./typescript/typescriptServices');
     var TypeScriptLS = require('./typescript/lightHarness').TypeScriptLS;
 
-    var TypeScriptWorker = exports.TypeScriptWorker = function(sender) {
+    var TypeScriptWorker = exports.TypeScriptWorker = function (sender) {
         this.sender = sender;
         var doc = this.doc = new Document("");
 
         var deferredUpdate = this.deferredUpdate = lang.deferredCall(this.onUpdate.bind(this));
 
-        this.typeScriptLS =  new TypeScriptLS();
-        this.ServicesFactory = new Services.TypeScriptServicesFactory();
-        this.serviceShim = this.ServicesFactory.createLanguageServiceShim(this.typeScriptLS);
-        this.languageService = this.serviceShim.languageService;
+        this.ts = ts;
+        this.typeScriptLS = new TypeScriptLS();
+        this.languageService = this.ts.createLanguageService(this.typeScriptLS, ts.createDocumentRegistry());
 
 
         var self = this;
-        sender.on("change", function(e) {
+        sender.on("change", function (e) {
             doc.applyDeltas(e.data);
             deferredUpdate.schedule(self.$timeout);
         });
 
-        sender.on("addLibrary", function(e) {
-            self.addlibrary(e.data.name , e.data.content);
+        sender.on("addLibrary", function (e) {
+            self.addlibrary(e.data.name, e.data.content);
         });
 
 
@@ -70,32 +69,32 @@ define(function(require, exports, module) {
 
     oop.inherits(TypeScriptWorker, Mirror);
 
-    (function() {
+    (function () {
         var proto = this;
-        this.setOptions = function(options) {
+        this.setOptions = function (options) {
             this.options = options || {
             };
         };
-        this.changeOptions = function(newOptions) {
+        this.changeOptions = function (newOptions) {
             oop.mixin(this.options, newOptions);
             this.deferredUpdate.schedule(100);
         };
 
-        this.addlibrary = function(name, content) {
-            this.typeScriptLS.addScript(name, content.replace(/\r\n?/g,"\n"), true);
+        this.addlibrary = function (name, content) {
+            this.typeScriptLS.addScript(name, content.replace(/\r\n?/g, "\n"), true);
         };
 
 
 
-        this.getCompletionsAtPosition = function(fileName, pos, isMemberCompletion, id){
+        this.getCompletionsAtPosition = function (fileName, pos, isMemberCompletion, id) {
             var ret = this.languageService.getCompletionsAtPosition(fileName, pos, isMemberCompletion);
             this.sender.callback(ret, id);
         };
 
         ["getTypeAtPosition",
             "getSignatureAtPosition",
-            "getDefinitionAtPosition"].forEach(function(elm){
-                proto[elm] = function(fileName, pos,  id) {
+            "getDefinitionAtPosition"].forEach(function (elm) {
+                proto[elm] = function (fileName, pos, id) {
                     var ret = this.languageService[elm](fileName, pos);
                     this.sender.callback(ret, id);
                 };
@@ -103,9 +102,9 @@ define(function(require, exports, module) {
 
         ["getReferencesAtPosition",
             "getOccurrencesAtPosition",
-            "getImplementorsAtPosition"].forEach(function(elm){
+            "getImplementorsAtPosition"].forEach(function (elm) {
 
-                proto[elm] = function(fileName, pos,  id) {
+                proto[elm] = function (fileName, pos, id) {
                     var referenceEntries = this.languageService[elm](fileName, pos);
                     var ret = referenceEntries.map(function (ref) {
                         return {
@@ -120,59 +119,29 @@ define(function(require, exports, module) {
 
         ["getNavigateToItems",
             "getScriptLexicalStructure",
-            "getOutliningRegions "].forEach(function(elm){
-                proto[elm] = function(value, id) {
+            "getOutliningRegions "].forEach(function (elm) {
+                proto[elm] = function (value, id) {
                     var navs = this.languageService[elm](value);
                     this.sender.callback(navs, id);
                 };
             });
 
-
-        this.compile = function (typeScriptContent){
+        this.compile = function (typeScriptContent) {
             var output = "";
             var sourceMap = "";
 
-            var outfile = {
-                Write: function (s) {
-                    output  += s;
-                },
-                WriteLine: function (s) {
-                    output  += s + "\n";
-                },
-                Close: function () {
+            var program = ts.createProgram(["temp.ts"], this.typeScriptLS.getCompilationSettings(), this.typeScriptLS);
+
+            var emitResult = program.emit(this.typeScriptLS.getSourceFile("temp.ts"), function (fileName, data, writeByteOrderMark, onError) {
+                if (fileName == "temp.js") {
+                    output += data;
                 }
-            };
-
-            var outerr = {
-                Write: function (s) {
-                },
-                WriteLine: function (s) {
-                },
-                Close: function () {
-                }
-            };
-
-            var sourceMapFile = {
-                Write: function (s) {
-                    sourceMap += s;
-                },
-                WriteLine: function (s) {
-                    sourceMap += s + "\n";
-                },
-                Close: function () {
-                }
-            };
-
-            var compilationSettings = new TypeScript.CompilationSettings();
-            compilationSettings.mapSourceFiles = true;
-            compilationSettings.outputFileName = "output.js";
-
-            var compiler = new TypeScript.TypeScriptCompiler(outfile, outerr, new TypeScript.NullLogger(), compilationSettings);
-            compiler.addUnit(typeScriptContent, "output.js", false);
-            compiler.typeCheck();
-            compiler.emit(false, function (name) {
-                return sourceMapFile;
             });
+            for (var i = 0; i < emitResult.sourceMaps.length; i++) {
+                if (emitResult.sourceMaps[i].sourceMapFile == "temp.js") {
+                    sourceMap += emitResult.sourceMaps[i].sourceMapMappings;
+                }
+            }
 
             return {
                 javascript: output,
@@ -180,21 +149,27 @@ define(function(require, exports, module) {
             };
         };
 
-        this.onUpdate = function() {
-            this.typeScriptLS.updateScript("temp.ts",this.doc.getValue() , false);
-            var errors = this.serviceShim.languageService.getScriptErrors("temp.ts", 100);
+        this.onUpdate = function () {
+            this.typeScriptLS.updateScript("temp.ts", this.doc.getValue(), false);
+
+            var outputFile = this.languageService.getEmitOutput("temp.ts");
+            var errors = this.languageService.getCompilerOptionsDiagnostics()
+                                        .concat(this.languageService.getSyntacticDiagnostics("temp.ts"))
+                                        .concat(this.languageService.getSemanticDiagnostics("temp.ts"));
+
+            //var errors = this.serviceShim.languageService.getScriptErrors("temp.ts", 100);
             var annotations = [];
             var self = this;
             this.sender.emit("compiled", this.compile(this.doc.getValue()));
 
-            errors.forEach(function(error){
+            errors.forEach(function (error) {
                 var pos = DocumentPositionUtil.getPosition(self.doc, error.minChar);
                 annotations.push({
                     row: pos.row,
                     column: pos.column,
                     text: error.message,
-                    minChar:error.minChar,
-                    limChar:error.limChar,
+                    minChar: error.minChar,
+                    limChar: error.limChar,
                     type: "error",
                     raw: error.message
                 });

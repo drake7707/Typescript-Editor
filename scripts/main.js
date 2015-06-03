@@ -10,6 +10,7 @@ define(function (require, exports, module) {
 
     var vlq = require("lib/vlq");
 
+    var ts = require('ace/mode/typescript/typescriptServices');
     var Services = require('ace/mode/typescript/typescriptServices').Services;
     var TypeScript = require('ace/mode/typescript/typescriptServices').TypeScript;
     var TypeScriptLS = require('ace/mode/typescript/lightHarness').TypeScriptLS;
@@ -25,8 +26,8 @@ define(function (require, exports, module) {
     var typeCompilationService = null;
     var docUpdateCount = 0;
     var typeScriptLS = new TypeScriptLS();
-    var ServicesFactory = new Services.TypeScriptServicesFactory();
-    var serviceShim = ServicesFactory.createLanguageServiceShim(typeScriptLS);
+
+    var languageService = ts.createLanguageService(typeScriptLS, ts.createDocumentRegistry());
 
     var selectFileName = "";
     var selectMilestone = "";
@@ -80,7 +81,7 @@ define(function (require, exports, module) {
         var data = typescript.replace(/\r\n?/g, "\n");
         editor.setValue(data);
         editor.moveCursorTo(0, 0);
-        typeScriptLS.updateScript(filename, editor.getSession().getDocument().getValue(), false);
+        typeScriptLS.updateScript(filename + ".ts", editor.getSession().getDocument().getValue(), false);
         syncStop = false;
 
         updateOutputPane();
@@ -156,6 +157,12 @@ define(function (require, exports, module) {
 
     }
 
+    function TextEdit(minChar, limChar, text) {
+        this.minChar = minChar;
+        this.limChar = limChar;
+        this.text = text;
+    }
+
     //sync LanguageService content and ace editor content
     function syncTypeScriptServiceContent(script, aceChangeEvent) {
 
@@ -165,27 +172,27 @@ define(function (require, exports, module) {
         var start = aceEditorPosition.getPositionChars(range.start);
 
         if (action == "insertText") {
-            editLanguageService(script, new Services.TextEdit(start, start, data.text));
+            editLanguageService(script, new TextEdit(start, start, data.text));
         } else if (action == "insertLines") {
 
             var text = data.lines.map(function (line) {
                 return line + '\n'; //TODO newline hard code
             }).join('');
-            editLanguageService(script, new Services.TextEdit(start, start, text));
+            editLanguageService(script, new TextEdit(start, start, text));
 
         } else if (action == "removeText") {
             var end = start + data.text.length;
-            editLanguageService(script, new Services.TextEdit(start, end, ""));
+            editLanguageService(script, new TextEdit(start, end, ""));
         } else if (action == "removeLines") {
             var len = aceEditorPosition.getLinesChars(data.lines);
             var end = start + len;
-            editLanguageService(script, new Services.TextEdit(start, end, ""));
+            editLanguageService(script, new TextEdit(start, end, ""));
         }
     };
 
 
     function editLanguageService(name, textEdit) {
-        typeScriptLS.editScript(name, textEdit.minChar, textEdit.limChar, textEdit.text);
+        typeScriptLS.editScript(name + ".ts", textEdit.minChar, textEdit.limChar, textEdit.text);
     }
 
     function onChangeCursor(e) {
@@ -216,10 +223,10 @@ define(function (require, exports, module) {
             };
         }
 
-        var option = new Services.EditorOptions();
+        var option = {};
         option.NewLineCharacter = "\n";
 
-        var smartIndent = serviceShim.languageService.getSmartIndentAtLineNumber(selectFileName, lineNumber, option);
+        var smartIndent = languageService.getIndentationAtPosition(selectFileName + ".ts", lineNumber, option);
 
         editor.indent();
         /*
@@ -245,58 +252,28 @@ define(function (require, exports, module) {
     }
 
     function showOccurrences() {
-        var references = serviceShim.languageService.getOccurrencesAtPosition(selectFileName, aceEditorPosition.getCurrentCharPosition());
+        var references = languageService.getOccurrencesAtPosition(selectFileName + ".ts", aceEditorPosition.getCurrentCharPosition());
         var session = editor.getSession();
         refMarkers.forEach(function (id) {
             session.removeMarker(id);
         });
+        if (typeof references === "undefined" || references == null)
+            return;
+
         references.forEach(function (ref) {
-            //TODO check script name
-            // console.log(ref.unitIndex);
-            var getpos = aceEditorPosition.getAcePositionFromChars;
-            var start = getpos(ref.ast.minChar);
-            var end = getpos(ref.ast.limChar);
-            var range = new AceRange(start.row, start.column, end.row, end.column);
-            refMarkers.push(session.addMarker(range, "typescript-ref", "text", true));
+            if (ref.fileName == selectFileName + ".ts") {
+                //TODO check script name
+                // console.log(ref.unitIndex);
+                var getpos = aceEditorPosition.getAcePositionFromChars;
+                var start = getpos(ref.textSpan.start);
+                var end = getpos(ref.textSpan.start + ref.textSpan.length);
+                var range = new AceRange(start.row, start.column, end.row, end.column);
+                refMarkers.push(session.addMarker(range, "typescript-ref", "text", true));
+            }
         });
     }
 
     var deferredShowOccurrences = deferredCall(showOccurrences);
-
-    /*  function Compile(typeScriptContent) {
-          var output = "";
-  
-          var outfile = {
-              Write: function (s) {
-                  output += s;
-              },
-              WriteLine: function (s) {
-                  output += s + "\n";
-              },
-              Close: function () {
-              }
-          };
-  
-          var outerr = {
-              Write: function (s) {
-              },
-              WriteLine: function (s) {
-              },
-              Close: function () {
-              }
-          };
-          var compilationSettings = new TypeScript.CompilationSettings();
-          compilationSettings.mapSourceFiles = true;
-  
-          var compiler = new TypeScript.TypeScriptCompiler(outfile, outerr, new TypeScript.NullLogger(), new TypeScript.CompilationSettings());
-          compiler.addUnit(typeScriptContent, "output.js", false);
-          compiler.typeCheck();
-          compiler.emit(false, function (name) {
-  
-          });
-          return output;
-      }
-      */
 
     function workerOnCreate(func, timeout) {
         if (editor.getSession().$worker) {
@@ -310,19 +287,21 @@ define(function (require, exports, module) {
 
 
     function refactor() {
-        var references = serviceShim.languageService.getOccurrencesAtPosition(selectFileName, aceEditorPosition.getCurrentCharPosition());
+        var references = languageService.getOccurrencesAtPosition(selectFileName + ".ts", aceEditorPosition.getCurrentCharPosition());
+        if (typeof references === "undefined" || references == null)
+            return;
 
         references.forEach(function (ref) {
             var getpos = aceEditorPosition.getAcePositionFromChars;
-            var start = getpos(ref.ast.minChar);
-            var end = getpos(ref.ast.limChar);
+            var start = getpos(ref.textSpan.start);
+            var end = getpos(ref.textSpan.start + ref.textSpan.length);
             var range = new AceRange(start.row, start.column, end.row, end.column);
             editor.session.multiSelect.addRange(range);
         });
     }
 
     function formatDocument() {
-        var textChanges = serviceShim.languageService.getFormattingEditsForRange(selectFileName, 0, editor.getValue().length, defaultFormatCodeOptions());
+        var textChanges = languageService.getFormattingEditsForRange(selectFileName + ".ts", 0, editor.getValue().length, defaultFormatCodeOptions());
         for (var i = textChanges.length - 1; i >= 0; i--) {
 
             var textChange = textChanges[i];
@@ -353,7 +332,7 @@ define(function (require, exports, module) {
 
     var previousCursorPositionStack = [];
     function gotoDefinition() {
-        var definitionInfo = serviceShim.languageService.getDefinitionAtPosition(selectFileName, aceEditorPosition.getCurrentCharPosition());
+        var definitionInfo = languageService.getDefinitionAtPosition(selectFileName + ".ts", aceEditorPosition.getCurrentCharPosition());
         if (definitionInfo != null) {
             previousCursorPositionStack.push(editor.getCursorPosition());
             var startPos = editor.getSession().getDocument().indexToPosition(definitionInfo.minChar);
@@ -507,7 +486,7 @@ define(function (require, exports, module) {
         }]);
 
         aceEditorPosition = new EditorPosition(editor);
-        typeCompilationService = new CompilationService(editor, serviceShim);
+        typeCompilationService = new CompilationService(editor, languageService);
         autoComplete = new AutoComplete(editor, selectFileName, typeCompilationService);
 
         // override editor onTextInput
@@ -519,9 +498,9 @@ define(function (require, exports, module) {
 
             } else if (editor.getSession().getDocument().isNewLine(text)) {
                 var lineNumber = editor.getCursorPosition().row;
-                var option = new Services.EditorOptions();
+                var option = {};
                 option.NewLineCharacter = "\n";
-                var indent = serviceShim.languageService.getSmartIndentAtLineNumber(selectFileName, lineNumber, option);
+                var indent = languageService.getIndentationAtPosition(selectFileName + ".ts", lineNumber, option);
                 var curIndent = editor.session.getLine(lineNumber).length;
                 if (indent - curIndent > 0) {
                     editor.commands.exec("inserttext", editor, { text: " ", times: indent - curIndent });

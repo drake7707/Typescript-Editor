@@ -12,6 +12,7 @@ define(function(require, exports, module) {
         d.prototype = new __();
     };
 
+    var ts = require('./typescriptServices');
     var Services = require('./typescriptServices').Services;
     var TypeScript = require('./typescriptServices').TypeScript;
 
@@ -26,7 +27,7 @@ define(function(require, exports, module) {
         }
         ScriptInfo.prototype.updateContent = function (content, isResident) {
             this.editRanges = [];
-            this.content = content;
+            this.content = ts.content;
             this.isResident = isResident;
             this.version++;
         };
@@ -79,6 +80,9 @@ define(function(require, exports, module) {
             this.scripts = [];
             this.maxScriptVersions = 100;
         }
+
+
+
         TypeScriptLS.prototype.addDefaultLibrary = function () {
             this.addScript("lib.d.ts", Harness.Compiler.libText, true);
         };
@@ -111,6 +115,74 @@ define(function(require, exports, module) {
             }
             throw new Error("No script with name '" + name + "'");
         };
+
+        TypeScriptLS.prototype.getScriptFileNames = function () {
+            var names = [];
+            for (var i = 0; i < this.scripts.length; i++) {
+                names.push(this.scripts[i].name);
+            }
+            return names;
+        };
+
+        TypeScriptLS.prototype.getScriptSnapshot = function (name) {
+            for(var i = 0; i < this.scripts.length; i++) {
+                if (this.scripts[i].name == name) {
+                    return ts.ScriptSnapshot.fromString(this.scripts[i].content);
+                }
+            }
+        };
+
+        TypeScriptLS.prototype.getScriptVersion = function (name) {
+            for (var i = 0; i < this.scripts.length; i++) {
+                if (this.scripts[i].name == name) {
+                    return this.scripts[i].version;
+                }
+            }
+        };
+
+        
+        TypeScriptLS.prototype.getCurrentDirectory = function () {
+            return "";
+        };
+        TypeScriptLS.prototype.getScriptIsOpen = function () {
+            return true;
+        };
+        TypeScriptLS.prototype.getDefaultLibFileName = function (options) {
+            return "lib";
+        };
+
+        TypeScriptLS.prototype.getCanonicalFileName = function (filename) {
+            return filename;
+        };
+        
+        TypeScriptLS.prototype.getCancellationToken = function () {
+            return null;
+        };
+        
+        TypeScriptLS.prototype.getLocalizedDiagnosticMessages = function () {
+            return null;
+        };
+
+        TypeScriptLS.prototype.getSourceFile = function (filename, languageVersion, onError) {
+            var script = null;
+            for (var i = 0; i < this.scripts.length; i++) {
+                if (this.scripts[i].name == filename) {
+                    script = this.scripts[i];
+                    break;
+                }
+            }
+            if (script == null)
+                return null;
+
+            var sourceFile = ts.createLanguageServiceSourceFile(filename, ts.ScriptSnapshot.fromString(script.content), ts.ScriptTarget.ES5, script.version, true, false);
+            return sourceFile;
+        }
+
+        TypeScriptLS.prototype.getNewLine = function (scriptIndex) {
+            return "\r\n";
+        };
+
+        
         TypeScriptLS.prototype.getScriptContent = function (scriptIndex) {
             return this.scripts[scriptIndex].content;
         };
@@ -133,8 +205,11 @@ define(function(require, exports, module) {
 
         };
         TypeScriptLS.prototype.getCompilationSettings = function () {
-            return "";
+            var settings = ts.getDefaultCompilerOptions();
+            settings.sourceMap = true;
+            return settings;
         };
+
         TypeScriptLS.prototype.getScriptCount = function () {
             return this.scripts.length;
         };
@@ -150,9 +225,9 @@ define(function(require, exports, module) {
         TypeScriptLS.prototype.getScriptIsResident = function (scriptIndex) {
             return this.scripts[scriptIndex].isResident;
         };
-        TypeScriptLS.prototype.getScriptVersion = function (scriptIndex) {
-            return this.scripts[scriptIndex].version;
-        };
+        //TypeScriptLS.prototype.getScriptVersion = function (scriptIndex) {
+        //    return this.scripts[scriptIndex].version;
+        //};
         TypeScriptLS.prototype.getScriptEditRangeSinceVersion = function (scriptIndex, scriptVersion) {
             var range = this.scripts[scriptIndex].getEditRangeSinceVersion(scriptVersion);
             return (range.minChar + "," + range.limChar + "," + range.delta);

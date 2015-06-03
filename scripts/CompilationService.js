@@ -2,14 +2,14 @@ define(["require", "exports", './EditorPosition'], function(require, exports, __
     var EditorPositionModule = __EditorPositionModule__;
 
     var CompilationService = (function () {
-        function CompilationService(editor, ServiceShim) {
+        function CompilationService(editor, languageService) {
             this.editor = editor;
-            this.ServiceShim = ServiceShim;
+            this.languageService = languageService;
             this.editorPos = new EditorPositionModule.EditorPosition(editor);
         }
         CompilationService.prototype.getCompilation = function (script, charpos, isMemberCompletion) {
             var compInfo;
-            compInfo = this.ServiceShim.languageService.getCompletionsAtPosition(script, charpos, isMemberCompletion);
+            compInfo = this.languageService.getCompletionsAtPosition(script, charpos, isMemberCompletion);
             return compInfo;
         };
         CompilationService.prototype.getCursorCompilation = function (script, cursor) {

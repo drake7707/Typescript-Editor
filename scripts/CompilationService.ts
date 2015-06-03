@@ -5,13 +5,13 @@ export class CompilationService{
     public editorPos;// The ace control
     public matchText;
 
-    constructor(public editor,public ServiceShim){
+    constructor(public editor, public languageService){
         this.editorPos = new EditorPositionModule.EditorPosition(editor);
     }
 
     getCompilation (script, charpos, isMemberCompletion) {
         var compInfo;
-        compInfo = this.ServiceShim.languageService.getCompletionsAtPosition(script, charpos, isMemberCompletion);
+        compInfo = this.languageService.languageService.getCompletionsAtPosition(script, charpos, isMemberCompletion);
         return compInfo;
     };
 
