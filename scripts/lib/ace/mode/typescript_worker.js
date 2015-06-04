@@ -169,21 +169,20 @@ define(function (require, exports, module) {
                                         .concat(this.languageService.getSyntacticDiagnostics("temp.ts"))
                                         .concat(this.languageService.getSemanticDiagnostics("temp.ts"));
 
-            //var errors = this.serviceShim.languageService.getScriptErrors("temp.ts", 100);
             var annotations = [];
             var self = this;
             this.sender.emit("compiled", this.compile(this.doc.getValue()));
 
             errors.forEach(function (error) {
-                var pos = DocumentPositionUtil.getPosition(self.doc, error.minChar);
+                var pos = DocumentPositionUtil.getPosition(self.doc, error.start);
                 annotations.push({
                     row: pos.row,
                     column: pos.column,
-                    text: error.message,
-                    minChar: error.minChar,
-                    limChar: error.limChar,
+                    text: typeof error.messageText === "string" ? error.messageText : error.messageText.messageText, // work around a bug in typescript i think
+                    minChar: error.start,
+                    limChar: error.start + error.length,
                     type: "error",
-                    raw: error.message
+                    raw: typeof error.messageText === "string" ? error.messageText : error.messageText.messageText
                 });
             });
 

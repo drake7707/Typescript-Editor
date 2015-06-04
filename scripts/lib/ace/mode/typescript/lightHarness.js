@@ -13,8 +13,8 @@ define(function (require, exports, module) {
     };
 
     var ts = require('./typescriptServices');
-    var Services = require('./typescriptServices').Services;
-    var TypeScript = require('./typescriptServices').TypeScript;
+    //var Services = require('./typescriptServices').Services;
+    //var TypeScript = require('./typescriptServices').TypeScript;
 
     var ScriptInfo = (function () {
         function ScriptInfo(name, content, isResident, maxScriptVersions) {
@@ -27,7 +27,7 @@ define(function (require, exports, module) {
         }
         ScriptInfo.prototype.updateContent = function (content, isResident) {
             this.editRanges = [];
-            this.content = content;
+            this.content = content.replace(/\r\n?/g, "\n");
             this.isResident = isResident;
             this.version++;
         };
@@ -150,6 +150,8 @@ define(function (require, exports, module) {
         TypeScriptLS.prototype.getDefaultLibFileName = function (options) {
             return "lib";
         };
+        
+     
 
         TypeScriptLS.prototype.getCanonicalFileName = function (filename) {
             return filename;
@@ -179,7 +181,7 @@ define(function (require, exports, module) {
         }
 
         TypeScriptLS.prototype.getNewLine = function (scriptIndex) {
-            return "\r\n";
+            return "\n";
         };
 
 
@@ -210,6 +212,17 @@ define(function (require, exports, module) {
             return settings;
         };
 
+
+        // TS 1.4 support
+        TypeScriptLS.prototype.getDefaultLibFilename = function (options) {
+            return this.getDefaultLibFileName(options);
+        };
+        TypeScriptLS.prototype.getCanonicalFilename = function (filename) {
+            return this.getCanonicalFileName(options);
+        };
+        //------------
+
+
         TypeScriptLS.prototype.getScriptCount = function () {
             return this.scripts.length;
         };
@@ -225,19 +238,12 @@ define(function (require, exports, module) {
         TypeScriptLS.prototype.getScriptIsResident = function (scriptIndex) {
             return this.scripts[scriptIndex].isResident;
         };
-        //TypeScriptLS.prototype.getScriptVersion = function (scriptIndex) {
-        //    return this.scripts[scriptIndex].version;
-        //};
+        
         TypeScriptLS.prototype.getScriptEditRangeSinceVersion = function (scriptIndex, scriptVersion) {
             var range = this.scripts[scriptIndex].getEditRangeSinceVersion(scriptVersion);
             return (range.minChar + "," + range.limChar + "," + range.delta);
         };
-        TypeScriptLS.prototype.getLanguageService = function () {
-            var ls = new Services.TypeScriptServicesFactory().createLanguageServiceShim(this);
-            ls.refresh(true);
-            this.ls = ls;
-            return ls;
-        };
+       
         TypeScriptLS.prototype.parseSourceText = function (fileName, sourceText) {
             var parser = new TypeScript.Parser();
             parser.setErrorRecovery(null, -1, -1);
@@ -250,22 +256,22 @@ define(function (require, exports, module) {
             var sourceText = new TypeScript.StringSourceText(IO.readFile(fileName));
             return this.parseSourceText(fileName, sourceText);
         };
-        TypeScriptLS.prototype.lineColToPosition = function (fileName, line, col) {
-            var script = this.ls.languageService.getScriptAST(fileName);
-            assert.notNull(script);
-            assert(line >= 1);
-            assert(col >= 1);
-            assert(line < script.locationInfo.lineMap.length);
-            return TypeScript.getPositionFromLineColumn(script, line, col);
-        };
-        TypeScriptLS.prototype.positionToLineCol = function (fileName, position) {
-            var script = this.ls.languageService.getScriptAST(fileName);
-            assert.notNull(script);
-            var result = TypeScript.getLineColumnFromPosition(script, position);
-            assert(result.line >= 1);
-            assert(result.col >= 1);
-            return result;
-        };
+        //TypeScriptLS.prototype.lineColToPosition = function (fileName, line, col) {
+        //    var script = this.ls.languageService.getScriptAST(fileName);
+        //    assert.notNull(script);
+        //    assert(line >= 1);
+        //    assert(col >= 1);
+        //    assert(line < script.locationInfo.lineMap.length);
+        //    return TypeScript.getPositionFromLineColumn(script, line, col);
+        //};
+        //TypeScriptLS.prototype.positionToLineCol = function (fileName, position) {
+        //    var script = this.ls.languageService.getScriptAST(fileName);
+        //    assert.notNull(script);
+        //    var result = TypeScript.getLineColumnFromPosition(script, position);
+        //    assert(result.line >= 1);
+        //    assert(result.col >= 1);
+        //    return result;
+        //};
         TypeScriptLS.prototype.checkEdits = function (sourceFileName, baselineFileName, edits) {
             var script = Harness.CollateralReader.read(sourceFileName);
             var formattedScript = this.applyEdits(script, edits);

@@ -6,9 +6,12 @@ define(function(require, exports, module) {
 
     var oop = require("ace/lib/oop");
 
-    exports.AutoComplete = function(editor,script,  compilationService){
+    
+    
+    exports.AutoComplete = function (editor, script, compilationService, typeScriptService) {
 
         var self = this;
+        this.ts = typeScriptService;
 
         oop.implement(self, EventEmitter);
         this.handler = new HashHandler();
@@ -36,7 +39,10 @@ define(function(require, exports, module) {
         }
 
         this.compilation = function(cursor){
-            var compilationInfo = compilationService.getCursorCompilation(self.scriptName, cursor);
+            var compilationInfo = compilationService.getCursorCompilation(self.scriptName, cursor, 100);
+            if (typeof compilationInfo === "undefined")
+                return;
+
             var text  = compilationService.matchText;
             var coords = editor.renderer.textToScreenCoordinates(cursor.row, cursor.column - text.length);
 
@@ -96,11 +102,14 @@ define(function(require, exports, module) {
             if (infos.length > 0){
                 self.view.show();
                 var html = '';
-                // TODO use template
                 for(var n in infos) {
                     var info = infos[n];
-                    var name =  '<span class="label-name">' + info.name + '</span>';
-                    var type = '<span class="label-type">' + info.type + '</span>';
+                    var name = '<span class="label-name">' + info.name + '</span>';
+
+                    var description = "";
+                    info.details.displayParts.forEach(function (el) { description += el.text; });
+
+                    var type = '<span class="label-type">' + description + '</span>';
 
                     var modifiers = info.kindModifiers.split(',');
                     for (var i = 0; i < modifiers.length; i++) {

@@ -22,7 +22,7 @@ define(function (require, exports, module) {
     var editor = null;
     var editorJavascript = null;
     var editorHTML = null;
-    
+
     var editorCSS = null;
 
     var typeCompilationService = null;
@@ -89,8 +89,9 @@ define(function (require, exports, module) {
         updateOutputPane();
     }
 
-    function startAutoComplete(editor) {
+    function startAutoComplete(ed) {
         if (autoComplete.isActive() == false) {
+            typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
             autoComplete.setScriptName(selectFileName);
             autoComplete.active();
         }
@@ -289,6 +290,7 @@ define(function (require, exports, module) {
 
 
     function refactor() {
+        typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
         var references = languageService.getOccurrencesAtPosition(selectFileName + ".ts", aceEditorPosition.getCurrentCharPosition());
         if (typeof references === "undefined" || references == null)
             return;
@@ -303,15 +305,16 @@ define(function (require, exports, module) {
     }
 
     function formatDocument() {
+        typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
         var textChanges = languageService.getFormattingEditsForRange(selectFileName + ".ts", 0, editor.getValue().length, defaultFormatCodeOptions());
         for (var i = textChanges.length - 1; i >= 0; i--) {
 
             var textChange = textChanges[i];
 
-            var startPos = editor.getSession().getDocument().indexToPosition(textChange.minChar);
-            var endPos = editor.getSession().getDocument().indexToPosition(textChange.limChar);
+            var startPos = editor.getSession().getDocument().indexToPosition(textChange.span.start);
+            var endPos = editor.getSession().getDocument().indexToPosition(textChange.span.start + textChange.span.length);
             var range = new AceRange(startPos.row, startPos.column, endPos.row, endPos.column);
-            editor.getSession().getDocument().replace(range, textChange.text);
+            editor.getSession().getDocument().replace(range, textChange.newText);
         }
     }
 
@@ -334,10 +337,12 @@ define(function (require, exports, module) {
 
     var previousCursorPositionStack = [];
     function gotoDefinition() {
-        var definitionInfo = languageService.getDefinitionAtPosition(selectFileName + ".ts", aceEditorPosition.getCurrentCharPosition());
-        if (definitionInfo != null) {
+        typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
+        var definitionInfos = languageService.getDefinitionAtPosition(selectFileName + ".ts", aceEditorPosition.getCurrentCharPosition());
+        if (typeof definitionInfos !== "undefined" && definitionInfos.length > 0) {
+            var definitionInfo = definitionInfos[0];
             previousCursorPositionStack.push(editor.getCursorPosition());
-            var startPos = editor.getSession().getDocument().indexToPosition(definitionInfo.minChar);
+            var startPos = editor.getSession().getDocument().indexToPosition(definitionInfo.textSpan.start);
             editor.gotoLine(startPos.row + 1, startPos.col, true);
         }
     }
@@ -489,7 +494,7 @@ define(function (require, exports, module) {
 
         aceEditorPosition = new EditorPosition(editor);
         typeCompilationService = new CompilationService(editor, languageService);
-        autoComplete = new AutoComplete(editor, selectFileName, typeCompilationService);
+        autoComplete = new AutoComplete(editor, selectFileName, typeCompilationService, ts);
 
         // override editor onTextInput
         var originalTextInput = editor.onTextInput;
@@ -677,7 +682,7 @@ define(function (require, exports, module) {
         }
 
         wnd.document.open();
-        
+
         // register onerror and console.log before closing the document, or the code will run in the window before the handlers are registered
         if (wnd.onerror == null) {
             wnd.onerror = function (errorMsg, url, lineNumber, column, errorObj) {
@@ -713,7 +718,7 @@ define(function (require, exports, module) {
         else
             html = message;
         logger.innerHTML += "<div class='console-entry'>" + html + "</div>";
-        
+
         logger.scrollTop = logger.scrollHeight;
         if ($("#txtConsole").children().length > 100) {
             $($("#txtConsole").children()[0]).empty().detach();
@@ -739,7 +744,7 @@ define(function (require, exports, module) {
 
                 jsStacktrace = "\n" + lines.join("\n");
             }
-                
+
         }
 
         var tsLineNumber = lineNumber;
@@ -772,13 +777,13 @@ define(function (require, exports, module) {
             };
             newAnnotations.push(errAnnotation);
             session.setAnnotations(newAnnotations);
-            
+
             if ($("#chkMoveCursorToError").hasClass("active")) {
                 editor.gotoLine(range.start.row + 1, range.start.col, true);
             }
         }
 
-        var jsRange = new AceRange(lineNumber-1, column, lineNumber-1, Infinity);
+        var jsRange = new AceRange(lineNumber - 1, column, lineNumber - 1, Infinity);
         var jsErrAnnotation = {
             row: jsRange.start.row,
             column: jsRange.start.column,
@@ -815,7 +820,7 @@ define(function (require, exports, module) {
             }
             htmlText = htmlText.replace("<!--%Javascript%-->", javascriptText);
         }
-        
+
         return htmlText;
     }
 
@@ -907,24 +912,24 @@ define(function (require, exports, module) {
         });
 
         $("#lstFiles").on("click", ".item .lnkDelete", function (ev) {
-            if(confirm("Are you sure?"))
+            if (confirm("Are you sure?"))
                 var item = $(this);
-                restService.deleteFile($(this).attr("data-name"), function(completeEntryDeleted) {
-                    if(completeEntryDeleted)
-                        item.parent().empty().detach();
-                    else {
-                        var milestone = parseInt(item.parent().find(".badge").text());
-                        milestone--;
-                        item.parent().find(".badge").text(milestone);
-                    }
-                });
+            restService.deleteFile($(this).attr("data-name"), function (completeEntryDeleted) {
+                if (completeEntryDeleted)
+                    item.parent().empty().detach();
+                else {
+                    var milestone = parseInt(item.parent().find(".badge").text());
+                    milestone--;
+                    item.parent().find(".badge").text(milestone);
+                }
+            });
 
             ev.preventDefault();
             return true;
         });
 
         $("#lnkSave").click(function (ev) {
-            restService.saveFile(selectFileName,editorHTML.getValue(), editorCSS.getValue(), editor.getValue());
+            restService.saveFile(selectFileName, editorHTML.getValue(), editorCSS.getValue(), editor.getValue());
 
             ev.preventDefault();
             return true;
@@ -1068,7 +1073,7 @@ define(function (require, exports, module) {
         function deleteFile(name, onsuccess) {
             $.post(restBaseUrl + "deleteMilestone", { name: name }, function (resp) {
                 if (resp.Success) {
-                    if(typeof onsuccess !== "undefined") {
+                    if (typeof onsuccess !== "undefined") {
                         onsuccess(resp.Result);
                     }
                 }
@@ -1126,7 +1131,7 @@ define(function (require, exports, module) {
 
     function LocalRestServices() {
         var self = this;
-        
+
         function saveObj(key, obj) {
             window.localStorage[key] = JSON.stringify(obj);
         }
@@ -1190,7 +1195,7 @@ define(function (require, exports, module) {
                 checkExampleReady();
             }, "text");
         }
-        
+
         function generateNewName() {
             var chars = "bcdfghjklmnpqrstvwxz";
             var vowels = "aeiou";
@@ -1212,26 +1217,25 @@ define(function (require, exports, module) {
             return name;
         }
 
-        function getDefaultHTML()
-        {
+        function getDefaultHTML() {
             return "<html>\n" +
-                    "    <head>\n"+
+                    "    <head>\n" +
                     "       <title>Typescript Editor - Hello</title>\n" +
-                    "       <!--%CSS%-->\n"+
-                    "    </head>\n"+
-                    "    <body>\n"+
+                    "       <!--%CSS%-->\n" +
+                    "    </head>\n" +
+                    "    <body>\n" +
                     "        <h1>Greeter example</h1>\n" +
-                    "    </body>\n"+
-                    "    <!--%Javascript%-->\n" + 
+                    "    </body>\n" +
+                    "    <!--%Javascript%-->\n" +
                     "</html>";
         }
         function getDefaultCSS() {
             return "body {\n" +
-                   "\n"+
+                   "\n" +
                    "};"
         }
         function getDefaultTypescript() {
-            return "class Hello {\n"+
+            return "class Hello {\n" +
                    "\n" +
                    "}";
         }
@@ -1246,11 +1250,11 @@ define(function (require, exports, module) {
                     Description: "",
                     Milestones: [
                         {
-                        HTML: getDefaultHTML(),
-                        CSS: getDefaultCSS(),
-                        Typescript: getDefaultTypescript(),
-                        Comments: ""
-                    }]
+                            HTML: getDefaultHTML(),
+                            CSS: getDefaultCSS(),
+                            Typescript: getDefaultTypescript(),
+                            Comments: ""
+                        }]
                 };
 
                 /* Don't pollute the localstorage with the same new templates
@@ -1258,7 +1262,7 @@ define(function (require, exports, module) {
                 entries[entry.Name] = entry;
                 saveObj("entries", entries);*/
 
-                var milestone = entry.Milestones[entry.LastMilestone-1];
+                var milestone = entry.Milestones[entry.LastMilestone - 1];
 
                 loadInEditors(entry.Name, entry.LastMilestone, milestone.HTML, milestone.CSS, milestone.Typescript);
                 setHash(entry.Name + "-" + entry.LastMilestone);
@@ -1276,7 +1280,7 @@ define(function (require, exports, module) {
 
                 var entries = loadObj("entries");
                 var entry = entries[file];
-                
+
                 if (typeof entry !== "undefined") {
                     var milestone = entry.Milestones[entry.LastMilestone - 1];
                     loadInEditors(entry.Name, entry.LastMilestone, milestone.HTML, milestone.CSS, milestone.Typescript, entry.Description);
@@ -1340,8 +1344,8 @@ define(function (require, exports, module) {
                 createEntryIfNotExists(name);
                 var entries = loadObj("entries");
                 var entry = entries[name];
-            
-                var milestone = entry.Milestones[entry.LastMilestone-1];
+
+                var milestone = entry.Milestones[entry.LastMilestone - 1];
                 milestone.HTML = html;
                 milestone.CSS = css;
                 milestone.Typescript = typescript;
@@ -1355,14 +1359,14 @@ define(function (require, exports, module) {
         }
         self.saveFile = saveFile;
 
-    
+
         function deleteFile(name, onsuccess) {
             try {
                 var entries = loadObj("entries");
                 var entry = entries[name];
                 if (typeof entry === "undefined")
                     return;
-                   
+
 
                 if (entry.LastMilestone > 1) {
                     entry.Milestones.pop();
@@ -1394,7 +1398,7 @@ define(function (require, exports, module) {
 
                 entry.LastMilestone++;
                 entry.Milestones.push({
-                    
+
                     HTML: html,
                     CSS: css,
                     Typescript: typescript

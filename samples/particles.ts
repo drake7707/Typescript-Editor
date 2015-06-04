@@ -16,7 +16,7 @@ class Particle {
 
     size: number;
 
-    alive: bool;
+    alive: boolean;
     seed: number;
     color: any;
 
@@ -25,12 +25,12 @@ class Particle {
 
 class Settings {
 
-    traceLines: bool = true;
-    connectEndToStart: bool = true;
-    applyGrid: bool = true;
+    traceLines: boolean = true;
+    connectEndToStart: boolean = true;
+    applyGrid: boolean = true;
     nrOfParticles: number = 10;
     sizeOfParticles: number = 1;
-    applyTrail: bool = true;
+    applyTrail: boolean = true;
 }
 var settings: Settings = new Settings();
 
@@ -38,7 +38,7 @@ var curT: number = 0;
 var MAX_T: number = 100;
 
 
-$(document).ready(function() {
+$(document).ready(function () {
     mainCanvas = $("#c").get(0);
 
 
@@ -65,22 +65,22 @@ $(document).ready(function() {
 
 function initializeControls() {
 
-    $("input[type=checkbox]").each(function(el) {
+    $("input[type=checkbox]").each(function (el) {
         var attr = $(el).attr("data-var");
         $(el).prop("checked", settings[attr]);
     });
 
-    $("input[type=checkbox]").change(function() {
+    $("input[type=checkbox]").change(function () {
         var attr = $(this).attr("data-var");
         settings[attr] = $(this).prop("checked");
         clear(mainCanvasContext);
     });
     $("input[type=checkbox]").change();
-    $("input[type=checkbox]").each(function(el) {
+    $("input[type=checkbox]").each(function (el) {
         $(el).prop("checked", settings[window[$(el).attr("data-var")]]);
     });
 
-    $("#btnError").click(function() {
+    $("#btnError").click(function () {
         $("tttt").somethingerror();
     });
 }
@@ -160,7 +160,7 @@ function step(ctx: CanvasRenderingContext2D) {
 }
 
 
-var updateFunc = function(p, t) {
+var updateFunc = function (p, t) {
     if (!p.alive)
         return;
 
@@ -194,7 +194,7 @@ function createParticle(i): Particle {
     p.seed = i; //Math.random();
     p.color = "rgba(200,200,200,1)";
 
-    p.update = function(t) {
+    p.update = function (t) {
         if (updateFunc != null)
             updateFunc(p, t);
     };
