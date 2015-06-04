@@ -155,12 +155,16 @@ body {
     background-image: url('./icons/property.png');
 }
 
-.label-kind-method {
+.label-kind-method, .label-kind-function {
     background-image: url('./icons/method.png');
 }
 
 .label-kind-interface {
-    background: #666;
+    background-image: url('./icons/interface.png');
+}
+
+.label-kind-class {
+    background-image: url('./icons/class.png');
 }
 
 .label-kind-variable {

@@ -1144,55 +1144,97 @@ define(function (require, exports, module) {
         if (loadObj("entries") == null)
             saveObj("entries", {});
 
-        if (typeof loadObj("entries")["example"] === "undefined") {
-            var sampleEntry = {
-                Name: "example",
-                LastMilestone: 1,
-                Description: "Particles example",
-                Milestones: [
-                    {
-                        HTML: getDefaultHTML(),
-                        CSS: getDefaultCSS(),
-                        Typescript: getDefaultTypescript(),
-                        Comments: ""
-                    }]
-            };
-            var entries = loadObj("entries");
-            entries["example"] = sampleEntry;
-            saveObj("entries", entries);
+        function downloadExampleIfNotAvailable() {
+            if (typeof loadObj("entries")["example"] === "undefined") {
+                var sampleEntry = {
+                    Name: "example",
+                    LastMilestone: 1,
+                    Description: "Particles example",
+                    Milestones: [
+                        {
+                            HTML: getDefaultHTML(),
+                            CSS: getDefaultCSS(),
+                            Typescript: getDefaultTypescript(),
+                            Comments: ""
+                        }]
+                };
+                var entries = loadObj("entries");
+                entries["example"] = sampleEntry;
+                saveObj("entries", entries);
 
-            function checkExampleReady() {
-                if (exampleReady < 3)
-                    return;
-                if (confirm("Load example?")) {
-                    self.loadFile("example", 1);
+                function checkExampleReady() {
+                    if (exampleReady < 3)
+                        return;
+                    if (confirm("Load example?")) {
+                        self.loadFile("example", 1);
+                    }
                 }
+                var exampleReady = 0;
+                $.get("samples/particles.html", function (data) {
+                    var entries = loadObj("entries");
+                    entries["example"].Milestones[0].HTML = data;
+                    saveObj("entries", entries);
+                    exampleReady++;
+                    checkExampleReady();
+                });
+
+                $.get("samples/particles.css", function (data) {
+                    var entries = loadObj("entries");
+                    entries["example"].Milestones[0].CSS = data;
+                    saveObj("entries", entries);
+                    exampleReady++;
+                    checkExampleReady();
+                });
+
+                $.get("samples/particles.ts", function (data) {
+                    var entries = loadObj("entries");
+                    entries["example"].Milestones[0].Typescript = data;
+                    saveObj("entries", entries);
+                    exampleReady++;
+                    checkExampleReady();
+                }, "text");
             }
-            var exampleReady = 0;
-            $.get("samples/particles.html", function (data) {
-                var entries = loadObj("entries");
-                entries["example"].Milestones[0].HTML = data;
-                saveObj("entries", entries);
-                exampleReady++;
-                checkExampleReady();
-            });
-
-            $.get("samples/particles.css", function (data) {
-                var entries = loadObj("entries");
-                entries["example"].Milestones[0].CSS = data;
-                saveObj("entries", entries);
-                exampleReady++;
-                checkExampleReady();
-            });
-
-            $.get("samples/particles.ts", function (data) {
-                var entries = loadObj("entries");
-                entries["example"].Milestones[0].Typescript = data;
-                saveObj("entries", entries);
-                exampleReady++;
-                checkExampleReady();
-            }, "text");
         }
+        function downloadClusteringExampleIfNotAvailable() {
+            if (typeof loadObj("entries")["clustering"] === "undefined") {
+                var sampleEntry = {
+                    Name: "clustering",
+                    LastMilestone: 1,
+                    Description: "Kruskal clustering with generics",
+                    Milestones: [
+                        {
+                            HTML: getDefaultHTML(),
+                            CSS: getDefaultCSS(),
+                            Typescript: getDefaultTypescript(),
+                            Comments: ""
+                        }]
+                };
+                var entries = loadObj("entries");
+                entries["clustering"] = sampleEntry;
+                saveObj("entries", entries);
+
+                $.get("samples/clustering.html", function (data) {
+                    var entries = loadObj("entries");
+                    entries["clustering"].Milestones[0].HTML = data;
+                    saveObj("entries", entries);
+                });
+
+                $.get("samples/clustering.css", function (data) {
+                    var entries = loadObj("entries");
+                    entries["clustering"].Milestones[0].CSS = data;
+                    saveObj("entries", entries);
+                });
+
+                $.get("samples/clustering.ts", function (data) {
+                    var entries = loadObj("entries");
+                    entries["clustering"].Milestones[0].Typescript = data;
+                    saveObj("entries", entries);
+                }, "text");
+            }
+        }
+
+        downloadExampleIfNotAvailable();
+        downloadClusteringExampleIfNotAvailable();
 
         function generateNewName() {
             var chars = "bcdfghjklmnpqrstvwxz";
