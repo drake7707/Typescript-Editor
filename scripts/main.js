@@ -1,5 +1,3 @@
-"use strict";
-
 define(function (require, exports, module) {
     var ace = require('ace/ace');
     var AceRange = require('ace/range').Range;
