@@ -39,7 +39,7 @@ var MAX_T: number = 100;
 
 
 $(document).ready(function () {
-    mainCanvas = $("#c").get(0);
+    mainCanvas = <HTMLCanvasElement>$("#c").get(0);
 
 
     mainCanvasContext = mainCanvas.getContext("2d");
