@@ -9,7 +9,7 @@ define(["require", "exports", './EditorPosition'], function(require, exports, __
         }
         CompilationService.prototype.getCompilation = function (script, charpos, isMemberCompletion) {
             var compInfo;
-            compInfo = this.languageService.getCompletionsAtPosition(script, charpos, isMemberCompletion);
+            compInfo = this.languageService.getCompletionsAtPosition(script + ".ts", charpos, isMemberCompletion);
             return compInfo;
         };
         CompilationService.prototype.getCursorCompilation = function (script, cursor) {

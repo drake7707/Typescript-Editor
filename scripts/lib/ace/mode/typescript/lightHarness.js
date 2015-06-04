@@ -2,7 +2,7 @@
 ///   Just the ScriptInfo and the
 ///  TypeScriptLS classes.
 /// Notice the manual require calls for ./typescriptServices.
-define(function(require, exports, module) {
+define(function (require, exports, module) {
 
     var __extends = this.__extends || function (d, b) {
         function __() {
@@ -27,7 +27,7 @@ define(function(require, exports, module) {
         }
         ScriptInfo.prototype.updateContent = function (content, isResident) {
             this.editRanges = [];
-            this.content = ts.content;
+            this.content = content;
             this.isResident = isResident;
             this.version++;
         };
@@ -40,35 +40,35 @@ define(function(require, exports, module) {
                 length: this.content.length,
                 editRange: new TypeScript.ScriptEditRange(minChar, limChar, (limChar - minChar) + newText.length)
             });
-            if(this.editRanges.length > this.maxScriptVersions) {
+            if (this.editRanges.length > this.maxScriptVersions) {
                 this.editRanges.splice(0, this.maxScriptVersions - this.editRanges.length);
             }
             this.version++;
         };
         ScriptInfo.prototype.getEditRangeSinceVersion = function (version) {
-            if(this.version == version) {
+            if (this.version == version) {
                 return null;
             }
             var initialEditRangeIndex = this.editRanges.length - (this.version - version);
-            if(initialEditRangeIndex < 0 || initialEditRangeIndex >= this.editRanges.length) {
+            if (initialEditRangeIndex < 0 || initialEditRangeIndex >= this.editRanges.length) {
                 return TypeScript.ScriptEditRange.unknown();
             }
             var entries = this.editRanges.slice(initialEditRangeIndex);
             var minDistFromStart = entries.map(function (x) {
                 return x.editRange.minChar;
             }).reduce(function (prev, current) {
-                    return Math.min(prev, current);
-                });
+                return Math.min(prev, current);
+            });
             var minDistFromEnd = entries.map(function (x) {
                 return x.length - x.editRange.limChar;
             }).reduce(function (prev, current) {
-                    return Math.min(prev, current);
-                });
+                return Math.min(prev, current);
+            });
             var aggDelta = entries.map(function (x) {
                 return x.editRange.delta;
             }).reduce(function (prev, current) {
-                    return prev + current;
-                });
+                return prev + current;
+            });
             return new TypeScript.ScriptEditRange(minDistFromStart, entries[0].length - minDistFromEnd, aggDelta);
         };
         return ScriptInfo;
@@ -98,8 +98,8 @@ define(function(require, exports, module) {
         };
         TypeScriptLS.prototype.updateScript = function (name, content, isResident) {
             if (typeof isResident === "undefined") { isResident = false; }
-            for(var i = 0; i < this.scripts.length; i++) {
-                if(this.scripts[i].name == name) {
+            for (var i = 0; i < this.scripts.length; i++) {
+                if (this.scripts[i].name == name) {
                     this.scripts[i].updateContent(content, isResident);
                     return;
                 }
@@ -107,8 +107,8 @@ define(function(require, exports, module) {
             this.addScript(name, content, isResident);
         };
         TypeScriptLS.prototype.editScript = function (name, minChar, limChar, newText) {
-            for(var i = 0; i < this.scripts.length; i++) {
-                if(this.scripts[i].name == name) {
+            for (var i = 0; i < this.scripts.length; i++) {
+                if (this.scripts[i].name == name) {
                     this.scripts[i].editContent(minChar, limChar, newText);
                     return;
                 }
@@ -125,7 +125,7 @@ define(function(require, exports, module) {
         };
 
         TypeScriptLS.prototype.getScriptSnapshot = function (name) {
-            for(var i = 0; i < this.scripts.length; i++) {
+            for (var i = 0; i < this.scripts.length; i++) {
                 if (this.scripts[i].name == name) {
                     return ts.ScriptSnapshot.fromString(this.scripts[i].content);
                 }
@@ -140,7 +140,7 @@ define(function(require, exports, module) {
             }
         };
 
-        
+
         TypeScriptLS.prototype.getCurrentDirectory = function () {
             return "";
         };
@@ -154,11 +154,11 @@ define(function(require, exports, module) {
         TypeScriptLS.prototype.getCanonicalFileName = function (filename) {
             return filename;
         };
-        
+
         TypeScriptLS.prototype.getCancellationToken = function () {
             return null;
         };
-        
+
         TypeScriptLS.prototype.getLocalizedDiagnosticMessages = function () {
             return null;
         };
@@ -182,7 +182,7 @@ define(function(require, exports, module) {
             return "\r\n";
         };
 
-        
+
         TypeScriptLS.prototype.getScriptContent = function (scriptIndex) {
             return this.scripts[scriptIndex].content;
         };
@@ -276,7 +276,7 @@ define(function(require, exports, module) {
         TypeScriptLS.prototype.applyEdits = function (content, edits) {
             var result = content;
             edits = this.normalizeEdits(edits);
-            for(var i = edits.length - 1; i >= 0; i--) {
+            for (var i = edits.length - 1; i >= 0; i--) {
                 var edit = edits[i];
                 var prefix = result.substring(0, edit.minChar);
                 var middle = edit.text;
@@ -289,7 +289,7 @@ define(function(require, exports, module) {
             var result = [];
             function mapEdits(edits) {
                 var result = [];
-                for(var i = 0; i < edits.length; i++) {
+                for (var i = 0; i < edits.length; i++) {
                     result.push({
                         edit: edits[i],
                         index: i
@@ -299,29 +299,29 @@ define(function(require, exports, module) {
             }
             var temp = mapEdits(edits).sort(function (a, b) {
                 var result = a.edit.minChar - b.edit.minChar;
-                if(result == 0) {
+                if (result == 0) {
                     result = a.index - b.index;
                 }
                 return result;
             });
             var current = 0;
             var next = 1;
-            while(current < temp.length) {
+            while (current < temp.length) {
                 var currentEdit = temp[current].edit;
-                if(next >= temp.length) {
+                if (next >= temp.length) {
                     result.push(currentEdit);
                     current++;
                     continue;
                 }
                 var nextEdit = temp[next].edit;
                 var gap = nextEdit.minChar - currentEdit.limChar;
-                if(gap >= 0) {
+                if (gap >= 0) {
                     result.push(currentEdit);
                     current = next;
                     next++;
                     continue;
                 }
-                if(currentEdit.limChar >= nextEdit.limChar) {
+                if (currentEdit.limChar >= nextEdit.limChar) {
                     next++;
                     continue;
                 } else {

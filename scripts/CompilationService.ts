@@ -11,7 +11,7 @@ export class CompilationService{
 
     getCompilation (script, charpos, isMemberCompletion) {
         var compInfo;
-        compInfo = this.languageService.languageService.getCompletionsAtPosition(script, charpos, isMemberCompletion);
+        compInfo = this.languageService.languageService.getCompletionsAtPosition(script + ".ts", charpos, isMemberCompletion);
         return compInfo;
     };
 

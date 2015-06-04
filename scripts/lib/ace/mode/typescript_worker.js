@@ -131,15 +131,27 @@ define(function (require, exports, module) {
             var sourceMap = "";
 
             var program = ts.createProgram(["temp.ts"], this.typeScriptLS.getCompilationSettings(), this.typeScriptLS);
-
-            var emitResult = program.emit(this.typeScriptLS.getSourceFile("temp.ts"), function (fileName, data, writeByteOrderMark, onError) {
+            var typeChecker = program.getTypeChecker(true);
+            var emitResult = program.emit(program.getSourceFile("temp.ts"), function (fileName, data, writeByteOrderMark, onError) {
                 if (fileName == "temp.js") {
                     output += data;
                 }
             });
+
+
             for (var i = 0; i < emitResult.sourceMaps.length; i++) {
                 if (emitResult.sourceMaps[i].sourceMapFile == "temp.js") {
-                    sourceMap += emitResult.sourceMaps[i].sourceMapMappings;
+
+                    var sourceMapObj = {
+                        file: emitResult.sourceMaps[i].sourceMapFile,
+                        version: 1,
+                        mappings: emitResult.sourceMaps[i].sourceMapMappings,
+                        names: emitResult.sourceMaps[i].sourceMapNames,
+                        sourceRoot: emitResult.sourceMaps[i].sourceMapSourceRoot,
+                        sources: emitResult.sourceMaps[i].sourceMapSources
+                    };
+                    sourceMap = JSON.stringify(sourceMapObj);
+                    break;
                 }
             }
 
