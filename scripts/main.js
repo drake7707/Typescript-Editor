@@ -956,7 +956,7 @@ define(function (require, exports, module) {
 
 
 
-    var restService = new RestServices();
+    var restService = new LocalRestServices();
 
     var ignoreHash = false;
     function openFromHash(newHash) {
