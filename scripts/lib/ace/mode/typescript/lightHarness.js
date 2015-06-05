@@ -13,6 +13,7 @@ define(function (require, exports, module) {
     };
 
     var ts = require('./typescriptServices');
+
     //var Services = require('./typescriptServices').Services;
     //var TypeScript = require('./typescriptServices').TypeScript;
 
@@ -124,12 +125,38 @@ define(function (require, exports, module) {
             return names;
         };
 
+        function resolveExternalReference(url) {
+            var request = new XMLHttpRequest();
+            request.open('GET', url, false);
+            request.send(null);
+
+            if (request.status === 200) {
+                return request.responseText;
+            }
+            else
+                return null;
+
+            return strReturn;
+        }
         TypeScriptLS.prototype.getScriptSnapshot = function (name) {
             for (var i = 0; i < this.scripts.length; i++) {
                 if (this.scripts[i].name == name) {
                     return ts.ScriptSnapshot.fromString(this.scripts[i].content);
                 }
             }
+
+            if (name.substr(0, 7) == "http://" || name.substr(0, 8) == "https://") {
+                var content = resolveExternalReference(name);
+                this.addScript(name, content, false);
+            }
+
+            for (var i = 0; i < this.scripts.length; i++) {
+                if (this.scripts[i].name == name) {
+                    return ts.ScriptSnapshot.fromString(this.scripts[i].content);
+                }
+            }
+
+            return null;
         };
 
         TypeScriptLS.prototype.getScriptVersion = function (name) {
@@ -144,14 +171,19 @@ define(function (require, exports, module) {
         TypeScriptLS.prototype.getCurrentDirectory = function () {
             return "";
         };
+
+        TypeScriptLS.prototype.useCaseSensitiveFileNames = function () {
+            return true;
+        };
+        
         TypeScriptLS.prototype.getScriptIsOpen = function () {
             return true;
         };
         TypeScriptLS.prototype.getDefaultLibFileName = function (options) {
             return "lib";
         };
-        
-     
+
+
 
         TypeScriptLS.prototype.getCanonicalFileName = function (filename) {
             return filename;
@@ -238,12 +270,12 @@ define(function (require, exports, module) {
         TypeScriptLS.prototype.getScriptIsResident = function (scriptIndex) {
             return this.scripts[scriptIndex].isResident;
         };
-        
+
         TypeScriptLS.prototype.getScriptEditRangeSinceVersion = function (scriptIndex, scriptVersion) {
             var range = this.scripts[scriptIndex].getEditRangeSinceVersion(scriptVersion);
             return (range.minChar + "," + range.limChar + "," + range.delta);
         };
-       
+
         TypeScriptLS.prototype.parseSourceText = function (fileName, sourceText) {
             var parser = new TypeScript.Parser();
             parser.setErrorRecovery(null, -1, -1);

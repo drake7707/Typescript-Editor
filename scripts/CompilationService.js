@@ -13,13 +13,15 @@ define(["require", "exports", './EditorPosition'], function (require, exports, _
             if (typeof compInfo !== "undefined") {
                 if (typeof limit !== "undefined")
                     compInfo.entries = compInfo.entries.slice(0, limit);
-
-                for (var i = 0; i < compInfo.entries.length; i++) {
-                    compInfo.entries[i].details = this.languageService.getCompletionEntryDetails(script + ".ts", charpos, compInfo.entries[i].name);
-                }
             }
             return compInfo;
         };
+
+        CompilationService.prototype.getCompilationDetails = function (script, cursor, name) {
+            var pos = this.editorPos.getPositionChars(cursor);
+            return this.languageService.getCompletionEntryDetails(script + ".ts", pos, name);
+        };
+
         CompilationService.prototype.getCursorCompilation = function (script, cursor, limit) {
             var isMemberCompletion, matches, pos, text;
             pos = this.editorPos.getPositionChars(cursor);

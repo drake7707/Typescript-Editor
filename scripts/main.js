@@ -555,6 +555,8 @@ define(function (require, exports, module) {
                 });
                 runtimeErrorMarkers = [];
             });
+
+            updateErrors();
         });
 
         workerOnCreate(function () {//TODO use worker init event            
@@ -624,7 +626,33 @@ define(function (require, exports, module) {
         }
         updateSideBySide();
 
+        $("#errorsTypescript").click(function (ev) {
+            var lines = $("#errorsTypescript").attr("data-lines").split(',');
+            var curIdx = parseInt($("#errorsTypescript").attr("data-curidx"));
+
+            editor.gotoLine(parseInt(lines[curIdx])+1, 0, true);
+            curIdx++;
+            curIdx = curIdx % lines.length;
+            $("#errorsTypescript").attr("data-curidx", curIdx);
+        });
     });
+
+    function updateErrors() {
+        var annotations = editor.getSession().getAnnotations();
+
+        if (annotations.length > 0) {
+            var lines = [];
+            annotations.forEach(function (a) { lines.push(a.row) });
+
+            $("#errorsTypescript").text(annotations.length + " error(s)");
+            $("#errorsTypescript").attr("data-lines", lines.join(","));
+            $("#errorsTypescript").attr("data-curidx", 0);
+            $("#errorsTypescript").show();
+        }
+        else {
+            $("#errorsTypescript").hide();
+        }
+    }
 
     /*
         All logic for the output pane/external window
@@ -729,9 +757,7 @@ define(function (require, exports, module) {
 
     function handleRuntimeError(errorMsg, url, lineNumber, column, errorObj) {
         var session = editor.getSession();
-        runtimeErrorMarkers.forEach(function (id) {
-            session.removeMarker(id);
-        });
+        runtimeErrorMarkers.forEach(function (id) { session.removeMarker(id); });
         runtimeErrorMarkers = [];
 
         var stacktrace = "";
@@ -742,7 +768,6 @@ define(function (require, exports, module) {
 
                 jsStacktrace = "\n" + lines.join("\n");
             }
-
         }
 
         var tsLineNumber = lineNumber;
@@ -779,6 +804,8 @@ define(function (require, exports, module) {
             if ($("#chkMoveCursorToError").hasClass("active")) {
                 editor.gotoLine(range.start.row + 1, range.start.col, true);
             }
+
+            updateErrors();
         }
 
         var jsRange = new AceRange(lineNumber - 1, column, lineNumber - 1, Infinity);
@@ -850,7 +877,7 @@ define(function (require, exports, module) {
 
 
 
-    var restService = new LocalRestServices();
+    var restService = new RestServices();
 
     var ignoreHash = false;
     function openFromHash(newHash) {

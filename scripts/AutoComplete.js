@@ -1,4 +1,4 @@
-define(function(require, exports, module) {
+define(function (require, exports, module) {
 
     var HashHandler = require('ace/keyboard/hash_handler').HashHandler;
     var EventEmitter = require("ace/lib/event_emitter").EventEmitter;
@@ -6,8 +6,8 @@ define(function(require, exports, module) {
 
     var oop = require("ace/lib/oop");
 
-    
-    
+
+
     exports.AutoComplete = function (editor, script, compilationService, typeScriptService) {
 
         var self = this;
@@ -18,13 +18,13 @@ define(function(require, exports, module) {
         this.view = new AutoCompleteView(editor, self);
         this.scriptName = script;
         this._active = false;
-        this.inputText =''; //TODO imporve name
+        this.inputText = ''; //TODO imporve name
 
         this.isActive = function () {
             return self._active;
         };
 
-        this.setScriptName = function (name){
+        this.setScriptName = function (name) {
             self.scriptName = name;
         };
 
@@ -34,16 +34,16 @@ define(function(require, exports, module) {
             self.listElement.innerHTML = '';
         };
 
-        this.hide = function(){
+        this.hide = function () {
             self.view.hide();
         }
 
-        this.compilation = function(cursor){
-            var compilationInfo = compilationService.getCursorCompilation(self.scriptName, cursor, 100);
+        this.compilation = function (cursor) {
+            var compilationInfo = compilationService.getCursorCompilation(self.scriptName, cursor);
             if (typeof compilationInfo === "undefined")
                 return;
 
-            var text  = compilationService.matchText;
+            var text = compilationService.matchText;
             var coords = editor.renderer.textToScreenCoordinates(cursor.row, cursor.column - text.length);
 
             self.view.setPosition(coords);
@@ -51,28 +51,28 @@ define(function(require, exports, module) {
 
             var compilations = compilationInfo.entries;
 
-            if (self.inputText.length > 0){
-                compilations = compilationInfo.entries.filter(function(elm){
-                    return elm.name.toLowerCase().indexOf(self.inputText.toLowerCase()) == 0 ;
+            if (self.inputText.length > 0) {
+                compilations = compilationInfo.entries.filter(function (elm) {
+                    return elm.name.toLowerCase().indexOf(self.inputText.toLowerCase()) == 0;
                 });
             }
 
-            var matchFunc = function(elm) {
+            var matchFunc = function (elm) {
                 return elm.name.indexOf(self.inputText) == 0 ? 1 : 0;
             };
 
-            var matchCompare = function(a, b){
+            var matchCompare = function (a, b) {
                 return matchFunc(b) - matchFunc(a);
             };
 
-            var textCompare = function(a, b){
-                 if (a.name == b.name){
+            var textCompare = function (a, b) {
+                if (a.name == b.name) {
                     return 0;
-                 }else{
-                     return (a.name > b.name) ? 1 : -1;
-                 }
+                } else {
+                    return (a.name > b.name) ? 1 : -1;
+                }
             };
-            var compare = function(a, b){
+            var compare = function (a, b) {
                 var ret = matchCompare(a, b);
                 return (ret != 0) ? ret : textCompare(a, b);
             };
@@ -84,12 +84,12 @@ define(function(require, exports, module) {
             return compilations.length;
         };
 
-        this.refreshCompilation = function(e){
+        this.refreshCompilation = function (e) {
             var cursor = editor.getCursorPosition();
-            if(e.data.action  == "insertText"){
+            if (e.data.action == "insertText") {
                 cursor.column += 1;
-            } else if (e.data.action  == "removeText"){
-                if(e.data.text == '\n'){
+            } else if (e.data.action == "removeText") {
+                if (e.data.text == '\n') {
                     self.deactivate();
                     return;
                 }
@@ -98,16 +98,25 @@ define(function(require, exports, module) {
             self.compilation(cursor);
         };
 
-        this.showCompilation = function(infos){
-            if (infos.length > 0){
+        this.showCompilation = function (infos) {
+            if (infos.length > 0) {
+                var cursor = editor.getCursorPosition();
+
+                var count = 0;
                 self.view.show();
                 var html = '';
-                for(var n in infos) {
+                for (var n in infos) {
                     var info = infos[n];
                     var name = '<span class="label-name">' + info.name + '</span>';
 
                     var description = "";
-                    info.details.displayParts.forEach(function (el) { description += el.text; });
+                    if (count < 50) { // limit the amount of details to prevent lag
+                        var details = compilationService.getCompilationDetails(self.scriptName, cursor, info.name);
+                        if (typeof details !== undefined) {
+                            details.displayParts.forEach(function (el) { description += el.text; });
+                            count++;
+                        }
+                    }
 
                     var type = '<span class="label-type">' + description + '</span>';
 
@@ -122,7 +131,7 @@ define(function(require, exports, module) {
                 }
                 self.listElement.innerHTML = html;
                 self.view.ensureFocus();
-            }else{
+            } else {
                 self.view.hide();
             }
         };
@@ -130,34 +139,34 @@ define(function(require, exports, module) {
         this.active = function () {
             self.show();
             var count = self.compilation(editor.getCursorPosition());
-            if(!(count > 0)){
+            if (!(count > 0)) {
                 self.hide();
                 return;
             }
             editor.keyBinding.addKeyboardHandler(self.handler);
         };
 
-        this.deactivate = function() {
+        this.deactivate = function () {
             editor.keyBinding.removeKeyboardHandler(self.handler);
         };
 
-        this.handler.attach = function(){
+        this.handler.attach = function () {
             editor.addEventListener("change", self.refreshCompilation);
-            self._emit("attach", {sender: self});
+            self._emit("attach", { sender: self });
             self._active = true;
         };
 
-        this.handler.detach = function(){
+        this.handler.detach = function () {
             editor.removeEventListener("change", self.refreshCompilation);
             self.view.hide();
-            self._emit("detach", {sender: self});
+            self._emit("detach", { sender: self });
             self._active = false;
         };
 
-        this.handler.handleKeyboard = function(data, hashId, key, keyCode) {
+        this.handler.handleKeyboard = function (data, hashId, key, keyCode) {
             if (hashId == -1) {
 
-                if(" -=,[]_/()!';:<>".indexOf(key) != -1){ //TODO
+                if (" -=,[]_/()!';:<>".indexOf(key) != -1) { //TODO
                     self.deactivate();
                 }
                 return null;
@@ -165,11 +174,11 @@ define(function(require, exports, module) {
 
             var command = self.handler.findKeyCommand(hashId, key);
 
-            if (!command){
+            if (!command) {
 
                 var defaultCommand = editor.commands.findKeyCommand(hashId, key);
-                if(defaultCommand){
-                    if(defaultCommand.name == "backspace"){
+                if (defaultCommand) {
+                    if (defaultCommand.name == "backspace") {
                         return null;
                     }
                     self.deactivate();
@@ -186,38 +195,38 @@ define(function(require, exports, module) {
                 command = this.commands[command];
             }
 
-            return {command: command, args: args};
+            return { command: command, args: args };
         };
 
 
         exports.Keybinding = {
-            "Up|Ctrl-p"      : "focusprev",
-            "Down|Ctrl-n"    : "focusnext",
-            "esc|Ctrl-g" : "cancel",
+            "Up|Ctrl-p": "focusprev",
+            "Down|Ctrl-n": "focusnext",
+            "esc|Ctrl-g": "cancel",
             "Return|Tab": "insertComplete"
         };
 
         this.handler.bindKeys(exports.Keybinding);
 
         this.handler.addCommands({
-            focusnext:function(editor){
+            focusnext: function (editor) {
                 self.view.focusNext();
             },
-            focusprev:function(editor){
+            focusprev: function (editor) {
                 self.view.focusPrev();
             },
-            cancel:function(editor){
+            cancel: function (editor) {
                 self.deactivate();
             },
-            insertComplete:function(editor){
+            insertComplete: function (editor) {
                 editor.removeEventListener("change", self.refreshCompilation);
                 var curr = self.view.current();
 
-                for(var i = 0; i<  self.inputText.length; i++){
+                for (var i = 0; i < self.inputText.length; i++) {
                     editor.remove("left");
                 }
 
-                if(curr){
+                if (curr) {
                     editor.insert($(curr).data("name"));
                 }
                 self.deactivate();

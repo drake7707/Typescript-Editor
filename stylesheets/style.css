@@ -1,6 +1,10 @@
 body {
 }
 
+.editor-tabs .nav {
+    margin-bottom: 0px !important;
+}
+
 .item .description {
     color: gray;
     padding-left: 5px;
@@ -46,10 +50,18 @@ body {
     float: left;
 }
 
+.errors {
+    background-color: #FFCCCC;
+    font-family: Monaco, Menlo, 'Ubuntu Mono', Consolas, source-code-pro, monospace;
+    padding-left: 3px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
 #editorHTML, #editorCSS, #editorJavascript, #editorTypescript {
     position: absolute;
     max-height: 10000px;
-    top: 6px;
+    top: 20px;
     right: 0;
     bottom: 0;
     left: 0;
@@ -151,6 +163,10 @@ body {
     position: relative;
 }
 
+.label-kind-keyword {
+    background-image: url('./icons/keyword.png');
+}
+
 .label-kind-property {
     background-image: url('./icons/property.png');
 }
@@ -167,7 +183,7 @@ body {
     background-image: url('./icons/class.png');
 }
 
-.label-kind-variable {
+.label-kind-variable, .label-kind-var {
     background-image: url('./icons/field.png');
 }
 
@@ -180,7 +196,6 @@ body {
 }
 
 .label-modifier-public {
-    background-image: url('./icons/overlayPrivate.png');
 }
 
 .label-modifier-protected {
@@ -194,6 +209,7 @@ body {
 .label-type {
     padding-left: 10px;
     color: lightgrey;
+    font-size: 0.9em;
 }
 
 .ace_autocomplete_selected .label-type {
