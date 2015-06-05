@@ -112,7 +112,7 @@ define(function (require, exports, module) {
                     var description = "";
                     if (count < 50) { // limit the amount of details to prevent lag
                         var details = compilationService.getCompilationDetails(self.scriptName, cursor, info.name);
-                        if (typeof details !== undefined) {
+                        if (typeof details !== "undefined") {
                             details.displayParts.forEach(function (el) { description += el.text; });
                             count++;
                         }

@@ -87,6 +87,78 @@ define(function (require, exports, module) {
         updateOutputPane();
     }
 
+    function insertLibraryReferenceIfNotPresent(jsUrl, cssUrl, tsUrl) {
+        if (jsUrl != "") {
+            var html = editorHTML.getSession().getDocument().getValue();
+            var scriptTag = "<script src=\"" + jsUrl + "\"></script>";
+            var regex = new RegExp(escapeRegExp(scriptTag), "g");
+            var idx = html.search(regex);
+            if (idx == -1) {
+                idx = html.indexOf("</head>");
+                editorHTML.getSession().getDocument()
+                var pos = editorHTML.getSession().getDocument().indexToPosition(idx, 0);
+                var startOfLineIdx = editorHTML.getSession().getDocument().positionToIndex({ row: pos.row, column: 0 }, 0);
+                var nrOfSpaces = idx - startOfLineIdx;
+                var padding = "";
+                for (var i = 0; i < nrOfSpaces; i++)
+                    padding += " ";
+
+                editorHTML.getSession().getDocument().insert(pos, "    " + scriptTag + "\n" + padding);
+            }
+            else {
+                // already there
+            }
+        }
+        if (cssUrl != "") {
+            var css = editorHTML.getSession().getDocument().getValue();
+            var linkTag = "<link rel=\"stylesheet\" href=\"" + cssUrl + "\"></link>";
+            var regex = new RegExp(escapeRegExp(linkTag), "g");
+            var idx = html.search(regex);
+            if (idx == -1) {
+                idx = html.indexOf("</head>");
+                var pos = editorHTML.getSession().getDocument().indexToPosition(idx, 0);
+                
+                var startOfLineIdx = editorHTML.getSession().getDocument().positionToIndex({ row: pos.row, column: 0 }, 0);
+                var nrOfSpaces = idx - startOfLineIdx;
+                var padding = "";
+                for (var i = 0; i < nrOfSpaces; i++)
+                    padding += " ";
+
+                editorHTML.getSession().getDocument().insert(pos, "    " + linkTag + "\n" + padding);
+
+            }
+            else {
+                // already there
+            }
+        }
+
+        var ts = editor.getSession().getDocument().getValue();
+        var referenceTag = "/// <reference path=\"" + tsUrl + "\" />";
+        var regex = new RegExp(escapeRegExp(referenceTag), "g");
+        var idx = ts.search(regex);
+        if (idx == -1) {
+            idx = ts.lastIndexOf("/// <reference");
+            if (idx == -1) {
+                idx = 0;
+                var pos = editor.getSession().getDocument().indexToPosition(idx, 0);
+                editor.getSession().getDocument().insert(pos, referenceTag + "\n");
+            }
+            else {
+                var pos = editor.getSession().getDocument().indexToPosition(idx, 0);
+                pos = { row: pos.row + 1, column: 0 };
+                editor.getSession().getDocument().insert(pos, referenceTag + "\n");
+            }
+        }
+        else {
+            // already there
+        }
+
+    }
+
+    function escapeRegExp(string){
+        return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
+    }
+
     function startAutoComplete(ed) {
         if (autoComplete.isActive() == false) {
             typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
@@ -285,7 +357,6 @@ define(function (require, exports, module) {
             });
         }
     }
-
 
     function refactor() {
         typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
@@ -626,6 +697,11 @@ define(function (require, exports, module) {
         }
         updateSideBySide();
 
+        $(".libLink").click(function (ev) {
+            insertLibraryReferenceIfNotPresent($(this).attr("data-js"), $(this).attr("data-css"), $(this).attr("data-ts"));
+            ev.preventDefault();
+            return true;
+        });
         $("#errorsTypescript").click(function (ev) {
             var lines = $("#errorsTypescript").attr("data-lines").split(',');
             var curIdx = parseInt($("#errorsTypescript").attr("data-curidx"));
@@ -654,6 +730,9 @@ define(function (require, exports, module) {
         }
     }
 
+
+
+    
     /*
         All logic for the output pane/external window
     */
