@@ -914,15 +914,27 @@ define(function (require, exports, module) {
         var javascriptText = "<script>" + editorJavascript.getSession().doc.getValue() + "</script>";
         var cssText = "<style>" + editorCSS.getSession().doc.getValue() + "</style>";
 
-        htmlText = htmlText.replace("<!--%CSS%-->", cssText);
+        if (htmlText.indexOf("<!--%CSS%-->") == -1) // insert at the end of the head tag if %CSS% is not available
+            htmlText = htmlText.replace("</head>", cssText + "\n" + "</head>");
+        else
+            htmlText = htmlText.replace("<!--%CSS%-->", cssText);
 
         if (includeJavascript) {
             var idx = htmlText.indexOf("<!--%Javascript%-->");
             if (idx != -1) {
                 var nrOfLinesToJavascript = htmlText.substring(0, idx).split('\n').length;
                 lineNumberOffsetOnPage = nrOfLinesToJavascript;
+                htmlText = htmlText.replace("<!--%Javascript%-->", javascriptText);
             }
-            htmlText = htmlText.replace("<!--%Javascript%-->", javascriptText);
+            else {
+                idx = htmlText.indexOf("</body>"); // insert the javascript at the end of the html body
+                if (idx != -1) {
+                    var nrOfLinesToJavascript = htmlText.substring(0, idx).split('\n').length;
+                    lineNumberOffsetOnPage = nrOfLinesToJavascript;
+                    htmlText = htmlText.replace("</body>", javascriptText + "\n" + "</body>");
+                }
+            }
+            
         }
 
         return htmlText;
@@ -936,7 +948,10 @@ define(function (require, exports, module) {
         outputUpdateTimer = window.setTimeout(function () {
             if ($("#tab-output").is(":visible")) {
                 var htmlText = getOutputHTML($("#chkRunJavascript").hasClass("active"));
-                var iframe = $("#outputIFrame").get(0);
+                $("#outputIFrame").empty().detach();
+                var jiframe = $("<iframe id='outputIFrame'></iframe>");
+                $("#outputFrame").append(jiframe);
+                var iframe = jiframe.get(0);
                 resetWindow(iframe.contentWindow, htmlText);
             }
 
@@ -1370,9 +1385,9 @@ define(function (require, exports, module) {
                     "       <!--%CSS%-->\n" +
                     "    </head>\n" +
                     "    <body>\n" +
-                    "        <h1>Greeter example</h1>\n" +
+                    "        <h1>Hello</h1>\n" +
+                    "        <!--%Javascript%-->\n" +
                     "    </body>\n" +
-                    "    <!--%Javascript%-->\n" +
                     "</html>";
         }
         function getDefaultCSS() {
