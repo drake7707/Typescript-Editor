@@ -1,5 +1,7 @@
 define(function (require, exports, module) {
     var ace = require('ace/ace');
+    var aceLanguageTools = require("ace/ext/language_tools");
+
     var AceRange = require('ace/range').Range;
     var AutoComplete = require('AutoComplete').AutoComplete;
     var lang = require("ace/lib/lang");
@@ -117,7 +119,7 @@ define(function (require, exports, module) {
             if (idx == -1) {
                 idx = html.indexOf("</head>");
                 var pos = editorHTML.getSession().getDocument().indexToPosition(idx, 0);
-                
+
                 var startOfLineIdx = editorHTML.getSession().getDocument().positionToIndex({ row: pos.row, column: 0 }, 0);
                 var nrOfSpaces = idx - startOfLineIdx;
                 var padding = "";
@@ -155,7 +157,7 @@ define(function (require, exports, module) {
 
     }
 
-    function escapeRegExp(string){
+    function escapeRegExp(string) {
         return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
     }
 
@@ -190,19 +192,10 @@ define(function (require, exports, module) {
         var line_count = 0;
         var isNewLine = editor.getSession().getDocument().isNewLine;
 
-        if (action == "insertText") {
-            if (isNewLine(data.text)) {
-                line_count = 1;
-            }
-        } else if (action == "insertLines") {
+        if (action == "insert") {
             line_count = data.lines.length;
-
-        } else if (action == "removeText") {
-            if (isNewLine(data.text)) {
-                line_count = -1;
-            }
-
-        } else if (action == "removeLines") {
+        }
+        else if (action == "remove") {
             line_count = -data.lines.length;
         }
 
@@ -239,24 +232,17 @@ define(function (require, exports, module) {
     //sync LanguageService content and ace editor content
     function syncTypeScriptServiceContent(script, aceChangeEvent) {
 
-        var data = aceChangeEvent.data;
+        var data = aceChangeEvent;
         var action = data.action;
-        var range = data.range;
-        var start = aceEditorPosition.getPositionChars(range.start);
+        var start = aceEditorPosition.getPositionChars(data.start);
 
-        if (action == "insertText") {
-            editLanguageService(script, new TextEdit(start, start, data.text));
-        } else if (action == "insertLines") {
+        if (action == "insert") {
 
             var text = data.lines.map(function (line) {
                 return line + '\n'; //TODO newline hard code
             }).join('');
             editLanguageService(script, new TextEdit(start, start, text));
-
-        } else if (action == "removeText") {
-            var end = start + data.text.length;
-            editLanguageService(script, new TextEdit(start, end, ""));
-        } else if (action == "removeLines") {
+        } else if (action == "remove") {
             var len = aceEditorPosition.getLinesChars(data.lines);
             var end = start + len;
             editLanguageService(script, new TextEdit(start, end, ""));
@@ -300,28 +286,7 @@ define(function (require, exports, module) {
         option.NewLineCharacter = "\n";
 
         var smartIndent = languageService.getIndentationAtPosition(selectFileName + ".ts", lineNumber, option);
-
         editor.indent();
-        /*
-        if(preIndent > smartIndent){
-            
-        }else{
-            var indent = smartIndent - preIndent;
-            if (indent == 0) // hack
-                indent = 1;
-            if(indent > 0){
-                editor.getSelection().moveCursorLineStart();
-                editor.commands.exec("inserttext", editor, {text:" ", times:indent});
-            }
-
-            if( cursor.column > wordLen){
-                cursor.column += indent;
-            }else{
-                cursor.column = indent + wordLen;
-            }
-
-            editor.getSelection().moveCursorToPosition(cursor);
-        }*/
     }
 
     function showOccurrences() {
@@ -335,8 +300,6 @@ define(function (require, exports, module) {
 
         references.forEach(function (ref) {
             if (ref.fileName == selectFileName + ".ts") {
-                //TODO check script name
-                // console.log(ref.unitIndex);
                 var getpos = aceEditorPosition.getAcePositionFromChars;
                 var start = getpos(ref.textSpan.start);
                 var end = getpos(ref.textSpan.start + ref.textSpan.length);
@@ -478,21 +441,37 @@ define(function (require, exports, module) {
 
 
     $(function () {
+        initializeControls();
+    });
+
+    function initializeControls() {
         appFileService = new FileService($);
 
         var theme = "ace/theme/github";
         editorHTML = ace.edit("editorHTML");
-        //editorHTML.setTheme(theme);
+        editorHTML.setTheme(theme);
         editorHTML.getSession().setMode('ace/mode/html');
+        editorHTML.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: false,
+            enableSnippets: true
+        });
 
         editorCSS = ace.edit("editorCSS");
-        //editorCSS.setTheme(theme);
+        editorCSS.setTheme(theme);
         editorCSS.getSession().setMode('ace/mode/css');
+        editorCSS.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: false,
+            enableSnippets: true
+        });
 
         editor = ace.edit("editorTypescript");
         editor.setTheme(theme);
         editor.getSession().setMode('ace/mode/typescript');
-
+        editor.setOptions({
+            enableSnippets: true
+        });
         editorJavascript = ace.edit("editorJavascript");
         editorJavascript.setTheme(theme);
         editorJavascript.getSession().setMode('ace/mode/javascript');
@@ -644,19 +623,6 @@ define(function (require, exports, module) {
             });
         }, 100);
 
-
-        function addLibrary(libname) {
-            appFileService.readFile(libname, function (content) {
-                var params = {
-                    data: {
-                        name: libname,
-                        content: content.replace(/\r\n?/g, "\n")
-                    }
-                };
-                editor.getSession().$worker.emit("addLibrary", params);
-            });
-        }
-
         $(".tab").click(function (e) {
             var id = $(this).attr("data-target");
             var el = document.getElementById(id);
@@ -673,45 +639,59 @@ define(function (require, exports, module) {
             updateOutputPane();
         });
 
-        function updateSideBySide() {
-            var activeTabs = $(".tab.active");
-            var perc = Math.floor(100 / activeTabs.length);
-            for (var i = 0; i < activeTabs.length; i++) {
-                var el = document.getElementById($(activeTabs[i]).attr("data-target"));
-                $(el).css("width", perc + "%");
-                $(el).show();
-            }
-
-            editorHTML.resize();
-            editorCSS.resize();
-            editor.resize();
-            editorJavascript.resize();
-
-            var tabs = $(".tab");
-            for (var i = 0; i < tabs.length; i++) {
-                if (!$(tabs[i]).hasClass("active")) {
-                    var el = document.getElementById($(tabs[i]).attr("data-target"));
-                    $(el).hide();
-                }
-            }
-        }
-        updateSideBySide();
-
         $(".libLink").click(function (ev) {
             insertLibraryReferenceIfNotPresent($(this).attr("data-js"), $(this).attr("data-css"), $(this).attr("data-ts"));
             ev.preventDefault();
             return true;
         });
+
         $("#errorsTypescript").click(function (ev) {
             var lines = $("#errorsTypescript").attr("data-lines").split(',');
             var curIdx = parseInt($("#errorsTypescript").attr("data-curidx"));
 
-            editor.gotoLine(parseInt(lines[curIdx])+1, 0, true);
+            editor.gotoLine(parseInt(lines[curIdx]) + 1, 0, true);
             curIdx++;
             curIdx = curIdx % lines.length;
             $("#errorsTypescript").attr("data-curidx", curIdx);
         });
-    });
+
+        updateSideBySide();
+    }
+
+    function addLibrary(libname) {
+        appFileService.readFile(libname, function (content) {
+            var params = {
+                data: {
+                    name: libname,
+                    content: content.replace(/\r\n?/g, "\n")
+                }
+            };
+            editor.getSession().$worker.emit("addLibrary", params);
+        });
+    }
+
+    function updateSideBySide() {
+        var activeTabs = $(".tab.active");
+        var perc = Math.floor(100 / activeTabs.length);
+        for (var i = 0; i < activeTabs.length; i++) {
+            var el = document.getElementById($(activeTabs[i]).attr("data-target"));
+            $(el).css("width", perc + "%");
+            $(el).show();
+        }
+
+        editorHTML.resize();
+        editorCSS.resize();
+        editor.resize();
+        editorJavascript.resize();
+
+        var tabs = $(".tab");
+        for (var i = 0; i < tabs.length; i++) {
+            if (!$(tabs[i]).hasClass("active")) {
+                var el = document.getElementById($(tabs[i]).attr("data-target"));
+                $(el).hide();
+            }
+        }
+    }
 
     function updateErrors() {
         var annotations = editor.getSession().getAnnotations();
@@ -732,7 +712,7 @@ define(function (require, exports, module) {
 
 
 
-    
+
     /*
         All logic for the output pane/external window
     */
@@ -934,7 +914,7 @@ define(function (require, exports, module) {
                     htmlText = htmlText.replace("</body>", javascriptText + "\n" + "</body>");
                 }
             }
-            
+
         }
 
         return htmlText;

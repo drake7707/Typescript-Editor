@@ -86,10 +86,10 @@ define(function (require, exports, module) {
 
         this.refreshCompilation = function (e) {
             var cursor = editor.getCursorPosition();
-            if (e.data.action == "insertText") {
+            if (e.action == "insert") {
                 cursor.column += 1;
-            } else if (e.data.action == "removeText") {
-                if (e.data.text == '\n') {
+            } else if (e.action == "remove") {
+                if (e.lines[0] == '\n') {
                     self.deactivate();
                     return;
                 }
@@ -202,6 +202,8 @@ define(function (require, exports, module) {
         exports.Keybinding = {
             "Up|Ctrl-p": "focusprev",
             "Down|Ctrl-n": "focusnext",
+            "PageUp": "focusprevpage",
+            "PageDown": "focusnextpage",
             "esc|Ctrl-g": "cancel",
             "Return|Tab": "insertComplete"
         };
@@ -214,6 +216,14 @@ define(function (require, exports, module) {
             },
             focusprev: function (editor) {
                 self.view.focusPrev();
+            },
+            focusnextpage: function (editor) {
+                for (var i = 0; i < 12; i++)
+                self.view.focusNext();
+            },
+            focusprevpage: function (editor) {
+                for (var i = 0; i < 12; i++)
+                    self.view.focusPrev();
             },
             cancel: function (editor) {
                 self.deactivate();

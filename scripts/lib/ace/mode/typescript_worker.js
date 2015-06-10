@@ -41,8 +41,10 @@ define(function (require, exports, module) {
     var TypeScriptLS = require('./typescript/lightHarness').TypeScriptLS;
 
     var TypeScriptWorker = exports.TypeScriptWorker = function (sender) {
+        Mirror.call(this, sender);
+        this.setTimeout(500);
+
         this.sender = sender;
-        var doc = this.doc = new Document("");
 
         var deferredUpdate = this.deferredUpdate = lang.deferredCall(this.onUpdate.bind(this));
 
@@ -50,18 +52,15 @@ define(function (require, exports, module) {
         this.typeScriptLS = new TypeScriptLS();
         this.languageService = this.ts.createLanguageService(this.typeScriptLS, ts.createDocumentRegistry());
 
-
         var self = this;
-        sender.on("change", function (e) {
-            doc.applyDeltas(e.data);
-            deferredUpdate.schedule(self.$timeout);
-        });
+        //sender.on("change", function (e) {
+        //    //doc.applyDeltas(e.data);
+        //    deferredUpdate.schedule(self.$timeout);
+        //});
 
         sender.on("addLibrary", function (e) {
             self.addlibrary(e.data.name, e.data.content);
         });
-
-
 
         this.setOptions();
         sender.emit("initAfter");
@@ -84,47 +83,10 @@ define(function (require, exports, module) {
             this.typeScriptLS.addScript(name, content.replace(/\r\n?/g, "\n"), true);
         };
 
-
-
         this.getCompletionsAtPosition = function (fileName, pos, isMemberCompletion, id) {
             var ret = this.languageService.getCompletionsAtPosition(fileName, pos, isMemberCompletion);
             this.sender.callback(ret, id);
         };
-
-        ["getTypeAtPosition",
-            "getSignatureAtPosition",
-            "getDefinitionAtPosition"].forEach(function (elm) {
-                proto[elm] = function (fileName, pos, id) {
-                    var ret = this.languageService[elm](fileName, pos);
-                    this.sender.callback(ret, id);
-                };
-            });
-
-        ["getReferencesAtPosition",
-            "getOccurrencesAtPosition",
-            "getImplementorsAtPosition"].forEach(function (elm) {
-
-                proto[elm] = function (fileName, pos, id) {
-                    var referenceEntries = this.languageService[elm](fileName, pos);
-                    var ret = referenceEntries.map(function (ref) {
-                        return {
-                            unitIndex: ref.unitIndex,
-                            minChar: ref.ast.minChar,
-                            limChar: ref.ast.limChar
-                        };
-                    });
-                    this.sender.callback(ret, id);
-                };
-            });
-
-        ["getNavigateToItems",
-            "getScriptLexicalStructure",
-            "getOutliningRegions "].forEach(function (elm) {
-                proto[elm] = function (value, id) {
-                    var navs = this.languageService[elm](value);
-                    this.sender.callback(navs, id);
-                };
-            });
 
         this.compile = function (typeScriptContent) {
             var output = "";
