@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    var INDENT_SIZE = 4;
+
     var ace = require('ace/ace');
     var aceLanguageTools = require("ace/ext/language_tools");
 
@@ -11,9 +13,10 @@ define(function (require, exports, module) {
     var deferredCall = require("ace/lib/lang").deferredCall;
 
     var vlq = require("lib/vlq");
+    var beautifyCSS = require('lib/beautify-css');
+    var beautifyHTML = require('lib/beautify-html');
 
     var ts = require('ace/mode/typescript/typescriptServices');
-    var Services = require('ace/mode/typescript/typescriptServices').Services;
     var TypeScript = require('ace/mode/typescript/typescriptServices').TypeScript;
     var TypeScriptLS = require('ace/mode/typescript/lightHarness').TypeScriptLS;
 
@@ -113,7 +116,7 @@ define(function (require, exports, module) {
         }
         if (cssUrl != "") {
             var css = editorHTML.getSession().getDocument().getValue();
-            var linkTag = "<link rel=\"stylesheet\" href=\"" + cssUrl + "\"></link>";
+            var linkTag = "<link rel=\"stylesheet\" href=\"" + cssUrl + "\" />";
             var regex = new RegExp(escapeRegExp(linkTag), "g");
             var idx = html.search(regex);
             if (idx == -1) {
@@ -290,6 +293,7 @@ define(function (require, exports, module) {
     }
 
     function showOccurrences() {
+        typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
         var references = languageService.getOccurrencesAtPosition(selectFileName + ".ts", aceEditorPosition.getCurrentCharPosition());
         var session = editor.getSession();
         refMarkers.forEach(function (id) {
@@ -336,6 +340,17 @@ define(function (require, exports, module) {
         });
     }
 
+
+    function formatCSS() {
+        var css = beautifyCSS.css_beautify(editorCSS.getSession().getDocument().getValue(), { indent_size: INDENT_SIZE });
+        editorCSS.getSession().getDocument().setValue(css);
+    }
+
+    function formatHTML() {
+        var html = beautifyHTML.html_beautify(editorHTML.getSession().getDocument().getValue(), { indent_size: INDENT_SIZE });
+        editorHTML.getSession().getDocument().setValue(html);
+    }
+
     function formatDocument() {
         typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
         var textChanges = languageService.getFormattingEditsForRange(selectFileName + ".ts", 0, editor.getValue().length, defaultFormatCodeOptions());
@@ -352,8 +367,8 @@ define(function (require, exports, module) {
 
     function defaultFormatCodeOptions() {
         return {
-            IndentSize: 4,
-            TabSize: 4,
+            IndentSize: INDENT_SIZE,
+            TabSize: INDENT_SIZE,
             NewLineCharacter: '\n',
             ConvertTabsToSpaces: true,
             InsertSpaceAfterCommaDelimiter: true,
@@ -442,14 +457,13 @@ define(function (require, exports, module) {
 
     $(function () {
         initializeControls();
+        setTheme("light");
     });
 
     function initializeControls() {
         appFileService = new FileService($);
 
-        var theme = "ace/theme/github";
         editorHTML = ace.edit("editorHTML");
-        editorHTML.setTheme(theme);
         editorHTML.getSession().setMode('ace/mode/html');
         editorHTML.setOptions({
             enableBasicAutocompletion: true,
@@ -458,7 +472,6 @@ define(function (require, exports, module) {
         });
 
         editorCSS = ace.edit("editorCSS");
-        editorCSS.setTheme(theme);
         editorCSS.getSession().setMode('ace/mode/css');
         editorCSS.setOptions({
             enableBasicAutocompletion: true,
@@ -467,13 +480,11 @@ define(function (require, exports, module) {
         });
 
         editor = ace.edit("editorTypescript");
-        editor.setTheme(theme);
         editor.getSession().setMode('ace/mode/typescript');
         editor.setOptions({
             enableSnippets: true
         });
         editorJavascript = ace.edit("editorJavascript");
-        editorJavascript.setTheme(theme);
         editorJavascript.getSession().setMode('ace/mode/javascript');
         editorJavascript.setReadOnly(true);
 
@@ -537,6 +548,22 @@ define(function (require, exports, module) {
             bindKey: "Shift-F12",
             exec: function (editor) {
                 gotoPreviousPosition();
+            }
+        }]);
+
+        editorHTML.commands.addCommands([{
+            name: "formatHTML",
+            bindKey: "Ctrl-D",
+            exec: function (editor) {
+                formatHTML();
+            }
+        }]);
+
+        editorCSS.commands.addCommands([{
+            name: "formatCSS",
+            bindKey: "Ctrl-D",
+            exec: function (editor) {
+                formatCSS();
             }
         }]);
 
@@ -655,6 +682,15 @@ define(function (require, exports, module) {
             $("#errorsTypescript").attr("data-curidx", curIdx);
         });
 
+        $("#lnkToggleTheme").click(function (ev) {
+            if($(document.body).hasClass("dark"))
+                setTheme("light");
+            else
+                setTheme("dark");
+            ev.preventDefault();
+            return true;
+        });
+
         updateSideBySide();
     }
 
@@ -668,6 +704,25 @@ define(function (require, exports, module) {
             };
             editor.getSession().$worker.emit("addLibrary", params);
         });
+    }
+
+    function setTheme(theme) {
+        var editorTheme;
+        if (theme == "dark") {
+            editorTheme = "ace/theme/tomorrow_night";
+            $(document.body).addClass("dark");
+            $("#cssBootstrap").attr("href", "stylesheets/bootstrap-dark.css");
+        }
+        else {
+            editorTheme = "ace/theme/github";
+            $(document.body).removeClass("dark");
+            $("#cssBootstrap").attr("href", "stylesheets/bootstrap.css");
+        }
+
+        editorHTML.setTheme(editorTheme);
+        editorCSS.setTheme(editorTheme);
+        editor.setTheme(editorTheme);
+        editorJavascript.setTheme(editorTheme);
     }
 
     function updateSideBySide() {
@@ -1067,13 +1122,13 @@ define(function (require, exports, module) {
 
     function showNotification(msg, type) {
         if (type == "info") {
-            $("#lblNotification").parent().css("backgroundColor", "#CCCCCC");
+            $("#lblNotification").parent().attr("class", "notification alert alert-info")
         }
         else if (type == "warning") {
-            $("#lblNotification").parent().css("backgroundColor", "#FFFFCC");
+            $("#lblNotification").parent().attr("class", "notification alert alert-error")
         }
         else if (type == "error") {
-            $("#lblNotification").parent().css("backgroundColor", "#FFCCCC");
+            $("#lblNotification").parent().attr("class", "notification alert alert-error")
         }
 
         $("#lblNotification").text(msg);
@@ -1373,7 +1428,7 @@ define(function (require, exports, module) {
         function getDefaultCSS() {
             return "body {\n" +
                    "\n" +
-                   "};"
+                   "}"
         }
         function getDefaultTypescript() {
             return "class Hello {\n" +

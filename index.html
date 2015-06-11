@@ -5,7 +5,7 @@
     <meta name="description" content="Typescript editor" />
     <meta>
 
-    <link type="text/css" rel="stylesheet" href="stylesheets/bootstrap.min.css" />
+    <link id="cssBootstrap" type="text/css" rel="stylesheet" href="stylesheets/bootstrap.css" />
     <link type="text/css" rel="stylesheet" href="stylesheets/style.css" />
 </head>
 <body>
@@ -31,7 +31,7 @@
                         <i class="icon-hdd"></i> Save
                     </a>
                     <a class="btn" href="#" id="lnkCreateMilestone">
-                        <i class="icon-tag"></i> Create milestone
+                        <i class="icon-tag"></i> New milestone
                     </a>
                 </div>
                 <div class="btn-group">
@@ -39,6 +39,7 @@
                         <i class="icon-info-sign"></i> Shortcuts
                     </a>
                 </div>
+                
                 <div class="btn-group">
                     <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
                         <i class="icon-book"></i> Libraries
@@ -55,16 +56,21 @@
 
                     </ul>
                 </div>
+                <div class="btn-group">
+                    <a class="btn" href="#" id="lnkToggleTheme">
+                        <i class="icon-adjust"></i> &nbsp;
+                    </a>
+                </div>
                 <div class="btn-group pull-right">
                     <!--<label><input type="checkbox" id="chkRunJavascript" />Run javascript in output pane</label>-->
                     <button type="button" class="btn" data-toggle="button" id="chkMoveCursorToError">
-                        Move cursor on runtime error
+                        <i class="icon-arrow-right"></i> Jump to line on error
                     </button>
                     <button type="button" class="btn" data-toggle="button" id="chkRunJavascript">
-                        Run javascript in output pane
+                        <i class="icon-cog"></i> Enable js in output pane
                     </button>
                     <a class="btn" href="#" id="lnkRunExternalWindow">
-                        <i class="icon-play"></i> Run in seperate window
+                        <i class="icon-play"></i> Open seperate window
                     </a>
                 </div>
             </div>
@@ -95,7 +101,7 @@
             </div>
             <div class="warp-container" id="tab-typescript">
                 <div class="editor-container">
-                    <div class="errors" id="errorsTypescript">
+                    <div class="error-bar" id="errorsTypescript">
                     </div>
                     <div id="editorTypescript">
                     </div>
@@ -186,15 +192,15 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Available shortcuts (only for the typescript pane)</h4>
+                    <h4 class="modal-title">Available shortcuts</h4>
                 </div>
                 <div class="modal-body">
                     <ul>
                         <li>[Ctrl-Space] : AutoComplete</li>
-                        <li>[F2] : Rename</li>
+                        <li>[F2] : Rename (TS only)</li>
                         <li>[Ctrl-D] : Format document</li>
-                        <li>[F12] : Go to definition</li>
-                        <li>[Shift-F12] : Go back to previous position</li>
+                        <li>[F12] : Go to definition (TS only)</li>
+                        <li>[Shift-F12] : Go back to previous position (TS only)</li>
                         <li>[Alt-0] : Fold all</li>
                         <li>[Alt-Shift-0] : Unfold all</li>
                         <li>[Ctrl-/] : Comment/uncomment line</li>

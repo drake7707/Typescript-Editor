@@ -20,13 +20,9 @@ body {
     position: absolute;
     right: 0px;
     width: 30%;
-    height: 30px;
-    padding: 3px;
-    padding-top: 8px;
     text-align: center;
-    border-bottom: 1px solid #AAAAAA;
-    border-left: 1px solid #AAAAAA;
-    display: none;
+    border-bottom-right-radius: inherit;
+    border-top-left-radius: inherit;
 }
 
 .warp-container {
@@ -50,12 +46,18 @@ body {
     float: left;
 }
 
-.errors {
+.tab {
+    cursor: pointer;
+}
+
+.error-bar {
     background-color: #FFCCCC;
     font-family: Monaco, Menlo, 'Ubuntu Mono', Consolas, source-code-pro, monospace;
     padding-left: 3px;
     font-size: 0.9em;
     font-weight: bold;
+    cursor: pointer;
+    color: black;
 }
 
 #editorHTML, #editorCSS, #editorJavascript, #editorTypescript {
@@ -67,9 +69,7 @@ body {
     left: 0;
 }
 
-.tab.active {
-    background-color: lightgrey;
-}
+
 
 .editor-area {
     height: auto;
