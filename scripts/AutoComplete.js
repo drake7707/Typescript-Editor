@@ -6,6 +6,7 @@ define(function (require, exports, module) {
 
     var oop = require("ace/lib/oop");
 
+    var snippetManager = require("ace/snippets").snippetManager;
 
 
     exports.AutoComplete = function (editor, script, compilationService, typeScriptService) {
@@ -77,6 +78,16 @@ define(function (require, exports, module) {
                 return (ret != 0) ? ret : textCompare(a, b);
             };
 
+            var snippets = snippetManager.files["ace/mode/typescript"].snippets;
+            for (var i = 0; i < snippets.length; i++) {
+                compilations.push({
+                    kind: "snippet",
+                    kindModifiers: "",
+                    name: snippets[i].name,
+                    sortText: "0"
+                });
+            }
+
             compilations = compilations.sort(compare);
 
             self.showCompilation(compilations);
@@ -110,7 +121,7 @@ define(function (require, exports, module) {
                     var name = '<span class="label-name">' + info.name + '</span>';
 
                     var description = "";
-                    if (count < 50) { // limit the amount of details to prevent lag
+                    if (count < 50 && info.kind != "snippet") { // limit the amount of details to prevent lag
                         var details = compilationService.getCompilationDetails(self.scriptName, cursor, info.name);
                         if (typeof details !== "undefined") {
                             details.displayParts.forEach(function (el) { description += el.text; });
@@ -127,7 +138,7 @@ define(function (require, exports, module) {
                     var accessors = modifiers.join(" ");
                     var kind = '<span class="label-kind label-kind-' + info.kind + '">' + '</span>';
                     var overlay = '<span class="label-overlay ' + accessors + '"></span>';
-                    html += '<li class="label-autocomplete" data-name="' + info.name + '">' + kind + name + type + overlay + '</li>';
+                    html += '<li class="label-autocomplete" data-name="' + info.name + '" data-kind="' + info.kind + '">' + kind + name + type + overlay + '</li>';
                 }
                 self.listElement.innerHTML = html;
                 self.view.ensureFocus();
@@ -219,7 +230,7 @@ define(function (require, exports, module) {
             },
             focusnextpage: function (editor) {
                 for (var i = 0; i < 12; i++)
-                self.view.focusNext();
+                    self.view.focusNext();
             },
             focusprevpage: function (editor) {
                 for (var i = 0; i < 12; i++)
@@ -238,6 +249,10 @@ define(function (require, exports, module) {
 
                 if (curr) {
                     editor.insert($(curr).data("name"));
+
+                    if ($(curr).data("kind") == "snippet") {
+                        snippetManager.expandWithTab(editor);
+                    }
                 }
                 self.deactivate();
 

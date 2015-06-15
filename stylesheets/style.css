@@ -187,6 +187,10 @@ body {
     background-image: url('./icons/field.png');
 }
 
+.label-kind-snippet {
+    background-image: url('./icons/snippet.png');
+}
+
 .label-overlay {
     position: absolute;
     width: 16px;

@@ -516,7 +516,7 @@ define(function (require, exports, module) {
                 refactor();
             }
         }]);
-
+/*
         editor.commands.addCommands([{
             name: "indent",
             bindKey: "Tab",
@@ -525,7 +525,7 @@ define(function (require, exports, module) {
                 languageServiceIndent();
             },
             multiSelectAction: "forEach"
-        }]);
+        }]);*/
 
         editor.commands.addCommands([{
             name: "formatDocument",
