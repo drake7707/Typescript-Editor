@@ -50,6 +50,9 @@ body {
     cursor: pointer;
 }
 
+.dark .error-bar {
+    background-color:#AA4444;
+}
 .error-bar {
     background-color: #FFCCCC;
     font-family: Monaco, Menlo, 'Ubuntu Mono', Consolas, source-code-pro, monospace;

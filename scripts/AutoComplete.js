@@ -52,6 +52,16 @@ define(function (require, exports, module) {
 
             var compilations = compilationInfo.entries;
 
+            var snippets = snippetManager.files["ace/mode/typescript"].snippets;
+            for (var i = 0; i < snippets.length; i++) {
+                compilations.push({
+                    kind: "snippet",
+                    kindModifiers: "",
+                    name: snippets[i].name,
+                    sortText: "0"
+                });
+            }
+
             if (self.inputText.length > 0) {
                 compilations = compilationInfo.entries.filter(function (elm) {
                     return elm.name.toLowerCase().indexOf(self.inputText.toLowerCase()) == 0;
@@ -77,16 +87,6 @@ define(function (require, exports, module) {
                 var ret = matchCompare(a, b);
                 return (ret != 0) ? ret : textCompare(a, b);
             };
-
-            var snippets = snippetManager.files["ace/mode/typescript"].snippets;
-            for (var i = 0; i < snippets.length; i++) {
-                compilations.push({
-                    kind: "snippet",
-                    kindModifiers: "",
-                    name: snippets[i].name,
-                    sortText: "0"
-                });
-            }
 
             compilations = compilations.sort(compare);
 
