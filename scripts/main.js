@@ -2,7 +2,7 @@ define(function (require, exports, module) {
     var INDENT_SIZE = 4;
 
     var ace = require('ace/ace');
-    var aceLanguageTools = require("ace/ext/language_tools");
+    var aceLanguageTools = require("ace/ext/language_tools"); // required for snippets & autocomplete for non typescript
 
     var AceRange = require('ace/range').Range;
     var AutoComplete = require('AutoComplete').AutoComplete;
@@ -20,18 +20,17 @@ define(function (require, exports, module) {
     var TypeScript = require('ace/mode/typescript/typescriptServices').TypeScript;
     var TypeScriptLS = require('ace/mode/typescript/lightHarness').TypeScriptLS;
 
+    var saveAs = require("lib/fileSaver");
+
     var aceEditorPosition = null;
     var appFileService = null;
+
     var editor = null;
     var editorJavascript = null;
     var editorHTML = null;
-
     var editorCSS = null;
 
-    var typeCompilationService = null;
-    var docUpdateCount = 0;
     var typeScriptLS = new TypeScriptLS();
-
     var languageService = ts.createLanguageService(typeScriptLS, ts.createDocumentRegistry());
 
     var selectFileName = "";
@@ -39,6 +38,7 @@ define(function (require, exports, module) {
 
     var syncStop = false; //for stop sync on loadfile
     var autoComplete = null;
+
     var refMarkers = [];
     var errorMarkers = [];
     var runtimeErrorMarkers = [];
@@ -51,12 +51,6 @@ define(function (require, exports, module) {
             "typescripts/lib.d.ts",
             "typescripts/jquery.d.ts"
         ];
-
-        // Add a non network script to get the balls rolling more quickly
-        // See https://typescript.codeplex.com/workitem/129
-        var iArgs = "interface IArguments {           [index: number]: any;        length: number;        callee: Function;    }";
-        typeScriptLS.addScript('start.d.ts', iArgs, true);
-
         libnames.forEach(function (libname) {
             appFileService.readFile(libname, function (content) {
                 typeScriptLS.addScript(libname, content.replace(/\r\n?/g, "\n"), true);
@@ -85,9 +79,22 @@ define(function (require, exports, module) {
         syncStop = true;
         var data = typescript.replace(/\r\n?/g, "\n");
         editor.setValue(data);
+
+
         editor.moveCursorTo(0, 0);
         typeScriptLS.updateScript(filename + ".ts", editor.getSession().getDocument().getValue(), false);
         syncStop = false;
+
+        // defer because ace will update the undo manager on a callback in the setValue
+        deferredCall(function () {
+            editor.session.getUndoManager().reset();
+            editorHTML.session.getUndoManager().reset();
+            editorCSS.session.getUndoManager().reset();
+
+            editor.session.getUndoManager().markClean();
+            editorHTML.session.getUndoManager().markClean();
+            editorCSS.session.getUndoManager().markClean();
+        }).schedule(100);
 
         updateOutputPane();
     }
@@ -164,13 +171,7 @@ define(function (require, exports, module) {
         return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
     }
 
-    function startAutoComplete(ed) {
-        if (autoComplete.isActive() == false) {
-            typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
-            autoComplete.setScriptName(selectFileName);
-            autoComplete.active();
-        }
-    }
+
 
     function onUpdateTypescriptDocument(e) {
         if (selectFileName) {
@@ -455,6 +456,7 @@ define(function (require, exports, module) {
     }
 
 
+
     $(function () {
         initializeControls();
         setTheme("light");
@@ -501,74 +503,10 @@ define(function (require, exports, module) {
 
         editor.addEventListener("changeSelection", onChangeCursor);
 
-        editor.commands.addCommands([{
-            name: "autoComplete",
-            bindKey: "Ctrl-Space",
-            exec: function (editor) {
-                startAutoComplete(editor);
-            }
-        }]);
-
-        editor.commands.addCommands([{
-            name: "refactor",
-            bindKey: "F2",
-            exec: function (editor) {
-                refactor();
-            }
-        }]);
-/*
-        editor.commands.addCommands([{
-            name: "indent",
-            bindKey: "Tab",
-            exec: function (editor) {
-                //editor.indent();
-                languageServiceIndent();
-            },
-            multiSelectAction: "forEach"
-        }]);*/
-
-        editor.commands.addCommands([{
-            name: "formatDocument",
-            bindKey: "Ctrl-D",
-            exec: function (editor) {
-                formatDocument();
-            }
-        }]);
-
-        editor.commands.addCommands([{
-            name: "gotoDefinition",
-            bindKey: "F12",
-            exec: function (editor) {
-                gotoDefinition();
-            }
-        }]);
-
-        editor.commands.addCommands([{
-            name: "gotoPreviousPosition",
-            bindKey: "Shift-F12",
-            exec: function (editor) {
-                gotoPreviousPosition();
-            }
-        }]);
-
-        editorHTML.commands.addCommands([{
-            name: "formatHTML",
-            bindKey: "Ctrl-D",
-            exec: function (editor) {
-                formatHTML();
-            }
-        }]);
-
-        editorCSS.commands.addCommands([{
-            name: "formatCSS",
-            bindKey: "Ctrl-D",
-            exec: function (editor) {
-                formatCSS();
-            }
-        }]);
+        initEditorShortcuts();
 
         aceEditorPosition = new EditorPosition(editor);
-        typeCompilationService = new CompilationService(editor, languageService);
+        var typeCompilationService = new CompilationService(editor, languageService);
         autoComplete = new AutoComplete(editor, selectFileName, typeCompilationService, ts);
 
         // override editor onTextInput
@@ -683,7 +621,7 @@ define(function (require, exports, module) {
         });
 
         $("#lnkToggleTheme").click(function (ev) {
-            if($(document.body).hasClass("dark"))
+            if ($(document.body).hasClass("dark"))
                 setTheme("light");
             else
                 setTheme("dark");
@@ -704,6 +642,78 @@ define(function (require, exports, module) {
             };
             editor.getSession().$worker.emit("addLibrary", params);
         });
+    }
+
+    function initEditorShortcuts() {
+        editor.commands.addCommands([{
+            name: "autoComplete",
+            bindKey: "Ctrl-Space",
+            exec: function (editor) {
+                if (autoComplete.isActive() == false) {
+                    typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
+                    autoComplete.setScriptName(selectFileName);
+                    autoComplete.active();
+                }
+            }
+        }]);
+
+        editor.commands.addCommands([{
+            name: "refactor",
+            bindKey: "F2",
+            exec: function (editor) {
+                refactor();
+            }
+        }]);
+        /*
+                editor.commands.addCommands([{
+                    name: "indent",
+                    bindKey: "Tab",
+                    exec: function (editor) {
+                        //editor.indent();
+                        languageServiceIndent();
+                    },
+                    multiSelectAction: "forEach"
+                }]);*/
+
+        editor.commands.addCommands([{
+            name: "formatDocument",
+            bindKey: "Ctrl-D",
+            exec: function (editor) {
+                formatDocument();
+            }
+        }]);
+
+        editor.commands.addCommands([{
+            name: "gotoDefinition",
+            bindKey: "F12",
+            exec: function (editor) {
+                gotoDefinition();
+            }
+        }]);
+
+        editor.commands.addCommands([{
+            name: "gotoPreviousPosition",
+            bindKey: "Shift-F12",
+            exec: function (editor) {
+                gotoPreviousPosition();
+            }
+        }]);
+
+        editorHTML.commands.addCommands([{
+            name: "formatHTML",
+            bindKey: "Ctrl-D",
+            exec: function (editor) {
+                formatHTML();
+            }
+        }]);
+
+        editorCSS.commands.addCommands([{
+            name: "formatCSS",
+            bindKey: "Ctrl-D",
+            exec: function (editor) {
+                formatCSS();
+            }
+        }]);
     }
 
     function setTheme(theme) {
@@ -765,7 +775,15 @@ define(function (require, exports, module) {
         }
     }
 
-
+    function isDirty() {
+        if (!editor.session.getUndoManager().isClean() ||
+            !editorHTML.session.getUndoManager().isClean() ||
+            !editorCSS.session.getUndoManager().isClean()) {
+            return true;
+        }
+        else
+            return false;
+    }
 
 
     /*
@@ -944,10 +962,10 @@ define(function (require, exports, module) {
 
     }
 
-    function getOutputHTML(includeJavascript) {
-        var htmlText = editorHTML.getSession().doc.getValue();
-        var javascriptText = "<script>" + editorJavascript.getSession().doc.getValue() + "</script>";
-        var cssText = "<style>" + editorCSS.getSession().doc.getValue() + "</style>";
+    function getOutputHTML(includeJavascript, includeTypescript) {
+        var htmlText = editorHTML.getValue();
+        var javascriptText = "<script>" + editorJavascript.getValue() + "</script>";
+        var cssText = "<style>" + editorCSS.getValue() + "</style>";
 
         if (htmlText.indexOf("<!--%CSS%-->") == -1) // insert at the end of the head tag if %CSS% is not available
             htmlText = htmlText.replace("</head>", cssText + "\n" + "</head>");
@@ -971,7 +989,15 @@ define(function (require, exports, module) {
             }
 
         }
+        if (includeTypescript) {
+            idx = htmlText.indexOf("</body>"); // insert the typescript at the end of the html body
+            if (idx != -1) {
+                var typescriptText = "<script id='_typescriptCode' type='text/typescript'> " + "\n" + editor.getSession().getValue() + "\n" + "</script>";
+                htmlText = htmlText.replace("</body>", typescriptText + "\n" + "</body>");
+            }
+        }
 
+        htmlText = htmlText.replace(/\r?\n/g, "\r\n"); // make sure \r\n for newlines so it's both readable on linux and windows
         return htmlText;
     }
 
@@ -1009,6 +1035,7 @@ define(function (require, exports, module) {
     var restService = new LocalRestServices();
 
     var ignoreHash = false;
+    var oldHash;
     function openFromHash(newHash) {
         var hash = newHash;
         newHash = hash.substr(1, hash.length - 1);
@@ -1022,15 +1049,29 @@ define(function (require, exports, module) {
         if (selectFileName != file || milestone != selectMilestone) {
             if (confirmIfDirty())
                 restService.loadFile(file, milestone);
+            else {
+                // revert hash
+                setHash(oldHash);
+            }
         }
+        oldHash = newHash;
     }
+
     function setHash(hash) {
         ignoreHash = true;
         window.location.hash = hash;
     }
 
+
     function confirmIfDirty() {
-        return true; // TODO
+        if (isDirty()) {
+            if (confirm("Recent changes are not saved, do you want to continue?"))
+                return true;
+            else
+                return false;
+        }
+        else
+            return true; // TODO
     }
 
     $(function () {
@@ -1041,7 +1082,9 @@ define(function (require, exports, module) {
             openFromHash(location.hash);
 
         $("#lnkNew").click(function (ev) {
-            restService.newFile();
+            if (confirmIfDirty()) {
+                restService.newFile();
+            }
 
             ev.preventDefault();
             return true;
@@ -1083,14 +1126,21 @@ define(function (require, exports, module) {
         });
 
         $("#lnkSave").click(function (ev) {
-            restService.saveFile(selectFileName, editorHTML.getValue(), editorCSS.getValue(), editor.getValue());
-
+            saveFile();
             ev.preventDefault();
             return true;
         });
 
         $("#lnkCreateMilestone").click(function (ev) {
             $('#modalCreateMilestone').modal();
+            ev.preventDefault();
+            return true;
+        });
+
+        $("#lnkDownload").click(function (ev) {
+            var html = getOutputHTML(true, true);
+            var blob = new Blob([html], { type: "text/html;charset=utf-8" });
+            saveAs(blob, selectFileName + "-" + selectMilestone + ".html");
             ev.preventDefault();
             return true;
         });
@@ -1117,8 +1167,29 @@ define(function (require, exports, module) {
             }
             ignoreHash = false;
         });
+        $(window).bind('beforeunload', function () {
+            if (confirmIfDirty()) {
+                return "Recent changes are not saved, do you want to continue?";
+            }
+        });
+
+        // auto save each 5min
+        var deferredAutosavecall;
+        deferredAutosavecall = deferredCall(function () {
+            if (isDirty())
+                saveFile();
+            deferredAutosavecall.schedule(5 * 60 * 1000);
+        })
+        deferredAutosavecall.schedule(5 * 60 * 1000);
     });
 
+    function saveFile() {
+        restService.saveFile(selectFileName, editorHTML.getValue(), editorCSS.getValue(), editor.getValue(), function onSucces() {
+            editor.session.getUndoManager().markClean();
+            editorHTML.session.getUndoManager().markClean();
+            editorCSS.session.getUndoManager().markClean();
+        });
+    }
 
     function showNotification(msg, type) {
         if (type == "info") {
@@ -1201,7 +1272,7 @@ define(function (require, exports, module) {
         }
         self.listFiles = listFiles;
 
-        function saveFile(name, html, css, typescript) {
+        function saveFile(name, html, css, typescript, onSuccess) {
             var file = {
                 name: name,
                 html: html,
@@ -1213,6 +1284,7 @@ define(function (require, exports, module) {
                 if (resp.Success) {
                     // show notification saved
                     showNotification("Saved successfully", "info");
+                    onSuccess();
                 }
                 else {
                     showNotification("Unable to save", "error");
@@ -1535,7 +1607,7 @@ define(function (require, exports, module) {
             }
         }
 
-        function saveFile(name, html, css, typescript) {
+        function saveFile(name, html, css, typescript, onSuccess) {
             try {
                 createEntryIfNotExists(name);
                 var entries = loadObj("entries");
@@ -1546,7 +1618,7 @@ define(function (require, exports, module) {
                 milestone.CSS = css;
                 milestone.Typescript = typescript;
                 saveObj("entries", entries);
-
+                onSuccess();
                 showNotification("Saved successfully", "info");
             }
             catch (e) {
