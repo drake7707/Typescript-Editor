@@ -181,6 +181,10 @@ define(function (require, exports, module) {
                     updateMarker(e);
                 } catch (ex) {
                 }
+                // make sure to reset the timer while typing, the compiled event with calls updateOutputPane is called with a deferred call which means the timer will
+                // already be fired before the next updateOutputPane comes through. This makes it constantly update the pane while typing, resetting the timer
+                // fixes this
+                resetOutputPaneTimer();
             }
         }
     }
@@ -268,30 +272,6 @@ define(function (require, exports, module) {
         }
     };
 
-    function languageServiceIndent() {
-        var cursor = editor.getCursorPosition();
-        var lineNumber = cursor.row;
-
-        var text = editor.session.getLine(lineNumber);
-        var matches = text.match(/^[\t ]*/);
-        var preIndent = 0;
-        var wordLen = 0;
-
-        if (matches) {
-            wordLen = matches[0].length;
-            for (var i = 0; i < matches[0].length; i++) {
-                var elm = matches[0].charAt(i);
-                var spaceLen = (elm == " ") ? 1 : editor.session.getTabSize();
-                preIndent += spaceLen;
-            };
-        }
-
-        var option = {};
-        option.NewLineCharacter = "\n";
-
-        var smartIndent = languageService.getIndentationAtPosition(selectFileName + ".ts", lineNumber, option);
-        editor.indent();
-    }
 
     function showOccurrences() {
         typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
@@ -664,17 +644,7 @@ define(function (require, exports, module) {
                 refactor();
             }
         }]);
-        /*
-                editor.commands.addCommands([{
-                    name: "indent",
-                    bindKey: "Tab",
-                    exec: function (editor) {
-                        //editor.indent();
-                        languageServiceIndent();
-                    },
-                    multiSelectAction: "forEach"
-                }]);*/
-
+       
         editor.commands.addCommands([{
             name: "formatDocument",
             bindKey: "Ctrl-D",
@@ -1001,17 +971,21 @@ define(function (require, exports, module) {
         return htmlText;
     }
 
-    var outputUpdateTimer = null;
-    function updateOutputPane() {
+    function resetOutputPaneTimer() {
         if (outputUpdateTimer != null)
             window.clearTimeout(outputUpdateTimer);
-
+    }
+    var outputUpdateTimer = null;
+    function updateOutputPane() {
+        resetOutputPaneTimer();
         outputUpdateTimer = window.setTimeout(function () {
             if ($("#tab-output").is(":visible")) {
                 var htmlText = getOutputHTML($("#chkRunJavascript").hasClass("active"));
-                $("#outputIFrame").empty().detach();
-                var jiframe = $("<iframe id='outputIFrame'></iframe>");
+                
+                var jiframe = $("<iframe class='outputframe' id='outputIFrame'></iframe>");
                 $("#outputFrame").append(jiframe);
+
+                $("#outputIFrame").empty().detach();
                 var iframe = jiframe.get(0);
                 resetWindow(iframe.contentWindow, htmlText);
             }
@@ -1071,7 +1045,7 @@ define(function (require, exports, module) {
                 return false;
         }
         else
-            return true; // TODO
+            return true;
     }
 
     $(function () {

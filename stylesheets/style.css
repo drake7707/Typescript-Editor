@@ -51,8 +51,9 @@ body {
 }
 
 .dark .error-bar {
-    background-color:#AA4444;
+    background-color: #AA4444;
 }
+
 .error-bar {
     background-color: #FFCCCC;
     font-family: Monaco, Menlo, 'Ubuntu Mono', Consolas, source-code-pro, monospace;
@@ -222,6 +223,15 @@ body {
 .ace_autocomplete_selected .label-type {
     color: blue;
     visibility: visible;
+}
+
+.outputframe {
+    width: 100%;
+    height: 100%;
+    border-width: 0px;
+    position: absolute;
+    left: 0px;
+    top: 0px;
 }
 
 #outputIFrame {
