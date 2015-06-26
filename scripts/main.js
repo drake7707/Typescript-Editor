@@ -628,7 +628,7 @@ define(function (require, exports, module) {
         editor.commands.addCommands([{
             name: "autoComplete",
             bindKey: "Ctrl-Space",
-            exec: function (editor) {
+            exec: function (ed) {
                 if (autoComplete.isActive() == false) {
                     typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
                     autoComplete.setScriptName(selectFileName);

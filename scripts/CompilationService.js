@@ -22,6 +22,19 @@ define(["require", "exports", './EditorPosition'], function (require, exports, _
             return this.languageService.getCompletionEntryDetails(script + ".ts", pos, name);
         };
 
+        CompilationService.prototype.isMemberCompletion = function (script, cursor, limit) {
+            var matches, pos, text;
+            pos = this.editorPos.getPositionChars(cursor);
+            text = this.editor.session.getLine(cursor.row).slice(0, cursor.column);
+            matches = text.match(/\.([a-zA-Z_0-9\$]*$)/);
+            if (matches && matches.length > 0) {
+                return true;
+            } else {
+                return false;
+            }
+            
+        };
+
         CompilationService.prototype.getCursorCompilation = function (script, cursor, limit) {
             var isMemberCompletion, matches, pos, text;
             pos = this.editorPos.getPositionChars(cursor);

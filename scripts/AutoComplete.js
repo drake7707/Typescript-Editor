@@ -52,14 +52,17 @@ define(function (require, exports, module) {
 
             var compilations = compilationInfo.entries;
 
-            var snippets = snippetManager.files["ace/mode/typescript"].snippets;
-            for (var i = 0; i < snippets.length; i++) {
-                compilations.push({
-                    kind: "snippet",
-                    kindModifiers: "",
-                    name: snippets[i].name,
-                    sortText: "0"
-                });
+
+            if (!compilationService.isMemberCompletion(self.scriptName, cursor)) {
+                var snippets = snippetManager.files["ace/mode/typescript"].snippets;
+                for (var i = 0; i < snippets.length; i++) {
+                    compilations.push({
+                        kind: "snippet",
+                        kindModifiers: "",
+                        name: snippets[i].name,
+                        sortText: "0"
+                    });
+                }
             }
 
             if (self.inputText.length > 0) {
