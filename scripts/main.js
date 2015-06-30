@@ -172,15 +172,19 @@ define(function (require, exports, module) {
     }
 
 
+    var deferredUpdateNavTree = deferredCall(updateNavigationTree);
 
     function onUpdateTypescriptDocument(e) {
         if (selectFileName) {
             if (!syncStop) {
                 try {
                     syncTypeScriptServiceContent(selectFileName, e);
-                    updateMarker(e);
+
+
                 } catch (ex) {
                 }
+                deferredUpdateNavTree.schedule(200);
+
                 // make sure to reset the timer while typing, the compiled event with calls updateOutputPane is called with a deferred call which means the timer will
                 // already be fired before the next updateOutputPane comes through. This makes it constantly update the pane while typing, resetting the timer
                 // fixes this
@@ -192,44 +196,46 @@ define(function (require, exports, module) {
         updateOutputPane();
     }
 
-    function updateMarker(aceChangeEvent) {
-        var data = aceChangeEvent.data;
-        var action = data.action;
-        var range = data.range;
-        var markers = editor.getSession().getMarkers(true);
-        var line_count = 0;
-        var isNewLine = editor.getSession().getDocument().isNewLine;
+    function updateNavigationTree() {
+        var nodes = languageService.getNavigationBarItems(selectFileName + ".ts");
 
-        if (action == "insert") {
-            line_count = data.lines.length;
+        var html = "";
+        for (var i = 0; i < nodes.length; i++) {
+            html += getNavigationListItemsFromNode(nodes[i], nodes[i].text);
         }
-        else if (action == "remove") {
-            line_count = -data.lines.length;
-        }
-
-        if (line_count != 0) {
-
-            var markerUpdate = function (id) {
-                var marker = markers[id];
-                var row = range.start.row;
-
-                if (line_count > 0) {
-                    row = +1;
-                }
-
-                if (marker && marker.range.start.row > row) {
-                    marker.range.start.row += line_count;
-                    marker.range.end.row += line_count;
-                }
-            };
-
-            errorMarkers.forEach(markerUpdate);
-            runtimeErrorMarkers.forEach(markerUpdate);
-            refMarkers.forEach(markerUpdate);
-            editor.onChangeFrontMarker();
-        }
-
+        $("#navTree").html(html);
     }
+
+    function getNavigationListItemsFromNode(node, path) {
+        var id = encodeURI(path + "." + node.text);
+
+        var childrenHtml = "";
+        for (var i = 0; i < node.childItems.length; i++) {
+            childrenHtml += getNavigationListItemsFromNode(node.childItems[i], id);
+        }
+
+        var kind = "label-kind-" + node.kind;
+        var text = node.text;
+
+        var span = '<span class="navItem ' + kind + '">' + text + '</span>';
+        var html;
+        if (childrenHtml.length > 0) {
+            html = '<li>' +
+                        '<input type="checkbox" id="' + id + '" />' +
+                        '<label for="' + id + '">' +
+                            span +
+                        '</label>' +
+                        '<ul>' + childrenHtml + "</ul>" +
+                    '</li>';
+        }
+        else {
+            html = '<li>' +
+                         span +
+                 '</li>';
+        }
+        return html;
+    }
+
 
     function TextEdit(minChar, limChar, text) {
         this.minChar = minChar;
@@ -261,6 +267,8 @@ define(function (require, exports, module) {
     function editLanguageService(name, textEdit) {
         typeScriptLS.editScript(name + ".ts", textEdit.minChar, textEdit.limChar, textEdit.text);
     }
+
+    var deferredShowOccurrences = deferredCall(showOccurrences);
 
     function onChangeCursor(e) {
         if (!syncStop) {
@@ -294,7 +302,6 @@ define(function (require, exports, module) {
         });
     }
 
-    var deferredShowOccurrences = deferredCall(showOccurrences);
 
     function workerOnCreate(func, timeout) {
         if (editor.getSession().$worker) {

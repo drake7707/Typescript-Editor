@@ -35,13 +35,6 @@ define(function (require, exports, module) {
             var middle = newText;
             var suffix = this.content.substring(limChar);
             this.content = prefix + middle + suffix;
-            this.editRanges.push({
-                length: this.content.length,
-                editRange: new TypeScript.ScriptEditRange(minChar, limChar, (limChar - minChar) + newText.length)
-            });
-            if (this.editRanges.length > this.maxScriptVersions) {
-                this.editRanges.splice(0, this.maxScriptVersions - this.editRanges.length);
-            }
             this.version++;
         };
 
