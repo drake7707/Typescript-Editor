@@ -916,11 +916,11 @@ define(function (require, exports, module) {
             var errAnnotation = {
                 row: range.start.row,
                 column: range.start.column,
-                text: errorMsg + stacktrace,
+                text: errorMsg + jsStacktrace,
                 minChar: range.end.row,
                 limChar: range.end.column,
                 type: "error",
-                raw: errorMsg,
+                raw: errorMsg + jsStacktrace,
                 runtime: true
             };
             newAnnotations.push(errAnnotation);
