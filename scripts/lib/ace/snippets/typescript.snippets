@@ -109,14 +109,14 @@ snippet do
 
 # for (...) {...}
 snippet for
-	for (var ${1:i}:number = 0; $1 < ${2:Things}.length; $1++) {
-		${3:$2[$1]}$0
+	for (var ${1:i}:number = 0; $1 < ${2:length}; $1++) {
+		$0
 	}
 
 # for (...) {...} (Improved Native For-Loop)
 snippet forr
-	for (var ${1:i}:number = ${2:Things}.length - 1; $1 >= 0; $1--) {
-		${3:$2[$1]}$0
+	for (var ${1:i}:number = ${2:length} - 1; $1 >= 0; $1--) {
+		$0
 	}
 
 # for (property in object ) { ... }

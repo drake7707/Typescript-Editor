@@ -644,7 +644,7 @@ define(function (require, exports, module) {
                 refactor();
             }
         }]);
-       
+
         editor.commands.addCommands([{
             name: "formatDocument",
             bindKey: "Ctrl-D",
@@ -760,6 +760,7 @@ define(function (require, exports, module) {
         All logic for the output pane/external window
     */
 
+    var consoleLogBuffer = [];
     $(function () {
         $("#lnkRunExternalWindow").click(function (ev) {
             runInExternalWindow();
@@ -774,6 +775,8 @@ define(function (require, exports, module) {
             ev.preventDefault();
             return true;
         })
+
+        runProcessConsoleBuffer();
     });
 
     var externalWindow = null;
@@ -838,23 +841,43 @@ define(function (require, exports, module) {
     }
 
     function addConsoleLog(message) {
-        var logger = $("#txtConsole").get(0);
-
-        var html;
-        if (typeof message == 'object')
-            html = (JSON && JSON.stringify ? JSON.stringify(message) : message);
-        else
-            html = message;
-        logger.innerHTML += "<div class='console-entry'>" + html + "</div>";
-
-        logger.scrollTop = logger.scrollHeight;
-        if ($("#txtConsole").children().length > 100) {
-            $($("#txtConsole").children()[0]).empty().detach();
-        }
+        consoleLogBuffer.push(message);
     }
 
     function clearConsoleLog() {
         $("#txtConsole").empty();
+    }
+
+    function runProcessConsoleBuffer() {
+        if (consoleLogBuffer.length > 0) {
+
+            var items = consoleLogBuffer.slice();
+            consoleLogBuffer = [];
+
+            var logger = $("#txtConsole").get(0);
+            var completeHtml = logger.innerHTML;
+
+            for (var i = 0; i < items.length; i++) {
+                var message = items[i];
+                var html;
+                if (typeof message == 'object')
+                    html = (JSON && JSON.stringify ? JSON.stringify(message) : message);
+                else
+                    html = message;
+
+                completeHtml += "<div class='console-entry'>" + html + "</div>";
+            }
+
+            logger.innerHTML = completeHtml;
+            logger.scrollTop = logger.scrollHeight;
+
+            var nrOfItems = $("#txtConsole").children().length;
+            if (nrOfItems > 100) {
+                var nrToRemove = nrOfItems - 100;
+                $("#txtConsole").find(".console-entry:lt(" + nrToRemove + ")").remove();
+            }
+        }
+        window.setTimeout(runProcessConsoleBuffer, 100);
     }
 
     function handleRuntimeError(errorMsg, url, lineNumber, column, errorObj) {
@@ -981,7 +1004,7 @@ define(function (require, exports, module) {
         outputUpdateTimer = window.setTimeout(function () {
             if ($("#tab-output").is(":visible")) {
                 var htmlText = getOutputHTML($("#chkRunJavascript").hasClass("active"));
-                
+
                 var jiframe = $("<iframe class='outputframe' id='outputIFrame'></iframe>");
                 $("#outputFrame").append(jiframe);
 
