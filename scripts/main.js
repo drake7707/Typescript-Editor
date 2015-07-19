@@ -96,6 +96,8 @@ define(function (require, exports, module) {
             editorCSS.session.getUndoManager().markClean();
         }).schedule(100);
 
+        deferredUpdateNavTree();
+
         updateOutputPane();
     }
 
@@ -197,31 +199,72 @@ define(function (require, exports, module) {
     }
 
     function updateNavigationTree() {
+
+        var expandedItems = {};
+        var checkedNavs = $(".navCheck:checked");
+        for (var i = 0; i < checkedNavs.length; i++)
+            expandedItems[checkedNavs[i].id] = true;
+        
         var nodes = languageService.getNavigationBarItems(selectFileName + ".ts");
 
         var html = "";
         for (var i = 0; i < nodes.length; i++) {
-            html += getNavigationListItemsFromNode(nodes[i], nodes[i].text);
+            html += getNavigationListItemsFromNode(nodes[i], nodes[i].text, expandedItems);
         }
-        $("#navTree").html(html);
+        $("#navTree").empty().html(html);
+
+        updateNavItemFromPosition();
     }
 
-    function getNavigationListItemsFromNode(node, path) {
+    function updateNavItemFromPosition() {
+        var curPos = aceEditorPosition.getCurrentCharPosition();
+
+        var navItems = $(".navItem");
+        navItems.removeClass("selected");
+
+        var smallestLengthNavItem = null;
+        var smallestLength = Number.MAX_VALUE;
+        for (var i = 0; i < navItems.length; i++) {
+            var start = parseInt(navItems[i].getAttribute("data-start"));
+            var length = parseInt(navItems[i].getAttribute("data-length"));
+            if (curPos > start && curPos <= start + length) {
+                if (length < smallestLength)
+                    smallestLengthNavItem = i;
+            }
+        }
+        if(smallestLengthNavItem != null)
+            $(navItems[smallestLengthNavItem]).addClass("selected");
+    }
+
+    function getNavigationListItemsFromNode(node, path, expandedItems) {
         var id = encodeURI(path + "." + node.text);
 
         var childrenHtml = "";
+
+        node.childItems.sort(function (a, b) { a.spans[0].start - b.spans[0].start });
+
         for (var i = 0; i < node.childItems.length; i++) {
-            childrenHtml += getNavigationListItemsFromNode(node.childItems[i], id);
+            childrenHtml += getNavigationListItemsFromNode(node.childItems[i], id, expandedItems);
         }
 
         var kind = "label-kind-" + node.kind;
         var text = node.text;
 
-        var span = '<span class="navItem ' + kind + '">' + text + '</span>';
+        var start = node.spans[0].start;
+        var length = node.spans[0].length;
+
+        var isLeaf = childrenHtml.length == 0;
+
+        var span = '<span class="navItem ' + (isLeaf ? "leaf " : "") +  kind + '" data-start="' + start + '" data-length="' + length + '">' + text + '</span>';
         var html;
+
+        var checked = "";
+        if (typeof expandedItems[id] !== "undefined")
+            checked = "checked";
+
         if (childrenHtml.length > 0) {
             html = '<li>' +
-                        '<input type="checkbox" id="' + id + '" />' +
+                        '<input type="checkbox" class="navCheck" id="' + id + '" ' + checked + ' />' +
                         '<label for="' + id + '">' +
                             span +
                         '</label>' +
@@ -277,6 +320,7 @@ define(function (require, exports, module) {
             } catch (ex) {
                 //TODO
             }
+            updateNavItemFromPosition();
         }
     };
 
@@ -376,10 +420,14 @@ define(function (require, exports, module) {
         var definitionInfos = languageService.getDefinitionAtPosition(selectFileName + ".ts", aceEditorPosition.getCurrentCharPosition());
         if (typeof definitionInfos !== "undefined" && definitionInfos.length > 0) {
             var definitionInfo = definitionInfos[0];
-            previousCursorPositionStack.push(editor.getCursorPosition());
-            var startPos = editor.getSession().getDocument().indexToPosition(definitionInfo.textSpan.start);
-            editor.gotoLine(startPos.row + 1, startPos.col, true);
+            doNewGotoDefinitionStep(definitionInfo.textSpan.start);
         }
+    }
+
+    function doNewGotoDefinitionStep(start) {
+        previousCursorPositionStack.push(editor.getCursorPosition());
+        var startPos = editor.getSession().getDocument().indexToPosition(start);
+        editor.gotoLine(startPos.row + 1, startPos.col, true);
     }
 
     function gotoPreviousPosition() {
@@ -614,6 +662,26 @@ define(function (require, exports, module) {
                 setTheme("dark");
             ev.preventDefault();
             return true;
+        });
+
+        $(".toggle-navigationTree").click(function (ev) {
+            if($(".typescript-navigation").is(":visible")) {
+                $(".typescript-navigation").hide();
+                $(".typescript-navigation").parent().find(".editor-container").css("width", "99%");
+                $(".toggle-navigationTree").find("i").attr("class", "icon-chevron-right");
+            }
+            else {
+                $(".typescript-navigation").show();
+                $(".typescript-navigation").parent().find(".editor-container").css("width", "80%");
+                $(".toggle-navigationTree").find("i").attr("class", "icon-chevron-left");
+            }
+                
+            
+            return true;
+        })
+
+        $(".typescript-navigation").on("click", ".navItem.leaf", function (ev) {
+            doNewGotoDefinitionStep(parseInt($(this).attr("data-start")));
         });
 
         updateSideBySide();

@@ -241,13 +241,41 @@ body {
 }
 
 
+.typescript-navigation {
+    height: 100%;
+    float: left;
+    width: 20%;
+    word-wrap: inherit;
+    position: relative;
+    overflow: hidden;
+    top: 20px;
+}
+
+.toggle-navigationTree {
+    height: 100%;
+    width: 20px;
+    float: left;
+    cursor: pointer;
+}
+
 .navItem {
     background-repeat: no-repeat;
     background-position-y: 4px;
     padding-left: 20px;
 }
 
+    .navItem.leaf {
+        cursor: pointer;
+    }
 
+    .navItem.selected {
+        font-weight: bold;
+        background-color: rgb(240,240,240);
+    }
+
+.dark .navItem.selected {
+    background-color: rgb(80,80,80);
+}
 /*
  * CSS3 Treeview. No JavaScript
  * @version 1.0
@@ -256,17 +284,22 @@ body {
  * @url developer's twitter: https://twitter.com/#!/wemakesitesnet
  * @url developer's blog http://acidmartin.wordpress.com/
  **/
-.css-treeview ul,
-.css-treeview li {
-    padding: 0;
-    margin: 0;
-    list-style: none;
+.css-treeview {
+    min-width: 200px;
+    margin-left:0px;
 }
 
-.css-treeview input {
-    position: absolute;
-    opacity: 0;
-}
+    .css-treeview ul,
+    .css-treeview li {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    .css-treeview input {
+        position: absolute;
+        opacity: 0;
+    }
 
 .css-treeview {
     font: normal 11px "Segoe UI", Arial, Sans-serif;
