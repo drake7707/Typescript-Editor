@@ -240,14 +240,15 @@ define(function (require, exports, module) {
         var id = encodeURI(path + "." + node.text);
 
         var childrenHtml = "";
-
+        
         node.childItems.sort(function (a, b) { a.spans[0].start - b.spans[0].start });
 
         for (var i = 0; i < node.childItems.length; i++) {
             childrenHtml += getNavigationListItemsFromNode(node.childItems[i], id, expandedItems);
         }
 
-        var kind = "label-kind-" + node.kind;
+        var kindVal = (node.kind + "").replace(" ", "-");
+        var kind = "label-kind-" + kindVal;
         var text = node.text;
 
         var start = node.spans[0].start;

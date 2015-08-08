@@ -139,7 +139,8 @@ define(function (require, exports, module) {
                         modifiers[0] = "label-modifier-" + modifiers[0];
                     }
                     var accessors = modifiers.join(" ");
-                    var kind = '<span class="label-kind label-kind-' + info.kind + '">' + '</span>';
+                    var kindVal = (info.kind + "").replace(" ", "-");
+                    var kind = '<span class="label-kind label-kind-' + kindVal + '">' + '</span>';
                     var overlay = '<span class="label-overlay ' + accessors + '"></span>';
                     html += '<li class="label-autocomplete" data-name="' + info.name + '" data-kind="' + info.kind + '">' + kind + name + type + overlay + '</li>';
                 }

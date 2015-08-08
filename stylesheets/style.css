@@ -175,6 +175,22 @@ body {
     position: relative;
 }
 
+.label-kind-constructor {
+    background-image: url('./icons/ctor.png');
+}
+
+.label-kind-module {
+    background-image: url('./icons/namespace.png');
+}
+
+.label-kind-enum {
+    background-image: url('./icons/enum.png');
+}
+
+.label-kind-const {
+    background-image: url('./icons/const.png');
+}
+
 .label-kind-keyword {
     background-image: url('./icons/keyword.png');
 }
@@ -195,7 +211,7 @@ body {
     background-image: url('./icons/class.png');
 }
 
-.label-kind-variable, .label-kind-var {
+.label-kind-variable, .label-kind-var, .label-kind-local-var,  .label-kind-parameter {
     background-image: url('./icons/field.png');
 }
 
@@ -268,7 +284,7 @@ body {
 
 .navItem {
     background-repeat: no-repeat;
-    background-position-y: 4px;
+    background-position: 0px 3px;
     padding-left: 20px;
 }
 
@@ -359,6 +375,7 @@ body {
             height: 16px;
             line-height: 16px;
             vertical-align: middle;
+            
         }
 
     .css-treeview label {
@@ -372,6 +389,7 @@ body {
             /*margin: 0 22px 0 0;*/
             vertical-align: middle;
             background-position: 0 -32px;
+            margin-top: -2px;
         }
 
     .css-treeview input:checked + label::before {
