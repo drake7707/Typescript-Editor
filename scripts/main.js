@@ -255,7 +255,7 @@ define(function (require, exports, module) {
 
         var isLeaf = childrenHtml.length == 0;
 
-        var span = '<span class="navItem ' + (isLeaf ? "leaf " : "") +  kind + '" data-start="' + start + '" data-length="' + length + '">' + text + '</span>';
+        var span = '<span class="navItem ' + (isLeaf ? "leaf " : "") + kind + '" data-start="' + start + '" data-length="' + length + '">' + htmlEncode(text) + '</span>';
         var html;
 
         var checked = "";
@@ -279,6 +279,10 @@ define(function (require, exports, module) {
         return html;
     }
 
+    function htmlEncode( html ) {
+        return document.createElement( 'a' ).appendChild( 
+            document.createTextNode( html ) ).parentNode.innerHTML;
+    };
 
     function TextEdit(minChar, limChar, text) {
         this.minChar = minChar;
@@ -1217,6 +1221,33 @@ define(function (require, exports, module) {
             return true;
         });
 
+        $("#lnkCreateGist").click(function (ev) {
+            var data = {
+                "description": $("#txtDescription").val(),
+                "public": false,
+                "files": {
+                    "main.ts": {
+                        "content": editor.getValue()
+                    },
+                    "main.css": {
+                        "content": editorCSS.getValue()
+                    },
+                    "main.html": {
+                        "content": editorHTML.getValue()
+                    },
+                    "demo.html": {
+                        "content": getOutputHTML(true, false)
+                    }
+                }
+            }
+            $.post("https://api.github.com/gists", data, function (resp) {
+                window.open(resp.html_url, "_blank");
+            }).fail(function (xhr, textStatus, errorThrown) {
+                alert("Unable to create gist: " + xhr.responseText);
+            });
+        });
+
+
         $("#btnCreateMilestone").click(function (ev) {
             $('#modalCreateMilestone').modal('hide');
             restService.createMilestone(selectFileName, editorHTML.getValue(), editorCSS.getValue(), editor.getValue(), $("#txtMilestoneComments").val());
@@ -1232,6 +1263,26 @@ define(function (require, exports, module) {
             $('#modalUpdateDescription').modal('hide');
             restService.updateDescription(selectFileName, $("#txtDescription").val());
         });
+
+        $(window).bind('keydown', function (event) {
+            if (event.ctrlKey || event.metaKey) {
+                if (event.which == 17)
+                    return;
+                
+                var char;
+                if (event.which >= 96 && event.which <= 105) // numpad
+                    char = event.which - 96;
+                else
+                    char = String.fromCharCode(event.which).toLowerCase();
+
+                var elements = $("*[data-shortcut='ctrl+" + char + "']");
+                if (elements.length > 0) {
+                    elements.click();
+                    event.preventDefault();
+                }
+            }
+        });
+
 
         $(window).bind('hashchange', function () {
             if (!ignoreHash) {

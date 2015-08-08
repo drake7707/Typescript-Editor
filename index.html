@@ -13,12 +13,8 @@
         <span id="lblNotification"></span>
     </div>
 
-    <div class="fluid-container" style="padding:5px">
+    <div class="fluid-container" style="padding:1px">
         <div>
-            <h1>TypeScript Editor <span id="lblFilename"></span></h1>
-            <p><span id="txtHeaderDescription"></span><a id="lnkUpdateDescription" href="#" title="Edit description of current file"><i class="icon-pencil"></i></a></p>
-
-
             <div class="btn-toolbar">
 
                 <div class="btn-group">
@@ -28,23 +24,23 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a class="" href="" id="lnkNew">
+                            <a class="" href="" id="lnkNew" data-shortcut="ctrl+n">
                                 <i class="icon-star"></i> New
                             </a>
                         </li>
                         <li>
-                            <a class="" href="" id="lnkOpen">
+                            <a class="" href="" id="lnkOpen"  data-shortcut="ctrl+o">
                                 <i class="icon-folder-open"></i> Open
                             </a>
                         </li>
                         <li>
-                            <a class="" href="" id="lnkSave">
+                            <a class="" href="" id="lnkSave"  data-shortcut="ctrl+s">
                                 <i class="icon-hdd"></i> Save
                             </a>
                         </li>
                         <li class="divider"></li>
                         <li>
-                            <a class="" href="" id="lnkCreateMilestone">
+                            <a class="" href="" id="lnkCreateMilestone"  data-shortcut="ctrl+m">
                                 <i class="icon-tag"></i> New milestone
                             </a>
                         </li>
@@ -52,6 +48,11 @@
                         <li>
                             <a class="" href="" id="lnkDownload">
                                 <i class="icon-download-alt"></i>Download
+                            </a>
+                        </li>
+                        <li>
+                            <a class="" href="" id="lnkCreateGist">
+                                <i class="icon-share"></i>Create gist on github
                             </a>
                         </li>
                     </ul>
@@ -101,6 +102,10 @@
                         <i class="icon-adjust"></i> &nbsp;
                     </a>
                 </div>
+                <div class="btn-group">
+                    <h4>TypeScript Editor <span id="lblFilename"></span></h4>
+                    <p><span id="txtHeaderDescription"></span><a id="lnkUpdateDescription" href="#" title="Edit description of current file"><i class="icon-pencil"></i></a></p>
+                </div>
                 <div class="btn-group pull-right">
                     <!--<label><input type="checkbox" id="chkRunJavascript" />Run javascript in output pane</label>-->
                     <button type="button" class="btn" data-toggle="button" id="chkMoveCursorToError">
@@ -118,12 +123,12 @@
         <div class="editor-area">
             <div class="editor-tabs">
                 <ul class="nav nav-tabs">
-                    <li class="tab active" data-target="tab-html"><a>HTML</a></li>
-                    <li class="tab" data-target="tab-css"><a>CSS</a></li>
-                    <li class="tab active" data-target="tab-typescript"><a>Typescript</a></li>
-                    <li class="tab" data-target="tab-javascript"><a>Javascript</a></li>
-                    <li class="tab" data-target="tab-console"><a>Console</a></li>
-                    <li class="tab" data-target="tab-output"><a>Output</a></li>
+                    <li class="tab active" data-target="tab-html" data-shortcut="ctrl+1"><a>HTML</a></li>
+                    <li class="tab" data-target="tab-css" data-shortcut="ctrl+2"><a>CSS</a></li>
+                    <li class="tab active" data-target="tab-typescript" data-shortcut="ctrl+3"><a>Typescript</a></li>
+                    <li class="tab" data-target="tab-javascript" data-shortcut="ctrl+4"><a>Javascript</a></li>
+                    <li class="tab" data-target="tab-console" data-shortcut="ctrl+5"><a>Console</a></li>
+                    <li class="tab" data-target="tab-output" data-shortcut="ctrl+6"><a>Output</a></li>
                 </ul>
             </div>
             <div class="warp-container" id="tab-html">

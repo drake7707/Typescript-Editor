@@ -1,4 +1,6 @@
 // made sure the getNodeSystem always returns undefined, there's no fs, os or path available
+// version from 1.5.3: https://raw.githubusercontent.com/Microsoft/TypeScript/v1.5.3/bin/typescriptServices.js
+
 
 define(function (require, exports, module) {
 /*! *****************************************************************************
@@ -709,6 +711,36 @@ var ts;
         Ternary[Ternary["True"] = -1] = "True";
     })(ts.Ternary || (ts.Ternary = {}));
     var Ternary = ts.Ternary;
+    function createFileMap(getCanonicalFileName) {
+        var files = {};
+        return {
+            get: get,
+            set: set,
+            contains: contains,
+            remove: remove,
+            forEachValue: forEachValueInMap
+        };
+        function set(fileName, value) {
+            files[normalizeKey(fileName)] = value;
+        }
+        function get(fileName) {
+            return files[normalizeKey(fileName)];
+        }
+        function contains(fileName) {
+            return hasProperty(files, normalizeKey(fileName));
+        }
+        function remove(fileName) {
+            var key = normalizeKey(fileName);
+            delete files[key];
+        }
+        function forEachValueInMap(f) {
+            forEachValue(files, f);
+        }
+        function normalizeKey(key) {
+            return getCanonicalFileName(normalizeSlashes(key));
+        }
+    }
+    ts.createFileMap = createFileMap;
     (function (Comparison) {
         Comparison[Comparison["LessThan"] = -1] = "LessThan";
         Comparison[Comparison["EqualTo"] = 0] = "EqualTo";
@@ -1532,8 +1564,9 @@ var ts;
             };
         }
         function getNodeSystem() {
-            return undefined;
-            //var _fs = require("fs");
+            return undefined; /// ADDED!
+
+            //var _fs = require("fs"); // COMMENTED SO REQUIREJS DOESN'T TRY TO FETCH IT
             //var _path = require("path");
             //var _os = require('os');
             var platform = _os.platform();
@@ -9707,7 +9740,7 @@ var ts;
                 token === 18 /* OpenBracketToken */) {
                 return parsePropertyOrMethodDeclaration(fullStart, decorators, modifiers);
             }
-            if (decorators) {
+            if (decorators || modifiers) {
                 // treat this as a property declaration with a missing name.
                 var name_3 = createMissingNode(65 /* Identifier */, true, ts.Diagnostics.Declaration_expected);
                 return parsePropertyDeclaration(fullStart, decorators, modifiers, name_3, undefined);
@@ -10165,7 +10198,7 @@ var ts;
                 case 85 /* ImportKeyword */:
                     return parseImportDeclarationOrImportEqualsDeclaration(fullStart, decorators, modifiers);
                 default:
-                    if (decorators) {
+                    if (decorators || modifiers) {
                         // We reached this point because we encountered an AtToken and assumed a declaration would
                         // follow. For recovery and error reporting purposes, return an incomplete declaration.                        
                         var node = createMissingNode(219 /* MissingDeclaration */, true, ts.Diagnostics.Declaration_expected);
@@ -10246,7 +10279,7 @@ var ts;
             }
             sourceFile.referencedFiles = referencedFiles;
             sourceFile.amdDependencies = amdDependencies;
-            sourceFile.amdModuleName = amdModuleName;
+            sourceFile.moduleName = amdModuleName;
         }
         function setExternalModuleIndicator(sourceFile) {
             sourceFile.externalModuleIndicator = ts.forEach(sourceFile.statements, function (node) {
@@ -11089,20 +11122,34 @@ var ts;
                         if (!ts.isExternalModule(location))
                             break;
                     case 206 /* ModuleDeclaration */:
-                        if (result = getSymbol(getSymbolOfNode(location).exports, name, meaning & 8914931 /* ModuleMember */)) {
-                            if (result.flags & meaning || !(result.flags & 8388608 /* Alias */ && getDeclarationOfAliasSymbol(result).kind === 218 /* ExportSpecifier */)) {
-                                break loop;
-                            }
-                            result = undefined;
-                        }
-                        else if (location.kind === 228 /* SourceFile */ ||
+                        var moduleExports = getSymbolOfNode(location).exports;
+                        if (location.kind === 228 /* SourceFile */ ||
                             (location.kind === 206 /* ModuleDeclaration */ && location.name.kind === 8 /* StringLiteral */)) {
-                            result = getSymbolOfNode(location).exports["default"];
+                            // It's an external module. Because of module/namespace merging, a module's exports are in scope,
+                            // yet we never want to treat an export specifier as putting a member in scope. Therefore,
+                            // if the name we find is purely an export specifier, it is not actually considered in scope.
+                            // Two things to note about this:
+                            //     1. We have to check this without calling getSymbol. The problem with calling getSymbol
+                            //        on an export specifier is that it might find the export specifier itself, and try to
+                            //        resolve it as an alias. This will cause the checker to consider the export specifier
+                            //        a circular alias reference when it might not be.
+                            //     2. We check === SymbolFlags.Alias in order to check that the symbol is *purely*
+                            //        an alias. If we used &, we'd be throwing out symbols that have non alias aspects,
+                            //        which is not the desired behavior.
+                            if (ts.hasProperty(moduleExports, name) &&
+                                moduleExports[name].flags === 8388608 /* Alias */ &&
+                                ts.getDeclarationOfKind(moduleExports[name], 218 /* ExportSpecifier */)) {
+                                break;
+                            }
+                            result = moduleExports["default"];
                             var localSymbol = ts.getLocalSymbolForExportDefault(result);
                             if (result && localSymbol && (result.flags & meaning) && localSymbol.name === name) {
                                 break loop;
                             }
                             result = undefined;
+                        }
+                        if (result = getSymbol(moduleExports, name, meaning & 8914931 /* ModuleMember */)) {
+                            break loop;
                         }
                         break;
                     case 205 /* EnumDeclaration */:
@@ -25632,6 +25679,11 @@ var ts;
                 return result;
             }
             function parenthesizeForAccess(expr) {
+                // When diagnosing whether the expression needs parentheses, the decision should be based
+                // on the innermost expression in a chain of nested type assertions.
+                while (expr.kind === 161 /* TypeAssertionExpression */) {
+                    expr = expr.expression;
+                }
                 // isLeftHandSideExpression is almost the correct criterion for when it is not necessary
                 // to parenthesize the expression before a dot. The known exceptions are:
                 //
@@ -25640,7 +25692,9 @@ var ts;
                 //    NumberLiteral
                 //       1.x            -> not the same as (1).x
                 //
-                if (ts.isLeftHandSideExpression(expr) && expr.kind !== 159 /* NewExpression */ && expr.kind !== 7 /* NumericLiteral */) {
+                if (ts.isLeftHandSideExpression(expr) &&
+                    expr.kind !== 159 /* NewExpression */ &&
+                    expr.kind !== 7 /* NumericLiteral */) {
                     return expr;
                 }
                 var node = ts.createSynthesizedNode(162 /* ParenthesizedExpression */);
@@ -25871,7 +25925,10 @@ var ts;
                 }
             }
             function emitParenExpression(node) {
-                if (!node.parent || node.parent.kind !== 164 /* ArrowFunction */) {
+                // If the node is synthesized, it means the emitter put the parentheses there,
+                // not the user. If we didn't want them, the emitter would not have put them
+                // there.
+                if (!ts.nodeIsSynthesized(node) && node.parent.kind !== 164 /* ArrowFunction */) {
                     if (node.expression.kind === 161 /* TypeAssertionExpression */) {
                         var operand = node.expression.expression;
                         // Make sure we consider all nested cast expressions, e.g.:
@@ -28153,7 +28210,7 @@ var ts;
                         emitDeclarationName(node);
                         write("\", ");
                         emitDeclarationName(node);
-                        write(")");
+                        write(");");
                     }
                     emitExportMemberAssignments(node.name);
                 }
@@ -28263,7 +28320,7 @@ var ts;
                         emitDeclarationName(node);
                         write("\", ");
                         emitDeclarationName(node);
-                        write(")");
+                        write(");");
                     }
                     emitExportMemberAssignments(node.name);
                 }
@@ -28966,10 +29023,10 @@ var ts;
                 emitSetters(exportStarFunction);
                 writeLine();
                 emitExecute(node, startIndex);
-                emitTempDeclarations(true);
                 decreaseIndent();
                 writeLine();
                 write("}"); // return
+                emitTempDeclarations(true);
             }
             function emitSetters(exportStarFunction) {
                 write("setters:[");
@@ -29102,7 +29159,11 @@ var ts;
                 ts.Debug.assert(!exportFunctionForFile);
                 // make sure that  name of 'exports' function does not conflict with existing identifiers
                 exportFunctionForFile = makeUniqueName("exports");
-                write("System.register([");
+                write("System.register(");
+                if (node.moduleName) {
+                    write("\"" + node.moduleName + "\", ");
+                }
+                write("[");
                 for (var i = 0; i < externalImports.length; ++i) {
                     var text = getExternalModuleNameText(externalImports[i]);
                     if (i !== 0) {
@@ -29182,8 +29243,8 @@ var ts;
                 collectExternalModuleInfo(node);
                 writeLine();
                 write("define(");
-                if (node.amdModuleName) {
-                    write("\"" + node.amdModuleName + "\", ");
+                if (node.moduleName) {
+                    write("\"" + node.moduleName + "\", ");
                 }
                 emitAMDDependencies(node, true);
                 write(") {");
@@ -29804,7 +29865,6 @@ var ts;
     function createProgram(rootNames, options, host) {
         var program;
         var files = [];
-        var filesByName = {};
         var diagnostics = ts.createDiagnosticCollection();
         var seenNoDefaultLib = options.noLib;
         var commonSourceDirectory;
@@ -29812,6 +29872,7 @@ var ts;
         var noDiagnosticsTypeChecker;
         var start = new Date().getTime();
         host = host || createCompilerHost(options);
+        var filesByName = ts.createFileMap(function (fileName) { return host.getCanonicalFileName(fileName); });
         ts.forEach(rootNames, function (name) { return processRootFile(name, false); });
         if (!seenNoDefaultLib) {
             processRootFile(host.getDefaultLibFileName(options), true);
@@ -29877,8 +29938,7 @@ var ts;
             return emitResult;
         }
         function getSourceFile(fileName) {
-            fileName = host.getCanonicalFileName(ts.normalizeSlashes(fileName));
-            return ts.hasProperty(filesByName, fileName) ? filesByName[fileName] : undefined;
+            return filesByName.get(fileName);
         }
         function getDiagnosticsHelper(sourceFile, getDiagnostics) {
             if (sourceFile) {
@@ -29976,18 +30036,18 @@ var ts;
         // Get source file from normalized fileName
         function findSourceFile(fileName, isDefaultLib, refFile, refStart, refLength) {
             var canonicalName = host.getCanonicalFileName(ts.normalizeSlashes(fileName));
-            if (ts.hasProperty(filesByName, canonicalName)) {
+            if (filesByName.contains(canonicalName)) {
                 // We've already looked for this file, use cached result
                 return getSourceFileFromCache(fileName, canonicalName, false);
             }
             else {
                 var normalizedAbsolutePath = ts.getNormalizedAbsolutePath(fileName, host.getCurrentDirectory());
                 var canonicalAbsolutePath = host.getCanonicalFileName(normalizedAbsolutePath);
-                if (ts.hasProperty(filesByName, canonicalAbsolutePath)) {
+                if (filesByName.contains(canonicalAbsolutePath)) {
                     return getSourceFileFromCache(normalizedAbsolutePath, canonicalAbsolutePath, true);
                 }
                 // We haven't looked for this file, do so now and cache result
-                var file = filesByName[canonicalName] = host.getSourceFile(fileName, options.target, function (hostErrorMessage) {
+                var file = host.getSourceFile(fileName, options.target, function (hostErrorMessage) {
                     if (refFile) {
                         diagnostics.add(ts.createFileDiagnostic(refFile, refStart, refLength, ts.Diagnostics.Cannot_read_file_0_Colon_1, fileName, hostErrorMessage));
                     }
@@ -29995,10 +30055,11 @@ var ts;
                         diagnostics.add(ts.createCompilerDiagnostic(ts.Diagnostics.Cannot_read_file_0_Colon_1, fileName, hostErrorMessage));
                     }
                 });
+                filesByName.set(canonicalName, file);
                 if (file) {
                     seenNoDefaultLib = seenNoDefaultLib || file.hasNoDefaultLib;
                     // Set the source file for normalized absolute path
-                    filesByName[canonicalAbsolutePath] = file;
+                    filesByName.set(canonicalAbsolutePath, file);
                     if (!options.noResolve) {
                         var basePath = ts.getDirectoryPath(fileName);
                         processReferencedFiles(file, basePath);
@@ -30014,7 +30075,7 @@ var ts;
                 return file;
             }
             function getSourceFileFromCache(fileName, canonicalName, useAbsolutePath) {
-                var file = filesByName[canonicalName];
+                var file = filesByName.get(canonicalName);
                 if (file && host.useCaseSensitiveFileNames()) {
                     var sourceFileName = useAbsolutePath ? ts.getNormalizedAbsolutePath(file.fileName, host.getCurrentDirectory()) : file.fileName;
                     if (canonicalName !== sourceFileName) {
@@ -36619,9 +36680,8 @@ var ts;
     var HostCache = (function () {
         function HostCache(host, getCanonicalFileName) {
             this.host = host;
-            this.getCanonicalFileName = getCanonicalFileName;
             // script id => script index
-            this.fileNameToEntry = {};
+            this.fileNameToEntry = ts.createFileMap(getCanonicalFileName);
             // Initialize the list with the root file names
             var rootFileNames = host.getScriptFileNames();
             for (var _i = 0; _i < rootFileNames.length; _i++) {
@@ -36634,9 +36694,6 @@ var ts;
         HostCache.prototype.compilationSettings = function () {
             return this._compilationSettings;
         };
-        HostCache.prototype.normalizeFileName = function (fileName) {
-            return this.getCanonicalFileName(ts.normalizeSlashes(fileName));
-        };
         HostCache.prototype.createEntry = function (fileName) {
             var entry;
             var scriptSnapshot = this.host.getScriptSnapshot(fileName);
@@ -36647,13 +36704,14 @@ var ts;
                     scriptSnapshot: scriptSnapshot
                 };
             }
-            return this.fileNameToEntry[this.normalizeFileName(fileName)] = entry;
+            this.fileNameToEntry.set(fileName, entry);
+            return entry;
         };
         HostCache.prototype.getEntry = function (fileName) {
-            return ts.lookUp(this.fileNameToEntry, this.normalizeFileName(fileName));
+            return this.fileNameToEntry.get(fileName);
         };
         HostCache.prototype.contains = function (fileName) {
-            return ts.hasProperty(this.fileNameToEntry, this.normalizeFileName(fileName));
+            return this.fileNameToEntry.contains(fileName);
         };
         HostCache.prototype.getOrCreateEntry = function (fileName) {
             if (this.contains(fileName)) {
@@ -36662,12 +36720,10 @@ var ts;
             return this.createEntry(fileName);
         };
         HostCache.prototype.getRootFileNames = function () {
-            var _this = this;
             var fileNames = [];
-            ts.forEachKey(this.fileNameToEntry, function (key) {
-                var entry = _this.getEntry(key);
-                if (entry) {
-                    fileNames.push(entry.hostFileName);
+            this.fileNameToEntry.forEachValue(function (value) {
+                if (value) {
+                    fileNames.push(value.hostFileName);
                 }
             });
             return fileNames;
@@ -36727,7 +36783,7 @@ var ts;
      * - noLib = true
      * - noResolve = true
      */
-    function transpile(input, compilerOptions, fileName, diagnostics) {
+    function transpile(input, compilerOptions, fileName, diagnostics, moduleName) {
         var options = compilerOptions ? ts.clone(compilerOptions) : getDefaultCompilerOptions();
         options.isolatedModules = true;
         // Filename can be non-ts file.
@@ -36741,6 +36797,9 @@ var ts;
         // Parse
         var inputFileName = fileName || "module.ts";
         var sourceFile = ts.createSourceFile(inputFileName, input, options.target);
+        if (moduleName) {
+            sourceFile.moduleName = moduleName;
+        }
         // Store syntactic diagnostics
         if (diagnostics && sourceFile.parseDiagnostics) {
             diagnostics.push.apply(diagnostics, sourceFile.parseDiagnostics);
@@ -36815,6 +36874,13 @@ var ts;
                     // after incremental parsing nameTable might not be up-to-date
                     // drop it so it can be lazily recreated later
                     newSourceFile.nameTable = undefined;
+                    // dispose all resources held by old script snapshot
+                    if (sourceFile !== newSourceFile && sourceFile.scriptSnapshot) {
+                        if (sourceFile.scriptSnapshot.dispose) {
+                            sourceFile.scriptSnapshot.dispose();
+                        }
+                        sourceFile.scriptSnapshot = undefined;
+                    }
                     return newSourceFile;
                 }
             }
@@ -36823,10 +36889,16 @@ var ts;
         return createLanguageServiceSourceFile(sourceFile.fileName, scriptSnapshot, sourceFile.languageVersion, version, true);
     }
     ts.updateLanguageServiceSourceFile = updateLanguageServiceSourceFile;
-    function createDocumentRegistry() {
+    function createGetCanonicalFileName(useCaseSensitivefileNames) {
+        return useCaseSensitivefileNames
+            ? (function (fileName) { return fileName; })
+            : (function (fileName) { return fileName.toLowerCase(); });
+    }
+    function createDocumentRegistry(useCaseSensitiveFileNames) {
         // Maps from compiler setting target (ES3, ES5, etc.) to all the cached documents we have
         // for those settings.
         var buckets = {};
+        var getCanonicalFileName = createGetCanonicalFileName(!!useCaseSensitiveFileNames);
         function getKeyFromCompilationSettings(settings) {
             return "_" + settings.target; //  + "|" + settings.propagateEnumConstantoString()
         }
@@ -36834,7 +36906,7 @@ var ts;
             var key = getKeyFromCompilationSettings(settings);
             var bucket = ts.lookUp(buckets, key);
             if (!bucket && createIfMissing) {
-                buckets[key] = bucket = {};
+                buckets[key] = bucket = ts.createFileMap(getCanonicalFileName);
             }
             return bucket;
         }
@@ -36843,7 +36915,7 @@ var ts;
                 var entries = ts.lookUp(buckets, name);
                 var sourceFiles = [];
                 for (var i in entries) {
-                    var entry = entries[i];
+                    var entry = entries.get(i);
                     sourceFiles.push({
                         name: i,
                         refCount: entry.languageServiceRefCount,
@@ -36866,16 +36938,17 @@ var ts;
         }
         function acquireOrUpdateDocument(fileName, compilationSettings, scriptSnapshot, version, acquiring) {
             var bucket = getBucketForCompilationSettings(compilationSettings, true);
-            var entry = ts.lookUp(bucket, fileName);
+            var entry = bucket.get(fileName);
             if (!entry) {
                 ts.Debug.assert(acquiring, "How could we be trying to update a document that the registry doesn't have?");
                 // Have never seen this file with these settings.  Create a new source file for it.
                 var sourceFile = createLanguageServiceSourceFile(fileName, scriptSnapshot, compilationSettings.target, version, false);
-                bucket[fileName] = entry = {
+                entry = {
                     sourceFile: sourceFile,
                     languageServiceRefCount: 0,
                     owners: []
                 };
+                bucket.set(fileName, entry);
             }
             else {
                 // We have an entry for this file.  However, it may be for a different version of 
@@ -36898,11 +36971,11 @@ var ts;
         function releaseDocument(fileName, compilationSettings) {
             var bucket = getBucketForCompilationSettings(compilationSettings, false);
             ts.Debug.assert(bucket !== undefined);
-            var entry = ts.lookUp(bucket, fileName);
+            var entry = bucket.get(fileName);
             entry.languageServiceRefCount--;
             ts.Debug.assert(entry.languageServiceRefCount >= 0);
             if (entry.languageServiceRefCount === 0) {
-                delete bucket[fileName];
+                bucket.remove(fileName);
             }
         }
         return {
@@ -37299,9 +37372,7 @@ var ts;
                 host.log(message);
             }
         }
-        function getCanonicalFileName(fileName) {
-            return useCaseSensitivefileNames ? fileName : fileName.toLowerCase();
-        }
+        var getCanonicalFileName = createGetCanonicalFileName(useCaseSensitivefileNames);
         function getValidSourceFile(fileName) {
             fileName = ts.normalizeSlashes(fileName);
             var sourceFile = program.getSourceFile(getCanonicalFileName(fileName));
@@ -41890,17 +41961,30 @@ var ts;
             var decoded = JSON.parse(encoded);
             return ts.createTextChangeRange(ts.createTextSpan(decoded.span.start, decoded.span.length), decoded.newLength);
         };
+        ScriptSnapshotShimAdapter.prototype.dispose = function () {
+            // if scriptSnapshotShim is a COM object then property check becomes method call with no arguments
+            // 'in' does not have this effect
+            if ("dispose" in this.scriptSnapshotShim) {
+                this.scriptSnapshotShim.dispose();
+            }
+        };
         return ScriptSnapshotShimAdapter;
     })();
     var LanguageServiceShimHostAdapter = (function () {
         function LanguageServiceShimHostAdapter(shimHost) {
             this.shimHost = shimHost;
+            this.loggingEnabled = false;
+            this.tracingEnabled = false;
         }
         LanguageServiceShimHostAdapter.prototype.log = function (s) {
-            this.shimHost.log(s);
+            if (this.loggingEnabled) {
+                this.shimHost.log(s);
+            }
         };
         LanguageServiceShimHostAdapter.prototype.trace = function (s) {
-            this.shimHost.trace(s);
+            if (this.tracingEnabled) {
+                this.shimHost.trace(s);
+            }
         };
         LanguageServiceShimHostAdapter.prototype.error = function (s) {
             this.shimHost.error(s);
@@ -41911,6 +41995,9 @@ var ts;
                 return undefined;
             }
             return this.shimHost.getProjectVersion();
+        };
+        LanguageServiceShimHostAdapter.prototype.useCaseSensitiveFileNames = function () {
+            return this.shimHost.useCaseSensitiveFileNames ? this.shimHost.useCaseSensitiveFileNames() : false;
         };
         LanguageServiceShimHostAdapter.prototype.getCompilationSettings = function () {
             var settingsJson = this.shimHost.getCompilationSettings();
@@ -41979,13 +42066,13 @@ var ts;
         return CoreServicesShimHostAdapter;
     })();
     ts.CoreServicesShimHostAdapter = CoreServicesShimHostAdapter;
-    function simpleForwardCall(logger, actionDescription, action, noPerfLogging) {
-        if (!noPerfLogging) {
+    function simpleForwardCall(logger, actionDescription, action, logPerformance) {
+        if (logPerformance) {
             logger.log(actionDescription);
             var start = Date.now();
         }
         var result = action();
-        if (!noPerfLogging) {
+        if (logPerformance) {
             var end = Date.now();
             logger.log(actionDescription + " completed in " + (end - start) + " msec");
             if (typeof (result) === "string") {
@@ -41998,9 +42085,9 @@ var ts;
         }
         return result;
     }
-    function forwardJSONCall(logger, actionDescription, action, noPerfLogging) {
+    function forwardJSONCall(logger, actionDescription, action, logPerformance) {
         try {
-            var result = simpleForwardCall(logger, actionDescription, action, noPerfLogging);
+            var result = simpleForwardCall(logger, actionDescription, action, logPerformance);
             return JSON.stringify({ result: result });
         }
         catch (err) {
@@ -42042,10 +42129,11 @@ var ts;
             _super.call(this, factory);
             this.host = host;
             this.languageService = languageService;
+            this.logPerformance = false;
             this.logger = this.host;
         }
         LanguageServiceShimObject.prototype.forwardJSONCall = function (actionDescription, action) {
-            return forwardJSONCall(this.logger, actionDescription, action, false);
+            return forwardJSONCall(this.logger, actionDescription, action, this.logPerformance);
         };
         /// DISPOSE
         /**
@@ -42352,12 +42440,12 @@ var ts;
         function ClassifierShimObject(factory, logger) {
             _super.call(this, factory);
             this.logger = logger;
+            this.logPerformance = false;
             this.classifier = ts.createClassifier();
         }
         ClassifierShimObject.prototype.getEncodedLexicalClassifications = function (text, lexState, syntacticClassifierAbsent) {
             var _this = this;
-            return forwardJSONCall(this.logger, "getEncodedLexicalClassifications", function () { return convertClassifications(_this.classifier.getEncodedLexicalClassifications(text, lexState, syntacticClassifierAbsent)); }, 
-            /*noPerfLogging:*/ true);
+            return forwardJSONCall(this.logger, "getEncodedLexicalClassifications", function () { return convertClassifications(_this.classifier.getEncodedLexicalClassifications(text, lexState, syntacticClassifierAbsent)); }, this.logPerformance);
         };
         /// COLORIZATION
         ClassifierShimObject.prototype.getClassificationsForLine = function (text, lexState, classifyKeywordsInGenerics) {
@@ -42379,9 +42467,10 @@ var ts;
             _super.call(this, factory);
             this.logger = logger;
             this.host = host;
+            this.logPerformance = false;
         }
         CoreServicesShimObject.prototype.forwardJSONCall = function (actionDescription, action) {
-            return forwardJSONCall(this.logger, actionDescription, action, false);
+            return forwardJSONCall(this.logger, actionDescription, action, this.logPerformance);
         };
         CoreServicesShimObject.prototype.getPreProcessedFileInfo = function (fileName, sourceTextSnapshot) {
             return this.forwardJSONCall("getPreProcessedFileInfo('" + fileName + "')", function () {
@@ -42438,7 +42527,6 @@ var ts;
     var TypeScriptServicesFactory = (function () {
         function TypeScriptServicesFactory() {
             this._shims = [];
-            this.documentRegistry = ts.createDocumentRegistry();
         }
         /*
          * Returns script API version.
@@ -42448,6 +42536,9 @@ var ts;
         };
         TypeScriptServicesFactory.prototype.createLanguageServiceShim = function (host) {
             try {
+                if (this.documentRegistry === undefined) {
+                    this.documentRegistry = ts.createDocumentRegistry(host.useCaseSensitiveFileNames && host.useCaseSensitiveFileNames());
+                }
                 var hostAdapter = new LanguageServiceShimHostAdapter(host);
                 var languageService = ts.createLanguageService(hostAdapter, this.documentRegistry);
                 return new LanguageServiceShimObject(this, host, languageService);
