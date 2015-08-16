@@ -1,9 +1,34 @@
 body {
 }
 
-.editor-tabs .nav {
-    margin-bottom: 0px !important;
+.ltable {
+    display: table;
 }
+
+.lrow {
+    display: table-row;
+}
+
+.lcell {
+    display: table-cell;
+}
+
+.stretch-v {
+    height: 100%;
+}
+
+.stretch {
+    width: 100%;
+    height: 100%;
+}
+
+.editor-tabs {
+    clear: both;
+}
+
+    .editor-tabs .nav {
+        margin-bottom: 0px !important;
+    }
 
 .item .description {
     color: gray;
@@ -26,8 +51,41 @@ body {
     z-index: 9999;
 }
 
+#editorLayout {
+    height: 100%;
+    width: 100%;
+}
+
+    #editorLayout tr:first-child {
+    }
+
+    #editorLayout th {
+        padding: 0px;
+    }
+
+    #editorLayout td {
+        border-right: 5px solid #CCCCCC;
+        padding: 0px;
+    }
+
+        #editorLayout td.lastvisible {
+            border: none;
+        }
+
+
+    #editorLayout tr:nth-child(2) {
+        height: 100%;
+    }
+
+.dark #editorLayout td {
+    border-right-color: #444444;
+    padding: 0px;
+}
+
 .warp-container {
-    float: left;
+    height: 100%;
+    width: 100%;
+    position:relative;
 }
 
 .console {
@@ -50,6 +108,7 @@ body {
 .btn-toolbar {
     margin-bottom: 0px !important;
 }
+
 .btn-group {
     vertical-align: top !important;
 }
@@ -74,6 +133,7 @@ body {
     font-weight: bold;
     cursor: pointer;
     color: black;
+    height: 20px;
 }
 
 #editorHTML, #editorCSS, #editorJavascript, #editorTypescript {
@@ -88,7 +148,7 @@ body {
 
 
 .editor-area {
-    height: 90%;
+    height: 100%;
     /* margin-bottom:20px; */
 }
 
@@ -211,7 +271,7 @@ body {
     background-image: url('./icons/class.png');
 }
 
-.label-kind-variable, .label-kind-var, .label-kind-local-var,  .label-kind-parameter {
+.label-kind-variable, .label-kind-var, .label-kind-local-var, .label-kind-parameter {
     background-image: url('./icons/field.png');
 }
 
@@ -270,9 +330,12 @@ body {
     float: left;
     width: 20%;
     word-wrap: inherit;
-    position: relative;
-    overflow: hidden;
-    top: 20px;
+    position: absolute;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+.typescript-editorcontainer.pad-left {
+    left:20%;
 }
 
 .toggle-navigationTree {
@@ -375,7 +438,6 @@ body {
             height: 16px;
             line-height: 16px;
             vertical-align: middle;
-            
         }
 
     .css-treeview label {

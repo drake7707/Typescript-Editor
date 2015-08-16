@@ -204,7 +204,7 @@ define(function (require, exports, module) {
         var checkedNavs = $(".navCheck:checked");
         for (var i = 0; i < checkedNavs.length; i++)
             expandedItems[checkedNavs[i].id] = true;
-        
+
         var nodes = languageService.getNavigationBarItems(selectFileName + ".ts");
 
         var html = "";
@@ -232,7 +232,7 @@ define(function (require, exports, module) {
                     smallestLengthNavItem = i;
             }
         }
-        if(smallestLengthNavItem != null)
+        if (smallestLengthNavItem != null)
             $(navItems[smallestLengthNavItem]).addClass("selected");
     }
 
@@ -240,7 +240,7 @@ define(function (require, exports, module) {
         var id = encodeURI(path + "." + node.text);
 
         var childrenHtml = "";
-        
+
         node.childItems.sort(function (a, b) { a.spans[0].start - b.spans[0].start });
 
         for (var i = 0; i < node.childItems.length; i++) {
@@ -280,9 +280,9 @@ define(function (require, exports, module) {
         return html;
     }
 
-    function htmlEncode( html ) {
-        return document.createElement( 'a' ).appendChild( 
-            document.createTextNode( html ) ).parentNode.innerHTML;
+    function htmlEncode(html) {
+        return document.createElement('a').appendChild(
+            document.createTextNode(html)).parentNode.innerHTML;
     };
 
     function TextEdit(minChar, limChar, text) {
@@ -629,13 +629,13 @@ define(function (require, exports, module) {
         }, 100);
 
         $(".tab").click(function (e) {
-            var id = $(this).attr("data-target");
-            var el = document.getElementById(id);
+            //var id = $(this).attr("data-target");
+            //var el = document.getElementById(id);
             $(this).toggleClass("active");
-            if ($(this).hasClass("active"))
-                $(el).show();
-            else
-                $(el).hide();
+            //if ($(this).hasClass("active"))
+            //    $(el).show();
+            //else
+            //    $(el).hide();
 
             updateSideBySide();
         });
@@ -670,18 +670,20 @@ define(function (require, exports, module) {
         });
 
         $(".toggle-navigationTree").click(function (ev) {
-            if($(".typescript-navigation").is(":visible")) {
+            if ($(".typescript-navigation").is(":visible")) {
+                $(".typescript-editorcontainer").removeClass("pad-left");
                 $(".typescript-navigation").hide();
                 $(".typescript-navigation").parent().find(".editor-container").css("width", "99%");
                 $(".toggle-navigationTree").find("i").attr("class", "icon-chevron-right");
             }
             else {
+                $(".typescript-editorcontainer").addClass("pad-left");
                 $(".typescript-navigation").show();
                 $(".typescript-navigation").parent().find(".editor-container").css("width", "80%");
                 $(".toggle-navigationTree").find("i").attr("class", "icon-chevron-left");
             }
-                
-            
+
+
             return true;
         })
 
@@ -786,13 +788,30 @@ define(function (require, exports, module) {
     }
 
     function updateSideBySide() {
+
+        $("#editorLayout").colResizable({
+            disable: true,
+        });
+
+
         var activeTabs = $(".tab.active");
         var perc = Math.floor(100 / activeTabs.length);
         for (var i = 0; i < activeTabs.length; i++) {
+
+            var idx = $(activeTabs[i]).index();
             var el = document.getElementById($(activeTabs[i]).attr("data-target"));
-            $(el).css("width", perc + "%");
-            $(el).show();
+            //    $(el).css("width", perc + "%");
+
+            $("#editorLayout tr:nth-child(1) th:nth-child(" + (idx + 1) + ")").css("width", perc + "%");
+            //$(el).show();
+
+            $("#editorLayout tr:nth-child(1) th:nth-child(" + (idx + 1) + ")").show();
+            $("#editorLayout tr:nth-child(2) td:nth-child(" + (idx + 1) + ")").show();
         }
+
+        $("#editorLayout .lastvisible").removeClass("lastvisible");
+        var lastActiveElementIndex = $(".tab.active:last").index();
+        $("#editorLayout tr:nth-child(2) td:nth-child(" + (lastActiveElementIndex + 1) + ")").addClass("lastvisible");
 
         editorHTML.resize();
         editorCSS.resize();
@@ -802,10 +821,30 @@ define(function (require, exports, module) {
         var tabs = $(".tab");
         for (var i = 0; i < tabs.length; i++) {
             if (!$(tabs[i]).hasClass("active")) {
-                var el = document.getElementById($(tabs[i]).attr("data-target"));
-                $(el).hide();
+
+                $("#editorLayout tr:nth-child(1) th:nth-child(" + (i + 1) + ")").hide();
+                $("#editorLayout tr:nth-child(2) td:nth-child(" + (i + 1) + ")").hide();
+                //var el = document.getElementById($(tabs[i]).attr("data-target"));
+                //$(el).hide();
             }
         }
+
+        $("#editorLayout").colResizable({
+            liveDrag: true,
+            draggingClass: "dragging",
+            onDrag: function (e) {
+                $("#outputFrame").hide(); // necessary otherwise the iframe will steal the mouse release event, breaking the resizing
+            },
+            onResize: function (e) {
+                $("#outputFrame").show();
+
+                // make sure to resize ace if needed
+                editorHTML.resize();
+                editorCSS.resize();
+                editor.resize();
+                editorJavascript.resize();
+            }
+        });
     }
 
     function updateErrors() {
@@ -940,8 +979,13 @@ define(function (require, exports, module) {
             for (var i = 0; i < items.length; i++) {
                 var message = items[i];
                 var html;
-                if (typeof message == 'object')
-                    html = (JSON && JSON.stringify ? JSON.stringify(message) : message);
+                if (typeof message == 'object') {
+                    try {
+                        html = (JSON && JSON.stringify ? JSON.stringify(message) : message);
+                    } catch (e) {
+                        html = message;
+                    }
+                }
                 else
                     html = message;
 
@@ -1266,10 +1310,10 @@ define(function (require, exports, module) {
         });
 
         $(window).bind('keydown', function (event) {
-            if (event.ctrlKey || event.metaKey) {
+            if ((event.ctrlKey && !event.altKey) || event.metaKey) {
                 if (event.which == 17)
                     return;
-                
+
                 var char;
                 if (event.which >= 96 && event.which <= 105) // numpad
                     char = event.which - 96;

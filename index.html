@@ -13,168 +13,199 @@
         <span id="lblNotification"></span>
     </div>
 
-    <div class="fluid-container" style="padding:1px">
-        <div>
-            <div class="btn-toolbar">
+    <div class="ltable fluid-container stretch-v">
+        <div class="lrow">
+            <div class="lcell">
+                <div class="btn-toolbar">
 
-                <div class="btn-group">
-                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="icon-home"></i> File
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a class="" href="" id="lnkNew" data-shortcut="ctrl+n">
-                                <i class="icon-star"></i> New
-                            </a>
-                        </li>
-                        <li>
-                            <a class="" href="" id="lnkOpen"  data-shortcut="ctrl+o">
-                                <i class="icon-folder-open"></i> Open
-                            </a>
-                        </li>
-                        <li>
-                            <a class="" href="" id="lnkSave"  data-shortcut="ctrl+s">
-                                <i class="icon-hdd"></i> Save
-                            </a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <a class="" href="" id="lnkCreateMilestone"  data-shortcut="ctrl+m">
-                                <i class="icon-tag"></i> New milestone
-                            </a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <a class="" href="" id="lnkDownload">
-                                <i class="icon-download-alt"></i>Download
-                            </a>
-                        </li>
-                        <li>
-                            <a class="" href="" id="lnkCreateGist">
-                                <i class="icon-share"></i>Create gist on github
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <!--
-                <div class="btn-group">
-                    <a class="btn" href="" id="lnkNew">
-                        <i class="icon-star"></i> New
-                    </a>
-                    <a class="btn" href="" id="lnkOpen">
-                        <i class="icon-folder-open"></i> Open
-                    </a>
-                    <a class="btn" href="" id="lnkSave">
-                        <i class="icon-hdd"></i> Save
-                    </a>
-                    <a class="btn" href="" id="lnkCreateMilestone">
-                        <i class="icon-tag"></i> New milestone
-                    </a>
-                    <a class="btn" href="" id="lnkDownload">
-                        <i class="icon-download-alt"></i>Download
-                    </a>
-                </div>
-                    -->
-                <div class="btn-group">
-                    <a class="btn" href="#" id="lnkShortcuts" data-toggle="modal" data-target="#modalShortcuts">
-                        <i class="icon-info-sign"></i> Shortcuts
-                    </a>
-                </div>
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="icon-home"></i> File
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="" href="" id="lnkNew" data-shortcut="ctrl+n">
+                                    <i class="icon-star"></i> New
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkOpen" data-shortcut="ctrl+o">
+                                    <i class="icon-folder-open"></i> Open
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkSave" data-shortcut="ctrl+s">
+                                    <i class="icon-hdd"></i> Save
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkCreateMilestone" data-shortcut="ctrl+m">
+                                    <i class="icon-tag"></i> New milestone
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkDownload">
+                                    <i class="icon-download-alt"></i>Download
+                                </a>
+                            </li>
+                            <!--<li>
+                                <a class="" href="" id="lnkCreateGist">
+                                    <i class="icon-share"></i>Create gist on github
+                                </a>
+                            </li>-->
+                        </ul>
+                    </div>
+                    <!--
+                    <div class="btn-group">
+                        <a class="btn" href="" id="lnkNew">
+                            <i class="icon-star"></i> New
+                        </a>
+                        <a class="btn" href="" id="lnkOpen">
+                            <i class="icon-folder-open"></i> Open
+                        </a>
+                        <a class="btn" href="" id="lnkSave">
+                            <i class="icon-hdd"></i> Save
+                        </a>
+                        <a class="btn" href="" id="lnkCreateMilestone">
+                            <i class="icon-tag"></i> New milestone
+                        </a>
+                        <a class="btn" href="" id="lnkDownload">
+                            <i class="icon-download-alt"></i>Download
+                        </a>
+                    </div>
+                        -->
+                    <div class="btn-group">
+                        <a class="btn" href="#" id="lnkShortcuts" data-toggle="modal" data-target="#modalShortcuts">
+                            <i class="icon-info-sign"></i> Shortcuts
+                        </a>
+                    </div>
 
-                <div class="btn-group">
-                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="icon-book"></i> Libraries
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a tabindex="-1" class="libLink" href="#" data-js="http://code.jquery.com/jquery-1.11.0.min.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/jquery/jquery.d.ts">JQuery</a></li>
-                        <li><a tabindex="-1" class="libLink" href="#" data-js="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js" data-css="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.min.css" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/jqueryui/jqueryui.d.ts">JQuery UI</a></li>
-                        <li><a tabindex="-1" class="libLink" href="#" data-js="https://cdnjs.cloudflare.com/ajax/libs/linq.js/2.2.0.2/jquery.linq.min.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/linq/linq.jquery.d.ts">LINQJS</a></li>
-                        <li class="divider"></li>
-                        <li><a tabindex="-1" class="libLink" href="#" data-js="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js" data-css="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/bootstrap/bootstrap.d.ts">Bootstrap</a></li>
-                        <li class="divider"></li>
-                        <li><a tabindex="-1" class="libLink" href="#" data-js="http://ajaxorg.github.io/ace-builds/src-noconflict/ace.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/ace/ace.d.ts">Ace editor</a></li>
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="icon-book"></i> Libraries
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a tabindex="-1" class="libLink" href="#" data-js="http://code.jquery.com/jquery-1.11.0.min.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/jquery/jquery.d.ts">JQuery</a></li>
+                            <li><a tabindex="-1" class="libLink" href="#" data-js="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js" data-css="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.min.css" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/jqueryui/jqueryui.d.ts">JQuery UI</a></li>
+                            <li><a tabindex="-1" class="libLink" href="#" data-js="https://cdnjs.cloudflare.com/ajax/libs/linq.js/2.2.0.2/jquery.linq.min.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/linq/linq.jquery.d.ts">LINQJS</a></li>
+                            <li class="divider"></li>
+                            <li><a tabindex="-1" class="libLink" href="#" data-js="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js" data-css="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/bootstrap/bootstrap.d.ts">Bootstrap</a></li>
+                            <li class="divider"></li>
+                            <li><a tabindex="-1" class="libLink" href="#" data-js="http://ajaxorg.github.io/ace-builds/src-noconflict/ace.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/ace/ace.d.ts">Ace editor</a></li>
+                        </ul>
+                    </div>
+                    <div class="btn-group">
+                        <a class="btn" href="#" id="lnkToggleTheme">
+                            <i class="icon-adjust"></i> &nbsp;
+                        </a>
+                    </div>
+                    <div class="btn-group">
+                        <h4>TypeScript Editor <span id="lblFilename"></span></h4>
+                        <p><span id="txtHeaderDescription"></span><a id="lnkUpdateDescription" href="#" title="Edit description of current file"><i class="icon-pencil"></i></a></p>
+                    </div>
+                    <div class="btn-group pull-right">
+                        <!--<label><input type="checkbox" id="chkRunJavascript" />Run javascript in output pane</label>-->
+                        <button type="button" class="btn" data-toggle="button" id="chkMoveCursorToError">
+                            <i class="icon-arrow-right"></i> Jump to line on error
+                        </button>
+                        <button type="button" class="btn" data-toggle="button" id="chkRunJavascript">
+                            <i class="icon-cog"></i> Enable js in output pane
+                        </button>
+                        <a class="btn" href="#" id="lnkRunExternalWindow">
+                            <i class="icon-play"></i> Open seperate window
+                        </a>
+                    </div>
+                </div>
+                <div class="editor-tabs">
+                    <ul class="nav nav-tabs">
+                        <li class="tab active" data-target="tab-html" data-shortcut="ctrl+1"><a>HTML</a></li>
+                        <li class="tab" data-target="tab-css" data-shortcut="ctrl+2"><a>CSS</a></li>
+                        <li class="tab active" data-target="tab-typescript" data-shortcut="ctrl+3"><a>Typescript</a></li>
+                        <li class="tab" data-target="tab-javascript" data-shortcut="ctrl+4"><a>Javascript</a></li>
+                        <li class="tab" data-target="tab-console" data-shortcut="ctrl+5"><a>Console</a></li>
+                        <li class="tab" data-target="tab-output" data-shortcut="ctrl+6"><a>Output</a></li>
                     </ul>
-                </div>
-                <div class="btn-group">
-                    <a class="btn" href="#" id="lnkToggleTheme">
-                        <i class="icon-adjust"></i> &nbsp;
-                    </a>
-                </div>
-                <div class="btn-group">
-                    <h4>TypeScript Editor <span id="lblFilename"></span></h4>
-                    <p><span id="txtHeaderDescription"></span><a id="lnkUpdateDescription" href="#" title="Edit description of current file"><i class="icon-pencil"></i></a></p>
-                </div>
-                <div class="btn-group pull-right">
-                    <!--<label><input type="checkbox" id="chkRunJavascript" />Run javascript in output pane</label>-->
-                    <button type="button" class="btn" data-toggle="button" id="chkMoveCursorToError">
-                        <i class="icon-arrow-right"></i> Jump to line on error
-                    </button>
-                    <button type="button" class="btn" data-toggle="button" id="chkRunJavascript">
-                        <i class="icon-cog"></i> Enable js in output pane
-                    </button>
-                    <a class="btn" href="#" id="lnkRunExternalWindow">
-                        <i class="icon-play"></i> Open seperate window
-                    </a>
                 </div>
             </div>
         </div>
-        <div class="editor-area">
-            <div class="editor-tabs">
-                <ul class="nav nav-tabs">
-                    <li class="tab active" data-target="tab-html" data-shortcut="ctrl+1"><a>HTML</a></li>
-                    <li class="tab" data-target="tab-css" data-shortcut="ctrl+2"><a>CSS</a></li>
-                    <li class="tab active" data-target="tab-typescript" data-shortcut="ctrl+3"><a>Typescript</a></li>
-                    <li class="tab" data-target="tab-javascript" data-shortcut="ctrl+4"><a>Javascript</a></li>
-                    <li class="tab" data-target="tab-console" data-shortcut="ctrl+5"><a>Console</a></li>
-                    <li class="tab" data-target="tab-output" data-shortcut="ctrl+6"><a>Output</a></li>
-                </ul>
-            </div>
-            <div class="warp-container" id="tab-html">
-                <div class="editor-container">
-                    <div id="editorHTML">
-                    </div>
-                </div>
-            </div>
-            <div class="warp-container" id="tab-css">
-                <div class="editor-container">
-                    <div id="editorCSS">
-                    </div>
-                </div>
+        <div class="lrow stretch-v">
+            <div class="lcell">
+                <div class="editor-area">
 
-            </div>
-            <div class="warp-container" id="tab-typescript">
-                <div class="typescript-navigation" style="display:none">
-                    <ul class="css-treeview" id="navTree"></ul>
-                </div>
-                <div class="editor-container">
-                    <div class="toggle-navigationTree" data-shortcut="ctrl+w"><i class="icon-chevron-right" title="Navigation tree"></i></div>
-                    <div class="error-bar" id="errorsTypescript">
-                    </div>
-                    <div id="editorTypescript">
-                    </div>
-                </div>
-            </div>
 
-            <div class="warp-container" id="tab-javascript">
-                <div class="editor-container">
-                    <div id="editorJavascript">
-                    </div>
-                </div>
-            </div>
-
-            <div class="warp-container" id="tab-console">
-                <div class="editor-container">
-                    <div class="console" id="txtConsole">
-                    </div>
-                </div>
-            </div>
-            <div class="warp-container" id="tab-output">
-                <div class="editor-container">
-                    <div id="outputFrame">
-                        <iframe id="outputIFrame"></iframe>
-                    </div>
+                    <table id="editorLayout">
+                        <tbody>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="warp-container" id="tab-html">
+                                        <div class="editor-container">
+                                            <div id="editorHTML">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="warp-container" id="tab-css">
+                                        <div class="editor-container">
+                                            <div id="editorCSS">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="warp-container" id="tab-typescript">
+                                        <div class="typescript-navigation" style="display:none">
+                                            <ul class="css-treeview" id="navTree"></ul>
+                                        </div>
+                                        <div class="typescript-editorcontainer editor-container">
+                                            <div class="toggle-navigationTree" data-shortcut="ctrl+w"><i class="icon-chevron-right" title="Navigation tree"></i></div>
+                                            <div class="error-bar" id="errorsTypescript">
+                                            </div>
+                                            <div id="editorTypescript">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="warp-container" id="tab-javascript">
+                                        <div class="editor-container">
+                                            <div id="editorJavascript">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="warp-container" id="tab-console">
+                                        <div class="editor-container">
+                                            <div class="console" id="txtConsole">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="warp-container" id="tab-output">
+                                        <div class="editor-container">
+                                            <div id="outputFrame">
+                                                <iframe id="outputIFrame"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -270,18 +301,18 @@
         </div>
     </div>
 
+    <script type="text/javascript">
+        var require = {
+            // The base path for all require calls. If this is absent it is assumed to be same as the location of require.js
+            baseUrl: window.location.protocol + "//" + window.location.host + window.location.pathname.split("/").slice(0, -1).join("/") + '/scripts',
+            paths: {
+                ace: "./lib/ace" // path of ace relative to baseUrl
+            }
+        };
+    </script>
+    <script type="text/javascript" src="./scripts/lib/jquery.js"></script>
+    <script type="text/javascript" src="./scripts/lib/colresizable-1.5.min.js"></script>
+    <script type="text/javascript" src="./scripts/lib/bootstrap.js"></script>
+    <script type="text/javascript" src="./scripts/lib/require.js" data-main="main"></script>
 </body>
-<script type="text/javascript">
-    var require = {
-        // The base path for all require calls. If this is absent it is assumed to be same as the location of require.js
-        baseUrl: window.location.protocol + "//" + window.location.host + window.location.pathname.split("/").slice(0, -1).join("/") + '/scripts',
-        paths: {
-            ace: "./lib/ace" // path of ace relative to baseUrl
-        }
-    };
-</script>
-<script type="text/javascript" src="./scripts/lib/jquery.js"></script>
-<script type="text/javascript" src="./scripts/lib/bootstrap.js"></script>
-<script src="./scripts/lib/require.js" data-main="main" type="text/javascript"></script>
-
 </html>
