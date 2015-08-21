@@ -202,7 +202,7 @@ define(function (require, exports, module) {
     function updateNavigationTree() {
 
         var expandedItems = {};
-        var checkedNavs = $(".navCheck:checked");
+        var checkedNavs = $(".navCheck:checked:visible");
         for (var i = 0; i < checkedNavs.length; i++)
             expandedItems[checkedNavs[i].id] = true;
 
