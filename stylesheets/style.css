@@ -85,7 +85,7 @@ body {
 .warp-container {
     height: 100%;
     width: 100%;
-    position:relative;
+    position: relative;
 }
 
 .console {
@@ -325,6 +325,12 @@ body {
 }
 
 
+#txtNavTreeFilter {
+    width: 100%;
+    float: left;
+    margin-left: -40px;
+}
+
 .typescript-navigation {
     height: 100%;
     float: left;
@@ -334,8 +340,33 @@ body {
     overflow-y: scroll;
     overflow-x: hidden;
 }
+
+.dark input[type=text] {
+    background-color: #444;
+    border: 1px solid #222;
+    color: silver;
+}
+
+.button-icon {
+    margin: 2px;
+    width: 16px;
+    height: 16px;
+    background-repeat: no-repeat;
+    float: left;
+    cursor: pointer;
+}
+
+#btnExpandAllNavTree {
+    background-image: url("icons/expandcollapseall.png");
+}
+
+#btnCollapseAllNavTree {
+    background-image: url("icons/expandcollapseall.png");
+    background-position: -16px 0px;
+}
+
 .typescript-editorcontainer.pad-left {
-    left:20%;
+    left: 20%;
 }
 
 .toggle-navigationTree {
@@ -405,7 +436,7 @@ body {
         }
 
     .css-treeview input + label + ul {
-        margin: 0 0 0 22px;
+        margin: 0 0 0 10px;
     }
 
     .css-treeview input ~ ul {
@@ -443,7 +474,10 @@ body {
     .css-treeview label {
         /*background-position: 18px 0;*/
         background-position: -16px 0;
+        width: 500px;
     }
+
+
 
         .css-treeview label::before {
             content: "";
@@ -456,6 +490,10 @@ body {
 
     .css-treeview input:checked + label::before {
         background-position: 0 -16px;
+    }
+
+    .css-treeview .leaf label::before {
+        visibility: hidden;
     }
 
 /* webkit adjacent element selector bugfix */

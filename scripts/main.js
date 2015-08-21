@@ -175,6 +175,7 @@ define(function (require, exports, module) {
 
 
     var deferredUpdateNavTree = deferredCall(updateNavigationTree);
+    var deferredFilterNavTree = deferredCall(filterNavTree);
 
     function onUpdateTypescriptDocument(e) {
         if (selectFileName) {
@@ -185,7 +186,7 @@ define(function (require, exports, module) {
 
                 } catch (ex) {
                 }
-                deferredUpdateNavTree.schedule(200);
+                deferredUpdateNavTree.schedule(1000);
 
                 // make sure to reset the timer while typing, the compiled event with calls updateOutputPane is called with a deferred call which means the timer will
                 // already be fired before the next updateOutputPane comes through. This makes it constantly update the pane while typing, resetting the timer
@@ -208,13 +209,83 @@ define(function (require, exports, module) {
         var nodes = languageService.getNavigationBarItems(selectFileName + ".ts");
 
         var html = "";
+
+        var moduleNodes = [];
+
+        var hierarchicalNodes = [];
         for (var i = 0; i < nodes.length; i++) {
-            html += getNavigationListItemsFromNode(nodes[i], nodes[i].text, expandedItems);
+
+            if (nodes[i].kind == "module") {
+                moduleNodes[nodes[i].indent] = nodes[i];
+            }
+
+            if (nodes[i].indent > 0) {
+                moduleNodes[nodes[i].indent - 1].childItems.push(nodes[i]);
+            }
+            else
+                hierarchicalNodes.push(nodes[i]);
         }
+
+        for (var i = 0; i < hierarchicalNodes.length; i++) {
+            var node = hierarchicalNodes[i];
+
+            /*
+            if (nodes[i].kind == "module") {
+
+            
+
+                var moduleNode = nodes[i];
+                var curHtml = "";
+                while (i + 1 < nodes.length && nodes[i + 1].kind != "module") {
+                    curHtml += getNavigationListItemsFromNode(nodes[i+1], nodes[i+1].text, expandedItems);
+                    i++;
+                }
+                html += getNavigationListItemsFromNode(moduleNode, moduleNode.text, expandedItems, curHtml);
+            }
+            else {*/
+            html += getNavigationListItemsFromNode(nodes[i], nodes[i].text, expandedItems);
+
+            // }
+        }
+
+
+
         $("#navTree").empty().html(html);
+
+        // make global always expand
+        $("#navTree li:first").children(".navCheck").prop("checked", true);
+
+        var innerNodes = $("#navTree ul");
+        for (var i = 0; i < innerNodes.length; i++) {
+            var ul = $(innerNodes[i]);
+            ul.children("li").sort(function (a, b) { return ($(b).data('start')) < ($(a).data('start')) ? 1 : -1; })
+              .appendTo(ul);
+        }
+
+        // remove duplicate global functions
+        var items = $("#navTree li:first").children("ul").children("li");
+        if (items.length > 0) {
+            var prevStart = $(items[0]).attr("data-start");
+            var prevLength = $(items[0]).attr("data-length");
+
+            for (var i = 1; i < items.length; i++) {
+                var curStart = $(items[i]).attr("data-start");
+                var curLength = $(items[i]).attr("data-length");
+
+                if (prevStart == curStart && prevLength == curLength) {
+                    $(items[i]).detach();
+                }
+                prevStart = curStart;
+                prevLength = curLength;
+            }
+        }
+
+        $("#navTreeSearch").html($("#navTree").html());
+        $("#navTreeSearch .navCheck").prop("checked", true);
 
         updateNavItemFromPosition();
     }
+
 
     function updateNavItemFromPosition() {
         var curPos = aceEditorPosition.getCurrentCharPosition();
@@ -236,16 +307,40 @@ define(function (require, exports, module) {
             $(navItems[smallestLengthNavItem]).addClass("selected");
     }
 
-    function getNavigationListItemsFromNode(node, path, expandedItems) {
+    function filterNavTree() {
+        var searchString = $("#txtNavTreeFilter").val().toLowerCase();
+
+        if (searchString == "") {
+            $("#navTreeSearch").hide();
+            $("#navTree").show();
+            return;
+        }
+        else {
+            $("#navTreeSearch").show();
+            $("#navTree").hide();
+        }
+
+        $("#navTreeSearch li").hide();
+
+        var items = $("#navTreeSearch .navItem");
+        for (var i = 0; i < items.length; i++) {
+            if ($(items[i]).text().toLowerCase().contains(searchString)) {
+                $(items[i]).parents("li").show();
+            }
+        }
+    }
+
+    function getNavigationListItemsFromNode(node, path, expandedItems, appendChildrenHtml) {
         var id = encodeURI(path + "." + node.text);
 
         var childrenHtml = "";
 
-        node.childItems.sort(function (a, b) { a.spans[0].start - b.spans[0].start });
-
         for (var i = 0; i < node.childItems.length; i++) {
             childrenHtml += getNavigationListItemsFromNode(node.childItems[i], id, expandedItems);
         }
+
+        if (typeof appendChildrenHtml !== "undefined")
+            childrenHtml += appendChildrenHtml;
 
         var kindVal = (node.kind + "").replace(" ", "-");
         var kind = "label-kind-" + kindVal;
@@ -263,8 +358,9 @@ define(function (require, exports, module) {
         if (typeof expandedItems[id] !== "undefined")
             checked = "checked";
 
+        var padding = node.indent * 20;
         if (childrenHtml.length > 0) {
-            html = '<li>' +
+            html = '<li data-start="' + start + '" data-length="' + length + '">' +
                         '<input type="checkbox" class="navCheck" id="' + id + '" ' + checked + ' />' +
                         '<label for="' + id + '">' +
                             span +
@@ -273,9 +369,13 @@ define(function (require, exports, module) {
                     '</li>';
         }
         else {
-            html = '<li>' +
-                         span +
-                 '</li>';
+            html = '<li class="leaf" data-start="' + start + '" data-length="' + length + '">' +
+                        '<input type="checkbox" class="navCheck" style="visbility:hidden" id="' + id + '" ' + checked + ' />' +
+                        '<label for="' + id + '">' +
+                            span +
+                        '</label>' +
+                        '<ul>' + "" + "</ul>" +
+                  '</li>';
         }
         return html;
     }
@@ -691,7 +791,30 @@ define(function (require, exports, module) {
             doNewGotoDefinitionStep(parseInt($(this).attr("data-start")));
         });
 
-        updateSideBySide();
+        $("#txtNavTreeFilter").keyup(function (ev) {
+            deferredFilterNavTree.schedule(200);
+        });
+
+        $("#btnExpandAllNavTree").click(function () {
+            if ($("#txtNavTreeFilter").val() == "")
+                $("#navTree .navCheck").prop("checked", true);
+            else
+                $("#navTreeSearch .navCheck").prop("checked", true);
+        });
+
+        $("#btnCollapseAllNavTree").click(function () {
+            if ($("#txtNavTreeFilter").val() == "")
+                $("#navTree .navCheck").prop("checked", false);
+            else
+                $("#navTreeSearch .navCheck").prop("checked", false);
+        });
+
+        filterNavTree();
+
+        window.setTimeout(function () {
+            updateSideBySide();
+        }, 25);
+
     }
 
     function addLibrary(libname) {
@@ -766,6 +889,13 @@ define(function (require, exports, module) {
                 formatCSS();
             }
         }]);
+
+
+        $(window).resize(function () {
+            updateSideBySide();
+
+        });
+
     }
 
     function setTheme(theme) {
@@ -813,11 +943,6 @@ define(function (require, exports, module) {
         var lastActiveElementIndex = $(".tab.active:last").index();
         $("#editorLayout tr:nth-child(2) td:nth-child(" + (lastActiveElementIndex + 1) + ")").addClass("lastvisible");
 
-        editorHTML.resize();
-        editorCSS.resize();
-        editor.resize();
-        editorJavascript.resize();
-
         var tabs = $(".tab");
         for (var i = 0; i < tabs.length; i++) {
             if (!$(tabs[i]).hasClass("active")) {
@@ -829,6 +954,17 @@ define(function (require, exports, module) {
             }
         }
 
+        initiateResizablePanes();
+
+        window.setTimeout(function () {
+            editorHTML.resize();
+            editorCSS.resize();
+            editor.resize();
+            editorJavascript.resize();
+        }, 25);
+    }
+
+    function initiateResizablePanes() {
         $("#editorLayout").colResizable({
             liveDrag: true,
             draggingClass: "dragging",

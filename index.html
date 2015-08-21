@@ -167,7 +167,19 @@
                                 <td>
                                     <div class="warp-container" id="tab-typescript">
                                         <div class="typescript-navigation" style="display:none">
-                                            <ul class="css-treeview" id="navTree"></ul>
+                                            <div>
+                                                <div style="margin-left:40px">
+                                                    <input type="text" id="txtNavTreeFilter" placeholder="Filter..." />
+                                                </div>
+                                                
+                                                <div class="button-icon" id="btnExpandAllNavTree"></div>
+                                                <div class="button-icon" id="btnCollapseAllNavTree"></div>
+                                                
+                                            </div>
+                                            <div style="position:relative;clear:both">
+                                                <ul class="css-treeview" id="navTree" style="position:absolute"></ul>
+                                                <ul class="css-treeview" id="navTreeSearch" style="position:absolute"></ul>
+                                            </div>
                                         </div>
                                         <div class="typescript-editorcontainer editor-container">
                                             <div class="toggle-navigationTree" data-shortcut="ctrl+w"><i class="icon-chevron-right" title="Navigation tree"></i></div>
