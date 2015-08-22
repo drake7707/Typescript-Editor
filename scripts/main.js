@@ -228,24 +228,7 @@ define(function (require, exports, module) {
 
         for (var i = 0; i < hierarchicalNodes.length; i++) {
             var node = hierarchicalNodes[i];
-
-            /*
-            if (nodes[i].kind == "module") {
-
-            
-
-                var moduleNode = nodes[i];
-                var curHtml = "";
-                while (i + 1 < nodes.length && nodes[i + 1].kind != "module") {
-                    curHtml += getNavigationListItemsFromNode(nodes[i+1], nodes[i+1].text, expandedItems);
-                    i++;
-                }
-                html += getNavigationListItemsFromNode(moduleNode, moduleNode.text, expandedItems, curHtml);
-            }
-            else {*/
             html += getNavigationListItemsFromNode(nodes[i], nodes[i].text, expandedItems);
-
-            // }
         }
 
 
@@ -351,6 +334,17 @@ define(function (require, exports, module) {
 
         var isLeaf = childrenHtml.length == 0;
 
+        var modifiers = node.kindModifiers.split(',');
+        var overlay = "";
+        for (var i = 0; i < modifiers.length; i++) {
+            overlay += '<span class="label-overlay ' + "label-modifier-" + modifiers[i] + '"></span>';
+        }
+
+        
+        for (var i = 0; i < modifiers.length; i++) {
+            
+        }
+
         var span = '<span class="navItem ' + (isLeaf ? "leaf " : "") + kind + '" data-start="' + start + '" data-length="' + length + '">' + htmlEncode(text) + '</span>';
         var html;
 
@@ -363,7 +357,7 @@ define(function (require, exports, module) {
             html = '<li data-start="' + start + '" data-length="' + length + '">' +
                         '<input type="checkbox" class="navCheck" id="' + id + '" ' + checked + ' />' +
                         '<label for="' + id + '">' +
-                            span +
+                            span + overlay +
                         '</label>' +
                         '<ul>' + childrenHtml + "</ul>" +
                     '</li>';
@@ -372,7 +366,7 @@ define(function (require, exports, module) {
             html = '<li class="leaf" data-start="' + start + '" data-length="' + length + '">' +
                         '<input type="checkbox" class="navCheck" style="visbility:hidden" id="' + id + '" ' + checked + ' />' +
                         '<label for="' + id + '">' +
-                            span +
+                            span + overlay + 
                         '</label>' +
                         '<ul>' + "" + "</ul>" +
                   '</li>';

@@ -259,6 +259,10 @@ body {
     background-image: url('./icons/property.png');
 }
 
+.label-kind-getter, .label-kind-setter {
+    background-image: url('./icons/gettersetter.png');
+}
+
 .label-kind-method, .label-kind-function {
     background-image: url('./icons/method.png');
 }
@@ -288,6 +292,10 @@ body {
 }
 
 .label-modifier-public {
+}
+
+.label-modifier-static {
+    background-image: url('./icons/overlayStatic.png');
 }
 
 .label-modifier-protected {
@@ -475,9 +483,13 @@ body {
         /*background-position: 18px 0;*/
         background-position: -16px 0;
         width: 500px;
+        position: relative;
     }
 
-
+        .css-treeview label .label-overlay {
+            left: 14px;
+            top: 1px;
+        }
 
         .css-treeview label::before {
             content: "";

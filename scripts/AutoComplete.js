@@ -136,12 +136,15 @@ define(function (require, exports, module) {
 
                     var modifiers = info.kindModifiers.split(',');
                     for (var i = 0; i < modifiers.length; i++) {
-                        modifiers[0] = "label-modifier-" + modifiers[0];
+                        modifiers[i] = "label-modifier-" + modifiers[i];
                     }
-                    var accessors = modifiers.join(" ");
+                    //var accessors = modifiers.join(" ");
                     var kindVal = (info.kind + "").replace(" ", "-");
                     var kind = '<span class="label-kind label-kind-' + kindVal + '">' + '</span>';
-                    var overlay = '<span class="label-overlay ' + accessors + '"></span>';
+                    var overlay = "";
+                    for (var i = 0; i < modifiers.length; i++) {
+                        overlay += '<span class="label-overlay ' + modifiers[i] + '"></span>';
+                    }
                     html += '<li class="label-autocomplete" data-name="' + info.name + '" data-kind="' + info.kind + '">' + kind + name + type + overlay + '</li>';
                 }
                 self.listElement.innerHTML = html;

@@ -22,6 +22,12 @@ snippet module
 		${0}
 	}
 #
+# namepsace
+snippet namespace
+	namespace ${1:true} {
+		${0}
+	}
+#
 # import syntax
 snippet import
 	import ${1:module_name} = require('${2:module_path}');
@@ -123,6 +129,12 @@ snippet forr
 snippet fori
 	for (var ${1:prop} in ${2:Things}) {
 		${0:$2[$1]}
+	}
+
+# forof (property in object ) { ... }
+snippet forof
+	for (var ${1:prop} of ${2:Things}) {
+		$0
 	}
 
 # try

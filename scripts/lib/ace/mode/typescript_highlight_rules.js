@@ -51,7 +51,7 @@ var TypeScriptHighlightRules = function() {
         // Match stuff like: module name {...}
         {
             token: ["keyword.operator.ts", "text", "variable.parameter.function.ts", "text"],
-            regex: "\\b(module)(\\s*)([a-zA-Z0-9_?.$][\\w?.$]*)(\\s*\\{)"
+            regex: "\\b(module|namespace)(\\s*)([a-zA-Z0-9_?.$][\\w?.$]*)(\\s*\\{)"
         }, 
         // Match stuff like: super(argument, list)
         {
