@@ -115,25 +115,25 @@ snippet do
 
 # for (...) {...}
 snippet for
-	for (var ${1:i}:number = 0; $1 < ${2:length}; $1++) {
+	for (let ${1:i}:number = 0; $1 < ${2:length}; $1++) {
 		$0
 	}
 
 # for (...) {...} (Improved Native For-Loop)
 snippet forr
-	for (var ${1:i}:number = ${2:length} - 1; $1 >= 0; $1--) {
+	for (let ${1:i}:number = ${2:length} - 1; $1 >= 0; $1--) {
 		$0
 	}
 
 # for (property in object ) { ... }
 snippet fori
-	for (var ${1:prop} in ${2:Things}) {
+	for (let ${1:el} in ${2:Things}) {
 		${0:$2[$1]}
 	}
 
 # forof (property in object ) { ... }
 snippet forof
-	for (var ${1:el} of ${2:Things}) {
+	for (let ${1:el} of ${2:Things}) {
 		$0
 	}
 

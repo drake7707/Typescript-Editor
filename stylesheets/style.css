@@ -275,7 +275,7 @@ body {
     background-image: url('./icons/class.png');
 }
 
-.label-kind-variable, .label-kind-var, .label-kind-local-var, .label-kind-parameter {
+.label-kind-variable, .label-kind-var, .label-kind-local-var, .label-kind-parameter, .label-kind-let {
     background-image: url('./icons/field.png');
 }
 
