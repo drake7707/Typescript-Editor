@@ -90,7 +90,10 @@ body {
 
 .console {
     height: 100%;
+    position: absolute;
+    font-size: 0.75em;
     overflow-y: scroll;
+    width: 100%;
 }
 
 .console-entry {
