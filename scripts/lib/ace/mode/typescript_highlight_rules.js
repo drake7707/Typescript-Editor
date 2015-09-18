@@ -50,8 +50,8 @@ var TypeScriptHighlightRules = function() {
     var tsRules =  [
         // Match stuff like: module name {...}
         {
-            token: ["keyword.operator.ts", "text", "variable.parameter.function.ts", "text"],
-            regex: "\\b(module|namespace)(\\s*)([a-zA-Z0-9_?.$][\\w?.$]*)(\\s*\\{)"
+            token: ["keyword.operator.ts", "text", "keyword.operator.ts", "text", "variable.parameter.function.ts", "text"],
+            regex: "(export)?(\\s*)?(module|namespace)(\\s*)([a-zA-Z0-9_?.$][\\w?.$]*)(\\s*\\{)"
         }, 
         // Match stuff like: super(argument, list)
         {
@@ -70,7 +70,7 @@ var TypeScriptHighlightRules = function() {
         },  
         {
             token: ["keyword.operator.ts"],
-            regex: "(?:\\b(constructor|declare|interface|as|AS|public|private|class|extends|export|super)\\b)"
+            regex: "(?:\\b(constructor|declare|interface|as|AS|public|private|class|extends|export|super|abstract)\\b)"
         }, 
         {
             token: ["storage.type.variable.ts"],
@@ -82,7 +82,7 @@ var TypeScriptHighlightRules = function() {
         },
         {
             token: "keyword",
-            regex: "(?:super|export|class|extends|import)\\b"
+            regex: "(?:super|export|class|extends|import|module|namespace)\\b"
         }
     ];
 

@@ -84,8 +84,8 @@ interface PropertyDescriptor {
     enumerable?: boolean;
     value?: any;
     writable?: boolean;
-    get? (): any;
-    set? (v: any): void;
+    get?(): any;
+    set?(v: any): void;
 }
 
 interface PropertyDescriptorMap {
@@ -331,31 +331,31 @@ interface String {
 
     /**
       * Replaces text in a string, using a regular expression or search string.
-      * @param searchValue A String object or string literal that represents the regular expression
-      * @param replaceValue A String object or string literal containing the text to replace for every successful match of rgExp in stringObj.
+      * @param searchValue A string that represents the regular expression.
+      * @param replaceValue A string containing the text to replace for every successful match of searchValue in this string.
       */
     replace(searchValue: string, replaceValue: string): string;
 
     /**
       * Replaces text in a string, using a regular expression or search string.
-      * @param searchValue A String object or string literal that represents the regular expression
-      * @param replaceValue A function that returns the replacement text.
+      * @param searchValue A string that represents the regular expression.
+      * @param replacer A function that returns the replacement text.
       */
-    replace(searchValue: string, replaceValue: (substring: string, ...args: any[]) => string): string;
+    replace(searchValue: string, replacer: (substring: string, ...args: any[]) => string): string;
 
     /**
       * Replaces text in a string, using a regular expression or search string.
-      * @param searchValue A Regular Expression object containing the regular expression pattern and applicable flags
-      * @param replaceValue A String object or string literal containing the text to replace for every successful match of rgExp in stringObj.
+      * @param searchValue A Regular Expression object containing the regular expression pattern and applicable flags.
+      * @param replaceValue A string containing the text to replace for every successful match of searchValue in this string.
       */
     replace(searchValue: RegExp, replaceValue: string): string;
 
     /**
       * Replaces text in a string, using a regular expression or search string.
       * @param searchValue A Regular Expression object containing the regular expression pattern and applicable flags
-      * @param replaceValue A function that returns the replacement text.
+      * @param replacer A function that returns the replacement text.
       */
-    replace(searchValue: RegExp, replaceValue: (substring: string, ...args: any[]) => string): string;
+    replace(searchValue: RegExp, replacer: (substring: string, ...args: any[]) => string): string;
 
     /**
       * Finds the first substring match in a regular expression search.
@@ -986,14 +986,14 @@ interface JSON {
       * @param replacer A function that transforms the results.
       * @param space Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.
       */
-    stringify(value: any, replacer: (key: string, value: any) => any, space: any): string;
+    stringify(value: any, replacer: (key: string, value: any) => any, space: string | number): string;
     /**
       * Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
       * @param value A JavaScript value, usually an object or array, to be converted.
       * @param replacer Array that transforms the results.
       * @param space Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.
       */
-    stringify(value: any, replacer: any[], space: any): string;
+    stringify(value: any, replacer: any[], space: string | number): string;
 }
 /**
   * An intrinsic object that provides functions to convert JavaScript values to and from the JavaScript Object Notation (JSON) format.
@@ -1165,8 +1165,8 @@ interface ArrayConstructor {
     (arrayLength?: number): any[];
     <T>(arrayLength: number): T[];
     <T>(...items: T[]): T[];
-    isArray(arg: any): boolean;
-    prototype: Array<any>;
+    isArray(arg: any): arg is Array<any>;
+prototype: Array<any>;
 }
 
 declare var Array: ArrayConstructor;
@@ -1185,9 +1185,24 @@ declare type PropertyDecorator = (target: Object, propertyKey: string | symbol) 
 declare type MethodDecorator = <T>(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<T>) => TypedPropertyDescriptor<T> | void;
 declare type ParameterDecorator = (target: Object, propertyKey: string | symbol, parameterIndex: number) => void;
 
-/////////////////////////////
-/// IE10 ECMAScript Extensions
-/////////////////////////////
+declare type PromiseConstructorLike = new <T>(executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void) => PromiseLike<T>;
+
+interface PromiseLike<T> {
+    /**
+    * Attaches callbacks for the resolution and/or rejection of the Promise.
+    * @param onfulfilled The callback to execute when the Promise is resolved.
+    * @param onrejected The callback to execute when the Promise is rejected.
+    * @returns A Promise for the completion of which ever callback is executed.
+    */
+    then<TResult>(onfulfilled?: (value: T) => TResult | PromiseLike<TResult>, onrejected?: (reason: any) => TResult | PromiseLike<TResult>): PromiseLike<TResult>;
+    then<TResult>(onfulfilled?: (value: T) => TResult | PromiseLike<TResult>, onrejected?: (reason: any) => void): PromiseLike<TResult>;
+}
+
+interface ArrayLike<T> {
+    length: number;
+    [n: number]: T;
+}
+
 
 /**
   * Represents a raw buffer of binary data, which is used to store data for the 
@@ -1204,7 +1219,7 @@ interface ArrayBuffer {
     /**
       * Returns a section of an ArrayBuffer.
       */
-    slice(begin:number, end?:number): ArrayBuffer;
+    slice(begin: number, end?: number): ArrayBuffer;
 }
 
 interface ArrayBufferConstructor {
@@ -1240,14 +1255,14 @@ interface DataView {
       * no alignment constraint; multi-byte values may be fetched from any offset. 
       * @param byteOffset The place in the buffer at which the value should be retrieved.
       */
-    getFloat32(byteOffset: number, littleEndian: boolean): number;
+    getFloat32(byteOffset: number, littleEndian?: boolean): number;
 
     /**
       * Gets the Float64 value at the specified byte offset from the start of the view. There is
       * no alignment constraint; multi-byte values may be fetched from any offset. 
       * @param byteOffset The place in the buffer at which the value should be retrieved.
       */
-    getFloat64(byteOffset: number, littleEndian: boolean): number;
+    getFloat64(byteOffset: number, littleEndian?: boolean): number;
 
     /**
       * Gets the Int8 value at the specified byte offset from the start of the view. There is 
@@ -1261,13 +1276,13 @@ interface DataView {
       * no alignment constraint; multi-byte values may be fetched from any offset. 
       * @param byteOffset The place in the buffer at which the value should be retrieved.
       */
-    getInt16(byteOffset: number, littleEndian: boolean): number;
+    getInt16(byteOffset: number, littleEndian?: boolean): number;
     /**
       * Gets the Int32 value at the specified byte offset from the start of the view. There is 
       * no alignment constraint; multi-byte values may be fetched from any offset. 
       * @param byteOffset The place in the buffer at which the value should be retrieved.
       */
-    getInt32(byteOffset: number, littleEndian: boolean): number;
+    getInt32(byteOffset: number, littleEndian?: boolean): number;
 
     /**
       * Gets the Uint8 value at the specified byte offset from the start of the view. There is 
@@ -1281,14 +1296,14 @@ interface DataView {
       * no alignment constraint; multi-byte values may be fetched from any offset. 
       * @param byteOffset The place in the buffer at which the value should be retrieved.
       */
-    getUint16(byteOffset: number, littleEndian: boolean): number;
+    getUint16(byteOffset: number, littleEndian?: boolean): number;
 
     /**
       * Gets the Uint32 value at the specified byte offset from the start of the view. There is 
       * no alignment constraint; multi-byte values may be fetched from any offset. 
       * @param byteOffset The place in the buffer at which the value should be retrieved.
       */
-    getUint32(byteOffset: number, littleEndian: boolean): number;
+    getUint32(byteOffset: number, littleEndian?: boolean): number;
 
     /**
       * Stores an Float32 value at the specified byte offset from the start of the view. 
@@ -1297,7 +1312,7 @@ interface DataView {
       * @param littleEndian If false or undefined, a big-endian value should be written, 
       * otherwise a little-endian value should be written.
       */
-    setFloat32(byteOffset: number, value: number, littleEndian: boolean): void;
+    setFloat32(byteOffset: number, value: number, littleEndian?: boolean): void;
 
     /**
       * Stores an Float64 value at the specified byte offset from the start of the view. 
@@ -1306,7 +1321,7 @@ interface DataView {
       * @param littleEndian If false or undefined, a big-endian value should be written, 
       * otherwise a little-endian value should be written.
       */
-    setFloat64(byteOffset: number, value: number, littleEndian: boolean): void;
+    setFloat64(byteOffset: number, value: number, littleEndian?: boolean): void;
 
     /**
       * Stores an Int8 value at the specified byte offset from the start of the view. 
@@ -1322,7 +1337,7 @@ interface DataView {
       * @param littleEndian If false or undefined, a big-endian value should be written, 
       * otherwise a little-endian value should be written.
       */
-    setInt16(byteOffset: number, value: number, littleEndian: boolean): void;
+    setInt16(byteOffset: number, value: number, littleEndian?: boolean): void;
 
     /**
       * Stores an Int32 value at the specified byte offset from the start of the view. 
@@ -1331,7 +1346,7 @@ interface DataView {
       * @param littleEndian If false or undefined, a big-endian value should be written, 
       * otherwise a little-endian value should be written.
       */
-    setInt32(byteOffset: number, value: number, littleEndian: boolean): void;
+    setInt32(byteOffset: number, value: number, littleEndian?: boolean): void;
 
     /**
       * Stores an Uint8 value at the specified byte offset from the start of the view. 
@@ -1347,7 +1362,7 @@ interface DataView {
       * @param littleEndian If false or undefined, a big-endian value should be written, 
       * otherwise a little-endian value should be written.
       */
-    setUint16(byteOffset: number, value: number, littleEndian: boolean): void;
+    setUint16(byteOffset: number, value: number, littleEndian?: boolean): void;
 
     /**
       * Stores an Uint32 value at the specified byte offset from the start of the view. 
@@ -1356,7 +1371,7 @@ interface DataView {
       * @param littleEndian If false or undefined, a big-endian value should be written, 
       * otherwise a little-endian value should be written.
       */
-    setUint32(byteOffset: number, value: number, littleEndian: boolean): void;
+    setUint32(byteOffset: number, value: number, littleEndian?: boolean): void;
 }
 
 interface DataViewConstructor {
@@ -1563,7 +1578,7 @@ interface Int8Array {
       * @param array A typed or untyped array of values to set.
       * @param offset The index in the current array at which the values are to be written.
       */
-    set(array: Int8Array, offset?: number): void;
+    set(array: ArrayLike<number>, offset?: number): void;
 
     /** 
       * Returns a section of an array.
@@ -1612,8 +1627,7 @@ interface Int8Array {
 interface Int8ArrayConstructor {
     prototype: Int8Array;
     new (length: number): Int8Array;
-    new (array: Int8Array): Int8Array;
-    new (array: number[]): Int8Array;
+    new (array: ArrayLike<number>): Int8Array;
     new (buffer: ArrayBuffer, byteOffset?: number, length?: number): Int8Array;
 
     /**
@@ -1626,6 +1640,15 @@ interface Int8ArrayConstructor {
       * @param items A set of elements to include in the new array object.
       */
     of(...items: number[]): Int8Array;
+    
+    /**
+      * Creates an array from an array-like or iterable object.
+      * @param arrayLike An array-like or iterable object to convert to an array.
+      * @param mapfn A mapping function to call on every element of the array.
+      * @param thisArg Value of 'this' used to invoke the mapfn.
+      */
+    from(arrayLike: ArrayLike<number>, mapfn?: (v: number, k: number) => number, thisArg?: any): Int8Array;
+
 }
 declare var Int8Array: Int8ArrayConstructor;
 
@@ -1828,7 +1851,7 @@ interface Uint8Array {
       * @param array A typed or untyped array of values to set.
       * @param offset The index in the current array at which the values are to be written.
       */
-    set(array: Uint8Array, offset?: number): void;
+    set(array: ArrayLike<number>, offset?: number): void;
 
     /** 
       * Returns a section of an array.
@@ -1878,8 +1901,7 @@ interface Uint8Array {
 interface Uint8ArrayConstructor {
     prototype: Uint8Array;
     new (length: number): Uint8Array;
-    new (array: Uint8Array): Uint8Array;
-    new (array: number[]): Uint8Array;
+    new (array: ArrayLike<number>): Uint8Array;
     new (buffer: ArrayBuffer, byteOffset?: number, length?: number): Uint8Array;
 
     /**
@@ -1892,8 +1914,290 @@ interface Uint8ArrayConstructor {
       * @param items A set of elements to include in the new array object.
       */
     of(...items: number[]): Uint8Array;
+    
+    /**
+      * Creates an array from an array-like or iterable object.
+      * @param arrayLike An array-like or iterable object to convert to an array.
+      * @param mapfn A mapping function to call on every element of the array.
+      * @param thisArg Value of 'this' used to invoke the mapfn.
+      */
+    from(arrayLike: ArrayLike<number>, mapfn?: (v: number, k: number) => number, thisArg?: any): Uint8Array;
+
 }
 declare var Uint8Array: Uint8ArrayConstructor;
+
+/**
+  * A typed array of 8-bit unsigned integer (clamped) values. The contents are initialized to 0. 
+  * If the requested number of bytes could not be allocated an exception is raised.
+  */
+interface Uint8ClampedArray {
+    /**
+      * The size in bytes of each element in the array. 
+      */
+    BYTES_PER_ELEMENT: number;
+
+    /**
+      * The ArrayBuffer instance referenced by the array. 
+      */
+    buffer: ArrayBuffer;
+
+    /**
+      * The length in bytes of the array.
+      */
+    byteLength: number;
+
+    /**
+      * The offset in bytes of the array.
+      */
+    byteOffset: number;
+
+    /** 
+      * Returns the this object after copying a section of the array identified by start and end
+      * to the same array starting at position target
+      * @param target If target is negative, it is treated as length+target where length is the 
+      * length of the array. 
+      * @param start If start is negative, it is treated as length+start. If end is negative, it 
+      * is treated as length+end.
+      * @param end If not specified, length of the this object is used as its default value. 
+      */
+    copyWithin(target: number, start: number, end?: number): Uint8ClampedArray;
+
+    /**
+      * Determines whether all the members of an array satisfy the specified test.
+      * @param callbackfn A function that accepts up to three arguments. The every method calls 
+      * the callbackfn function for each element in array1 until the callbackfn returns false, 
+      * or until the end of the array.
+      * @param thisArg An object to which the this keyword can refer in the callbackfn function.
+      * If thisArg is omitted, undefined is used as the this value.
+      */
+    every(callbackfn: (value: number, index: number, array: Uint8ClampedArray) => boolean, thisArg?: any): boolean;
+
+    /**
+        * Returns the this object after filling the section identified by start and end with value
+        * @param value value to fill array section with
+        * @param start index to start filling the array at. If start is negative, it is treated as 
+        * length+start where length is the length of the array. 
+        * @param end index to stop filling the array at. If end is negative, it is treated as 
+        * length+end.
+        */
+    fill(value: number, start?: number, end?: number): Uint8ClampedArray;
+
+    /**
+      * Returns the elements of an array that meet the condition specified in a callback function. 
+      * @param callbackfn A function that accepts up to three arguments. The filter method calls 
+      * the callbackfn function one time for each element in the array. 
+      * @param thisArg An object to which the this keyword can refer in the callbackfn function. 
+      * If thisArg is omitted, undefined is used as the this value.
+      */
+    filter(callbackfn: (value: number, index: number, array: Uint8ClampedArray) => boolean, thisArg?: any): Uint8ClampedArray;
+
+    /** 
+      * Returns the value of the first element in the array where predicate is true, and undefined 
+      * otherwise.
+      * @param predicate find calls predicate once for each element of the array, in ascending 
+      * order, until it finds one where predicate returns true. If such an element is found, find 
+      * immediately returns that element value. Otherwise, find returns undefined.
+      * @param thisArg If provided, it will be used as the this value for each invocation of 
+      * predicate. If it is not provided, undefined is used instead.
+      */
+    find(predicate: (value: number, index: number, obj: Array<number>) => boolean, thisArg?: any): number;
+
+    /** 
+      * Returns the index of the first element in the array where predicate is true, and undefined 
+      * otherwise.
+      * @param predicate find calls predicate once for each element of the array, in ascending 
+      * order, until it finds one where predicate returns true. If such an element is found, find 
+      * immediately returns that element value. Otherwise, find returns undefined.
+      * @param thisArg If provided, it will be used as the this value for each invocation of 
+      * predicate. If it is not provided, undefined is used instead.
+      */
+    findIndex(predicate: (value: number) => boolean, thisArg?: any): number;
+
+    /**
+      * Performs the specified action for each element in an array.
+      * @param callbackfn  A function that accepts up to three arguments. forEach calls the 
+      * callbackfn function one time for each element in the array. 
+      * @param thisArg  An object to which the this keyword can refer in the callbackfn function. 
+      * If thisArg is omitted, undefined is used as the this value.
+      */
+    forEach(callbackfn: (value: number, index: number, array: Uint8ClampedArray) => void, thisArg?: any): void;
+
+    /**
+      * Returns the index of the first occurrence of a value in an array.
+      * @param searchElement The value to locate in the array.
+      * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+      *  search starts at index 0.
+      */
+    indexOf(searchElement: number, fromIndex?: number): number;
+
+    /**
+      * Adds all the elements of an array separated by the specified separator string.
+      * @param separator A string used to separate one element of an array from the next in the 
+      * resulting String. If omitted, the array elements are separated with a comma.
+      */
+    join(separator?: string): string;
+
+    /**
+      * Returns the index of the last occurrence of a value in an array.
+      * @param searchElement The value to locate in the array.
+      * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the 
+      * search starts at index 0.
+      */
+    lastIndexOf(searchElement: number, fromIndex?: number): number;
+
+    /**
+      * The length of the array.
+      */
+    length: number;
+
+    /**
+      * Calls a defined callback function on each element of an array, and returns an array that 
+      * contains the results.
+      * @param callbackfn A function that accepts up to three arguments. The map method calls the 
+      * callbackfn function one time for each element in the array. 
+      * @param thisArg An object to which the this keyword can refer in the callbackfn function. 
+      * If thisArg is omitted, undefined is used as the this value.
+      */
+    map(callbackfn: (value: number, index: number, array: Uint8ClampedArray) => number, thisArg?: any): Uint8ClampedArray;
+
+    /**
+      * Calls the specified callback function for all the elements in an array. The return value of 
+      * the callback function is the accumulated result, and is provided as an argument in the next 
+      * call to the callback function.
+      * @param callbackfn A function that accepts up to four arguments. The reduce method calls the 
+      * callbackfn function one time for each element in the array.
+      * @param initialValue If initialValue is specified, it is used as the initial value to start 
+      * the accumulation. The first call to the callbackfn function provides this value as an argument
+      * instead of an array value.
+      */
+    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => number, initialValue?: number): number;
+
+    /**
+      * Calls the specified callback function for all the elements in an array. The return value of 
+      * the callback function is the accumulated result, and is provided as an argument in the next 
+      * call to the callback function.
+      * @param callbackfn A function that accepts up to four arguments. The reduce method calls the 
+      * callbackfn function one time for each element in the array.
+      * @param initialValue If initialValue is specified, it is used as the initial value to start 
+      * the accumulation. The first call to the callbackfn function provides this value as an argument 
+      * instead of an array value.
+      */
+    reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => U, initialValue: U): U;
+
+    /** 
+      * Calls the specified callback function for all the elements in an array, in descending order. 
+      * The return value of the callback function is the accumulated result, and is provided as an 
+      * argument in the next call to the callback function.
+      * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls 
+      * the callbackfn function one time for each element in the array. 
+      * @param initialValue If initialValue is specified, it is used as the initial value to start 
+      * the accumulation. The first call to the callbackfn function provides this value as an 
+      * argument instead of an array value.
+      */
+    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => number, initialValue?: number): number;
+
+    /** 
+      * Calls the specified callback function for all the elements in an array, in descending order. 
+      * The return value of the callback function is the accumulated result, and is provided as an 
+      * argument in the next call to the callback function.
+      * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
+      * the callbackfn function one time for each element in the array. 
+      * @param initialValue If initialValue is specified, it is used as the initial value to start 
+      * the accumulation. The first call to the callbackfn function provides this value as an argument
+      * instead of an array value.
+      */
+    reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => U, initialValue: U): U;
+
+    /**
+      * Reverses the elements in an Array. 
+      */
+    reverse(): Uint8ClampedArray;
+
+    /**
+      * Sets a value or an array of values.
+      * @param index The index of the location to set.
+      * @param value The value to set.
+      */
+    set(index: number, value: number): void;
+
+    /**
+      * Sets a value or an array of values.
+      * @param array A typed or untyped array of values to set.
+      * @param offset The index in the current array at which the values are to be written.
+      */
+    set(array: Uint8ClampedArray, offset?: number): void;
+
+    /** 
+      * Returns a section of an array.
+      * @param start The beginning of the specified portion of the array.
+      * @param end The end of the specified portion of the array.
+      */
+    slice(start?: number, end?: number): Uint8ClampedArray;
+
+    /**
+      * Determines whether the specified callback function returns true for any element of an array.
+      * @param callbackfn A function that accepts up to three arguments. The some method calls the 
+      * callbackfn function for each element in array1 until the callbackfn returns true, or until 
+      * the end of the array.
+      * @param thisArg An object to which the this keyword can refer in the callbackfn function. 
+      * If thisArg is omitted, undefined is used as the this value.
+      */
+    some(callbackfn: (value: number, index: number, array: Uint8ClampedArray) => boolean, thisArg?: any): boolean;
+
+    /**
+      * Sorts an array.
+      * @param compareFn The name of the function used to determine the order of the elements. If 
+      * omitted, the elements are sorted in ascending, ASCII character order.
+      */
+    sort(compareFn?: (a: number, b: number) => number): Uint8ClampedArray;
+
+    /**
+      * Gets a new Uint8ClampedArray view of the ArrayBuffer store for this array, referencing the elements
+      * at begin, inclusive, up to end, exclusive. 
+      * @param begin The index of the beginning of the array.
+      * @param end The index of the end of the array.
+      */
+    subarray(begin: number, end?: number): Uint8ClampedArray;
+
+    /**
+      * Converts a number to a string by using the current locale. 
+      */
+    toLocaleString(): string;
+
+    /**
+      * Returns a string representation of an array.
+      */
+    toString(): string;
+
+    [index: number]: number;
+}
+
+interface Uint8ClampedArrayConstructor {
+    prototype: Uint8ClampedArray;
+    new (length: number): Uint8ClampedArray;
+    new (array: ArrayLike<number>): Uint8ClampedArray;
+    new (buffer: ArrayBuffer, byteOffset?: number, length?: number): Uint8ClampedArray;
+
+    /**
+      * The size in bytes of each element in the array. 
+      */
+    BYTES_PER_ELEMENT: number;
+
+    /**
+      * Returns a new array from a set of elements.
+      * @param items A set of elements to include in the new array object.
+      */
+    of(...items: number[]): Uint8ClampedArray;
+
+    /**
+      * Creates an array from an array-like or iterable object.
+      * @param arrayLike An array-like or iterable object to convert to an array.
+      * @param mapfn A mapping function to call on every element of the array.
+      * @param thisArg Value of 'this' used to invoke the mapfn.
+      */
+    from(arrayLike: ArrayLike<number>, mapfn?: (v: number, k: number) => number, thisArg?: any): Uint8ClampedArray;
+}
+declare var Uint8ClampedArray: Uint8ClampedArrayConstructor;
 
 /**
   * A typed array of 16-bit signed integer values. The contents are initialized to 0. If the 
@@ -2094,7 +2398,7 @@ interface Int16Array {
       * @param array A typed or untyped array of values to set.
       * @param offset The index in the current array at which the values are to be written.
       */
-    set(array: Int16Array, offset?: number): void;
+    set(array: ArrayLike<number>, offset?: number): void;
 
     /** 
       * Returns a section of an array.
@@ -2144,8 +2448,7 @@ interface Int16Array {
 interface Int16ArrayConstructor {
     prototype: Int16Array;
     new (length: number): Int16Array;
-    new (array: Int16Array): Int16Array;
-    new (array: number[]): Int16Array;
+    new (array: ArrayLike<number>): Int16Array;
     new (buffer: ArrayBuffer, byteOffset?: number, length?: number): Int16Array;
 
     /**
@@ -2158,6 +2461,15 @@ interface Int16ArrayConstructor {
       * @param items A set of elements to include in the new array object.
       */
     of(...items: number[]): Int16Array;
+    
+    /**
+      * Creates an array from an array-like or iterable object.
+      * @param arrayLike An array-like or iterable object to convert to an array.
+      * @param mapfn A mapping function to call on every element of the array.
+      * @param thisArg Value of 'this' used to invoke the mapfn.
+      */
+    from(arrayLike: ArrayLike<number>, mapfn?: (v: number, k: number) => number, thisArg?: any): Int16Array;
+
 }
 declare var Int16Array: Int16ArrayConstructor;
 
@@ -2360,7 +2672,7 @@ interface Uint16Array {
       * @param array A typed or untyped array of values to set.
       * @param offset The index in the current array at which the values are to be written.
       */
-    set(array: Uint16Array, offset?: number): void;
+    set(array: ArrayLike<number>, offset?: number): void;
 
     /** 
       * Returns a section of an array.
@@ -2410,8 +2722,7 @@ interface Uint16Array {
 interface Uint16ArrayConstructor {
     prototype: Uint16Array;
     new (length: number): Uint16Array;
-    new (array: Uint16Array): Uint16Array;
-    new (array: number[]): Uint16Array;
+    new (array: ArrayLike<number>): Uint16Array;
     new (buffer: ArrayBuffer, byteOffset?: number, length?: number): Uint16Array;
 
     /**
@@ -2424,6 +2735,15 @@ interface Uint16ArrayConstructor {
       * @param items A set of elements to include in the new array object.
       */
     of(...items: number[]): Uint16Array;
+    
+    /**
+      * Creates an array from an array-like or iterable object.
+      * @param arrayLike An array-like or iterable object to convert to an array.
+      * @param mapfn A mapping function to call on every element of the array.
+      * @param thisArg Value of 'this' used to invoke the mapfn.
+      */
+    from(arrayLike: ArrayLike<number>, mapfn?: (v: number, k: number) => number, thisArg?: any): Uint16Array;
+
 }
 declare var Uint16Array: Uint16ArrayConstructor;
 /**
@@ -2625,7 +2945,7 @@ interface Int32Array {
       * @param array A typed or untyped array of values to set.
       * @param offset The index in the current array at which the values are to be written.
       */
-    set(array: Int32Array, offset?: number): void;
+    set(array: ArrayLike<number>, offset?: number): void;
 
     /** 
       * Returns a section of an array.
@@ -2675,8 +2995,7 @@ interface Int32Array {
 interface Int32ArrayConstructor {
     prototype: Int32Array;
     new (length: number): Int32Array;
-    new (array: Int32Array): Int32Array;
-    new (array: number[]): Int32Array;
+    new (array: ArrayLike<number>): Int32Array;
     new (buffer: ArrayBuffer, byteOffset?: number, length?: number): Int32Array;
 
     /**
@@ -2689,6 +3008,14 @@ interface Int32ArrayConstructor {
       * @param items A set of elements to include in the new array object.
       */
     of(...items: number[]): Int32Array;
+    
+    /**
+      * Creates an array from an array-like or iterable object.
+      * @param arrayLike An array-like or iterable object to convert to an array.
+      * @param mapfn A mapping function to call on every element of the array.
+      * @param thisArg Value of 'this' used to invoke the mapfn.
+      */
+    from(arrayLike: ArrayLike<number>, mapfn?: (v: number, k: number) => number, thisArg?: any): Int32Array;
 }
 declare var Int32Array: Int32ArrayConstructor;
 
@@ -2891,7 +3218,7 @@ interface Uint32Array {
       * @param array A typed or untyped array of values to set.
       * @param offset The index in the current array at which the values are to be written.
       */
-    set(array: Uint32Array, offset?: number): void;
+    set(array: ArrayLike<number>, offset?: number): void;
 
     /** 
       * Returns a section of an array.
@@ -2941,8 +3268,7 @@ interface Uint32Array {
 interface Uint32ArrayConstructor {
     prototype: Uint32Array;
     new (length: number): Uint32Array;
-    new (array: Uint32Array): Uint32Array;
-    new (array: number[]): Uint32Array;
+    new (array: ArrayLike<number>): Uint32Array;
     new (buffer: ArrayBuffer, byteOffset?: number, length?: number): Uint32Array;
 
     /**
@@ -2955,6 +3281,14 @@ interface Uint32ArrayConstructor {
       * @param items A set of elements to include in the new array object.
       */
     of(...items: number[]): Uint32Array;
+    
+    /**
+      * Creates an array from an array-like or iterable object.
+      * @param arrayLike An array-like or iterable object to convert to an array.
+      * @param mapfn A mapping function to call on every element of the array.
+      * @param thisArg Value of 'this' used to invoke the mapfn.
+      */
+    from(arrayLike: ArrayLike<number>, mapfn?: (v: number, k: number) => number, thisArg?: any): Uint32Array;
 }
 declare var Uint32Array: Uint32ArrayConstructor;
 
@@ -3157,7 +3491,7 @@ interface Float32Array {
       * @param array A typed or untyped array of values to set.
       * @param offset The index in the current array at which the values are to be written.
       */
-    set(array: Float32Array, offset?: number): void;
+    set(array: ArrayLike<number>, offset?: number): void;
 
     /** 
       * Returns a section of an array.
@@ -3207,8 +3541,7 @@ interface Float32Array {
 interface Float32ArrayConstructor {
     prototype: Float32Array;
     new (length: number): Float32Array;
-    new (array: Float32Array): Float32Array;
-    new (array: number[]): Float32Array;
+    new (array: ArrayLike<number>): Float32Array;
     new (buffer: ArrayBuffer, byteOffset?: number, length?: number): Float32Array;
 
     /**
@@ -3221,6 +3554,15 @@ interface Float32ArrayConstructor {
       * @param items A set of elements to include in the new array object.
       */
     of(...items: number[]): Float32Array;
+    
+    /**
+      * Creates an array from an array-like or iterable object.
+      * @param arrayLike An array-like or iterable object to convert to an array.
+      * @param mapfn A mapping function to call on every element of the array.
+      * @param thisArg Value of 'this' used to invoke the mapfn.
+      */
+    from(arrayLike: ArrayLike<number>, mapfn?: (v: number, k: number) => number, thisArg?: any): Float32Array;
+
 }
 declare var Float32Array: Float32ArrayConstructor;
 
@@ -3423,7 +3765,7 @@ interface Float64Array {
       * @param array A typed or untyped array of values to set.
       * @param offset The index in the current array at which the values are to be written.
       */
-    set(array: Float64Array, offset?: number): void;
+    set(array: ArrayLike<number>, offset?: number): void;
 
     /** 
       * Returns a section of an array.
@@ -3473,8 +3815,7 @@ interface Float64Array {
 interface Float64ArrayConstructor {
     prototype: Float64Array;
     new (length: number): Float64Array;
-    new (array: Float64Array): Float64Array;
-    new (array: number[]): Float64Array;
+    new (array: ArrayLike<number>): Float64Array;
     new (buffer: ArrayBuffer, byteOffset?: number, length?: number): Float64Array;
 
     /**
@@ -3487,8 +3828,17 @@ interface Float64ArrayConstructor {
       * @param items A set of elements to include in the new array object.
       */
     of(...items: number[]): Float64Array;
+    
+    /**
+      * Creates an array from an array-like or iterable object.
+      * @param arrayLike An array-like or iterable object to convert to an array.
+      * @param mapfn A mapping function to call on every element of the array.
+      * @param thisArg Value of 'this' used to invoke the mapfn.
+      */
+    from(arrayLike: ArrayLike<number>, mapfn?: (v: number, k: number) => number, thisArg?: any): Float64Array;
 }
-declare var Float64Array: Float64ArrayConstructor;/////////////////////////////
+declare var Float64Array: Float64ArrayConstructor;
+/////////////////////////////
 /// ECMAScript Internationalization API 
 /////////////////////////////
 
@@ -3531,6 +3881,11 @@ declare module Intl {
         currency?: string;
         currencyDisplay?: string;
         useGrouping?: boolean;
+        minimumintegerDigits?: number;
+        minimumFractionDigits?: number;
+        maximumFractionDigits?: number;
+        minimumSignificantDigits?: number;
+        maximumSignificantDigits?: number;
     }
 
     interface ResolvedNumberFormatOptions {
@@ -3573,6 +3928,7 @@ declare module Intl {
         timeZoneName?: string;
         formatMatcher?: string;
         hour12?: boolean;
+        timeZone?: string;
     }
 
     interface ResolvedDateTimeFormatOptions {
@@ -3593,7 +3949,7 @@ declare module Intl {
     }
 
     interface DateTimeFormat {
-        format(date: number): string;
+        format(date?: Date | number): string;
         resolvedOptions(): ResolvedDateTimeFormatOptions;
     }
     var DateTimeFormat: {
@@ -3642,18 +3998,45 @@ interface Number {
 
 interface Date {
     /**
-      * Converts a date to a string by using the current or specified locale.  
+      * Converts a date and time to a string by using the current or specified locale.  
       * @param locales An array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.
       * @param options An object that contains one or more properties that specify comparison options.
       */
     toLocaleString(locales?: string[], options?: Intl.DateTimeFormatOptions): string;
+    /**
+      * Converts a date to a string by using the current or specified locale.  
+      * @param locales An array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.
+      * @param options An object that contains one or more properties that specify comparison options.
+      */
+    toLocaleDateString(locales?: string[], options?: Intl.DateTimeFormatOptions): string;
 
+    /**
+      * Converts a time to a string by using the current or specified locale.  
+      * @param locale Locale tag. If you omit this parameter, the default locale of the JavaScript runtime is used.
+      * @param options An object that contains one or more properties that specify comparison options.
+      */
+    toLocaleTimeString(locale?: string[], options?: Intl.DateTimeFormatOptions): string;
+    
+    /**
+      * Converts a date and time to a string by using the current or specified locale.  
+      * @param locale Locale tag. If you omit this parameter, the default locale of the JavaScript runtime is used.
+      * @param options An object that contains one or more properties that specify comparison options.
+      */
+    toLocaleString(locale?: string, options?: Intl.DateTimeFormatOptions): string;
+    
     /**
       * Converts a date to a string by using the current or specified locale.  
       * @param locale Locale tag. If you omit this parameter, the default locale of the JavaScript runtime is used.
       * @param options An object that contains one or more properties that specify comparison options.
       */
-    toLocaleString(locale?: string, options?: Intl.DateTimeFormatOptions): string;
+    toLocaleDateString(locale?: string, options?: Intl.DateTimeFormatOptions): string;
+
+    /**
+      * Converts a time to a string by using the current or specified locale.  
+      * @param locale Locale tag. If you omit this parameter, the default locale of the JavaScript runtime is used.
+      * @param options An object that contains one or more properties that specify comparison options.
+      */
+    toLocaleTimeString(locale?: string, options?: Intl.DateTimeFormatOptions): string;
 }
 
 
@@ -3848,7 +4231,7 @@ interface ANGLE_instanced_arrays {
 
 declare var ANGLE_instanced_arrays: {
     prototype: ANGLE_instanced_arrays;
-    new(): ANGLE_instanced_arrays;
+    new (): ANGLE_instanced_arrays;
     VERTEX_ATTRIB_ARRAY_DIVISOR_ANGLE: number;
 }
 
@@ -3866,7 +4249,7 @@ interface AnalyserNode extends AudioNode {
 
 declare var AnalyserNode: {
     prototype: AnalyserNode;
-    new(): AnalyserNode;
+    new (): AnalyserNode;
 }
 
 interface AnimationEvent extends Event {
@@ -3877,7 +4260,7 @@ interface AnimationEvent extends Event {
 
 declare var AnimationEvent: {
     prototype: AnimationEvent;
-    new(): AnimationEvent;
+    new (): AnimationEvent;
 }
 
 interface ApplicationCache extends EventTarget {
@@ -3912,7 +4295,7 @@ interface ApplicationCache extends EventTarget {
 
 declare var ApplicationCache: {
     prototype: ApplicationCache;
-    new(): ApplicationCache;
+    new (): ApplicationCache;
     CHECKING: number;
     DOWNLOADING: number;
     IDLE: number;
@@ -3928,7 +4311,7 @@ interface AriaRequestEvent extends Event {
 
 declare var AriaRequestEvent: {
     prototype: AriaRequestEvent;
-    new(type: string, eventInitDict?: AriaRequestEventInit): AriaRequestEvent;
+    new (type: string, eventInitDict?: AriaRequestEventInit): AriaRequestEvent;
 }
 
 interface Attr extends Node {
@@ -3940,7 +4323,7 @@ interface Attr extends Node {
 
 declare var Attr: {
     prototype: Attr;
-    new(): Attr;
+    new (): Attr;
 }
 
 interface AudioBuffer {
@@ -3953,7 +4336,7 @@ interface AudioBuffer {
 
 declare var AudioBuffer: {
     prototype: AudioBuffer;
-    new(): AudioBuffer;
+    new (): AudioBuffer;
 }
 
 interface AudioBufferSourceNode extends AudioNode {
@@ -3971,7 +4354,7 @@ interface AudioBufferSourceNode extends AudioNode {
 
 declare var AudioBufferSourceNode: {
     prototype: AudioBufferSourceNode;
-    new(): AudioBufferSourceNode;
+    new (): AudioBufferSourceNode;
 }
 
 interface AudioContext extends EventTarget {
@@ -4001,7 +4384,7 @@ interface AudioContext extends EventTarget {
 
 declare var AudioContext: {
     prototype: AudioContext;
-    new(): AudioContext;
+    new (): AudioContext;
 }
 
 interface AudioDestinationNode extends AudioNode {
@@ -4010,7 +4393,7 @@ interface AudioDestinationNode extends AudioNode {
 
 declare var AudioDestinationNode: {
     prototype: AudioDestinationNode;
-    new(): AudioDestinationNode;
+    new (): AudioDestinationNode;
 }
 
 interface AudioListener {
@@ -4023,7 +4406,7 @@ interface AudioListener {
 
 declare var AudioListener: {
     prototype: AudioListener;
-    new(): AudioListener;
+    new (): AudioListener;
 }
 
 interface AudioNode extends EventTarget {
@@ -4039,7 +4422,7 @@ interface AudioNode extends EventTarget {
 
 declare var AudioNode: {
     prototype: AudioNode;
-    new(): AudioNode;
+    new (): AudioNode;
 }
 
 interface AudioParam {
@@ -4055,7 +4438,7 @@ interface AudioParam {
 
 declare var AudioParam: {
     prototype: AudioParam;
-    new(): AudioParam;
+    new (): AudioParam;
 }
 
 interface AudioProcessingEvent extends Event {
@@ -4066,7 +4449,7 @@ interface AudioProcessingEvent extends Event {
 
 declare var AudioProcessingEvent: {
     prototype: AudioProcessingEvent;
-    new(): AudioProcessingEvent;
+    new (): AudioProcessingEvent;
 }
 
 interface AudioTrack {
@@ -4080,7 +4463,7 @@ interface AudioTrack {
 
 declare var AudioTrack: {
     prototype: AudioTrack;
-    new(): AudioTrack;
+    new (): AudioTrack;
 }
 
 interface AudioTrackList extends EventTarget {
@@ -4099,7 +4482,7 @@ interface AudioTrackList extends EventTarget {
 
 declare var AudioTrackList: {
     prototype: AudioTrackList;
-    new(): AudioTrackList;
+    new (): AudioTrackList;
 }
 
 interface BarProp {
@@ -4108,7 +4491,7 @@ interface BarProp {
 
 declare var BarProp: {
     prototype: BarProp;
-    new(): BarProp;
+    new (): BarProp;
 }
 
 interface BeforeUnloadEvent extends Event {
@@ -4117,7 +4500,7 @@ interface BeforeUnloadEvent extends Event {
 
 declare var BeforeUnloadEvent: {
     prototype: BeforeUnloadEvent;
-    new(): BeforeUnloadEvent;
+    new (): BeforeUnloadEvent;
 }
 
 interface BiquadFilterNode extends AudioNode {
@@ -4131,7 +4514,7 @@ interface BiquadFilterNode extends AudioNode {
 
 declare var BiquadFilterNode: {
     prototype: BiquadFilterNode;
-    new(): BiquadFilterNode;
+    new (): BiquadFilterNode;
 }
 
 interface Blob {
@@ -4152,7 +4535,7 @@ interface CDATASection extends Text {
 
 declare var CDATASection: {
     prototype: CDATASection;
-    new(): CDATASection;
+    new (): CDATASection;
 }
 
 interface CSS {
@@ -4166,7 +4549,7 @@ interface CSSConditionRule extends CSSGroupingRule {
 
 declare var CSSConditionRule: {
     prototype: CSSConditionRule;
-    new(): CSSConditionRule;
+    new (): CSSConditionRule;
 }
 
 interface CSSFontFaceRule extends CSSRule {
@@ -4175,7 +4558,7 @@ interface CSSFontFaceRule extends CSSRule {
 
 declare var CSSFontFaceRule: {
     prototype: CSSFontFaceRule;
-    new(): CSSFontFaceRule;
+    new (): CSSFontFaceRule;
 }
 
 interface CSSGroupingRule extends CSSRule {
@@ -4186,7 +4569,7 @@ interface CSSGroupingRule extends CSSRule {
 
 declare var CSSGroupingRule: {
     prototype: CSSGroupingRule;
-    new(): CSSGroupingRule;
+    new (): CSSGroupingRule;
 }
 
 interface CSSImportRule extends CSSRule {
@@ -4197,7 +4580,7 @@ interface CSSImportRule extends CSSRule {
 
 declare var CSSImportRule: {
     prototype: CSSImportRule;
-    new(): CSSImportRule;
+    new (): CSSImportRule;
 }
 
 interface CSSKeyframeRule extends CSSRule {
@@ -4207,7 +4590,7 @@ interface CSSKeyframeRule extends CSSRule {
 
 declare var CSSKeyframeRule: {
     prototype: CSSKeyframeRule;
-    new(): CSSKeyframeRule;
+    new (): CSSKeyframeRule;
 }
 
 interface CSSKeyframesRule extends CSSRule {
@@ -4220,7 +4603,7 @@ interface CSSKeyframesRule extends CSSRule {
 
 declare var CSSKeyframesRule: {
     prototype: CSSKeyframesRule;
-    new(): CSSKeyframesRule;
+    new (): CSSKeyframesRule;
 }
 
 interface CSSMediaRule extends CSSConditionRule {
@@ -4229,7 +4612,7 @@ interface CSSMediaRule extends CSSConditionRule {
 
 declare var CSSMediaRule: {
     prototype: CSSMediaRule;
-    new(): CSSMediaRule;
+    new (): CSSMediaRule;
 }
 
 interface CSSNamespaceRule extends CSSRule {
@@ -4239,7 +4622,7 @@ interface CSSNamespaceRule extends CSSRule {
 
 declare var CSSNamespaceRule: {
     prototype: CSSNamespaceRule;
-    new(): CSSNamespaceRule;
+    new (): CSSNamespaceRule;
 }
 
 interface CSSPageRule extends CSSRule {
@@ -4251,7 +4634,7 @@ interface CSSPageRule extends CSSRule {
 
 declare var CSSPageRule: {
     prototype: CSSPageRule;
-    new(): CSSPageRule;
+    new (): CSSPageRule;
 }
 
 interface CSSRule {
@@ -4275,7 +4658,7 @@ interface CSSRule {
 
 declare var CSSRule: {
     prototype: CSSRule;
-    new(): CSSRule;
+    new (): CSSRule;
     CHARSET_RULE: number;
     FONT_FACE_RULE: number;
     IMPORT_RULE: number;
@@ -4298,7 +4681,7 @@ interface CSSRuleList {
 
 declare var CSSRuleList: {
     prototype: CSSRuleList;
-    new(): CSSRuleList;
+    new (): CSSRuleList;
 }
 
 interface CSSStyleDeclaration {
@@ -4657,7 +5040,7 @@ interface CSSStyleDeclaration {
 
 declare var CSSStyleDeclaration: {
     prototype: CSSStyleDeclaration;
-    new(): CSSStyleDeclaration;
+    new (): CSSStyleDeclaration;
 }
 
 interface CSSStyleRule extends CSSRule {
@@ -4668,7 +5051,7 @@ interface CSSStyleRule extends CSSRule {
 
 declare var CSSStyleRule: {
     prototype: CSSStyleRule;
-    new(): CSSStyleRule;
+    new (): CSSStyleRule;
 }
 
 interface CSSStyleSheet extends StyleSheet {
@@ -4695,7 +5078,7 @@ interface CSSStyleSheet extends StyleSheet {
 
 declare var CSSStyleSheet: {
     prototype: CSSStyleSheet;
-    new(): CSSStyleSheet;
+    new (): CSSStyleSheet;
 }
 
 interface CSSSupportsRule extends CSSConditionRule {
@@ -4703,7 +5086,7 @@ interface CSSSupportsRule extends CSSConditionRule {
 
 declare var CSSSupportsRule: {
     prototype: CSSSupportsRule;
-    new(): CSSSupportsRule;
+    new (): CSSSupportsRule;
 }
 
 interface CanvasGradient {
@@ -4712,7 +5095,7 @@ interface CanvasGradient {
 
 declare var CanvasGradient: {
     prototype: CanvasGradient;
-    new(): CanvasGradient;
+    new (): CanvasGradient;
 }
 
 interface CanvasPattern {
@@ -4720,7 +5103,7 @@ interface CanvasPattern {
 
 declare var CanvasPattern: {
     prototype: CanvasPattern;
-    new(): CanvasPattern;
+    new (): CanvasPattern;
 }
 
 interface CanvasRenderingContext2D {
@@ -4750,16 +5133,11 @@ interface CanvasRenderingContext2D {
     clearRect(x: number, y: number, w: number, h: number): void;
     clip(fillRule?: string): void;
     closePath(): void;
-    createImageData(imageDataOrSw: number, sh?: number): ImageData;
-    createImageData(imageDataOrSw: ImageData, sh?: number): ImageData;
+    createImageData(imageDataOrSw: number | ImageData, sh?: number): ImageData;
     createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient;
-    createPattern(image: HTMLImageElement, repetition: string): CanvasPattern;
-    createPattern(image: HTMLCanvasElement, repetition: string): CanvasPattern;
-    createPattern(image: HTMLVideoElement, repetition: string): CanvasPattern;
+    createPattern(image: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement, repetition: string): CanvasPattern;
     createRadialGradient(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient;
-    drawImage(image: HTMLImageElement, offsetX: number, offsetY: number, width?: number, height?: number, canvasOffsetX?: number, canvasOffsetY?: number, canvasImageWidth?: number, canvasImageHeight?: number): void;
-    drawImage(image: HTMLCanvasElement, offsetX: number, offsetY: number, width?: number, height?: number, canvasOffsetX?: number, canvasOffsetY?: number, canvasImageWidth?: number, canvasImageHeight?: number): void;
-    drawImage(image: HTMLVideoElement, offsetX: number, offsetY: number, width?: number, height?: number, canvasOffsetX?: number, canvasOffsetY?: number, canvasImageWidth?: number, canvasImageHeight?: number): void;
+    drawImage(image: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement, offsetX: number, offsetY: number, width?: number, height?: number, canvasOffsetX?: number, canvasOffsetY?: number, canvasImageWidth?: number, canvasImageHeight?: number): void;
     fill(fillRule?: string): void;
     fillRect(x: number, y: number, w: number, h: number): void;
     fillText(text: string, x: number, y: number, maxWidth?: number): void;
@@ -4787,7 +5165,7 @@ interface CanvasRenderingContext2D {
 
 declare var CanvasRenderingContext2D: {
     prototype: CanvasRenderingContext2D;
-    new(): CanvasRenderingContext2D;
+    new (): CanvasRenderingContext2D;
 }
 
 interface ChannelMergerNode extends AudioNode {
@@ -4795,7 +5173,7 @@ interface ChannelMergerNode extends AudioNode {
 
 declare var ChannelMergerNode: {
     prototype: ChannelMergerNode;
-    new(): ChannelMergerNode;
+    new (): ChannelMergerNode;
 }
 
 interface ChannelSplitterNode extends AudioNode {
@@ -4803,7 +5181,7 @@ interface ChannelSplitterNode extends AudioNode {
 
 declare var ChannelSplitterNode: {
     prototype: ChannelSplitterNode;
-    new(): ChannelSplitterNode;
+    new (): ChannelSplitterNode;
 }
 
 interface CharacterData extends Node, ChildNode {
@@ -4819,7 +5197,7 @@ interface CharacterData extends Node, ChildNode {
 
 declare var CharacterData: {
     prototype: CharacterData;
-    new(): CharacterData;
+    new (): CharacterData;
 }
 
 interface ClientRect {
@@ -4833,7 +5211,7 @@ interface ClientRect {
 
 declare var ClientRect: {
     prototype: ClientRect;
-    new(): ClientRect;
+    new (): ClientRect;
 }
 
 interface ClientRectList {
@@ -4844,7 +5222,7 @@ interface ClientRectList {
 
 declare var ClientRectList: {
     prototype: ClientRectList;
-    new(): ClientRectList;
+    new (): ClientRectList;
 }
 
 interface ClipboardEvent extends Event {
@@ -4853,7 +5231,7 @@ interface ClipboardEvent extends Event {
 
 declare var ClipboardEvent: {
     prototype: ClipboardEvent;
-    new(type: string, eventInitDict?: ClipboardEventInit): ClipboardEvent;
+    new (type: string, eventInitDict?: ClipboardEventInit): ClipboardEvent;
 }
 
 interface CloseEvent extends Event {
@@ -4865,7 +5243,7 @@ interface CloseEvent extends Event {
 
 declare var CloseEvent: {
     prototype: CloseEvent;
-    new(): CloseEvent;
+    new (): CloseEvent;
 }
 
 interface CommandEvent extends Event {
@@ -4875,7 +5253,7 @@ interface CommandEvent extends Event {
 
 declare var CommandEvent: {
     prototype: CommandEvent;
-    new(type: string, eventInitDict?: CommandEventInit): CommandEvent;
+    new (type: string, eventInitDict?: CommandEventInit): CommandEvent;
 }
 
 interface Comment extends CharacterData {
@@ -4884,7 +5262,7 @@ interface Comment extends CharacterData {
 
 declare var Comment: {
     prototype: Comment;
-    new(): Comment;
+    new (): Comment;
 }
 
 interface CompositionEvent extends UIEvent {
@@ -4895,7 +5273,7 @@ interface CompositionEvent extends UIEvent {
 
 declare var CompositionEvent: {
     prototype: CompositionEvent;
-    new(typeArg: string, eventInitDict?: CompositionEventInit): CompositionEvent;
+    new (typeArg: string, eventInitDict?: CompositionEventInit): CompositionEvent;
 }
 
 interface Console {
@@ -4923,7 +5301,7 @@ interface Console {
 
 declare var Console: {
     prototype: Console;
-    new(): Console;
+    new (): Console;
 }
 
 interface ConvolverNode extends AudioNode {
@@ -4933,7 +5311,7 @@ interface ConvolverNode extends AudioNode {
 
 declare var ConvolverNode: {
     prototype: ConvolverNode;
-    new(): ConvolverNode;
+    new (): ConvolverNode;
 }
 
 interface Coordinates {
@@ -4948,7 +5326,7 @@ interface Coordinates {
 
 declare var Coordinates: {
     prototype: Coordinates;
-    new(): Coordinates;
+    new (): Coordinates;
 }
 
 interface Crypto extends Object, RandomSource {
@@ -4957,7 +5335,7 @@ interface Crypto extends Object, RandomSource {
 
 declare var Crypto: {
     prototype: Crypto;
-    new(): Crypto;
+    new (): Crypto;
 }
 
 interface CryptoKey {
@@ -4969,7 +5347,7 @@ interface CryptoKey {
 
 declare var CryptoKey: {
     prototype: CryptoKey;
-    new(): CryptoKey;
+    new (): CryptoKey;
 }
 
 interface CryptoKeyPair {
@@ -4979,7 +5357,7 @@ interface CryptoKeyPair {
 
 declare var CryptoKeyPair: {
     prototype: CryptoKeyPair;
-    new(): CryptoKeyPair;
+    new (): CryptoKeyPair;
 }
 
 interface CustomEvent extends Event {
@@ -4989,7 +5367,7 @@ interface CustomEvent extends Event {
 
 declare var CustomEvent: {
     prototype: CustomEvent;
-    new(typeArg: string, eventInitDict?: CustomEventInit): CustomEvent;
+    new (typeArg: string, eventInitDict?: CustomEventInit): CustomEvent;
 }
 
 interface DOMError {
@@ -4999,7 +5377,7 @@ interface DOMError {
 
 declare var DOMError: {
     prototype: DOMError;
-    new(): DOMError;
+    new (): DOMError;
 }
 
 interface DOMException {
@@ -5038,7 +5416,7 @@ interface DOMException {
 
 declare var DOMException: {
     prototype: DOMException;
-    new(): DOMException;
+    new (): DOMException;
     ABORT_ERR: number;
     DATA_CLONE_ERR: number;
     DOMSTRING_SIZE_ERR: number;
@@ -5077,7 +5455,7 @@ interface DOMImplementation {
 
 declare var DOMImplementation: {
     prototype: DOMImplementation;
-    new(): DOMImplementation;
+    new (): DOMImplementation;
 }
 
 interface DOMParser {
@@ -5086,7 +5464,7 @@ interface DOMParser {
 
 declare var DOMParser: {
     prototype: DOMParser;
-    new(): DOMParser;
+    new (): DOMParser;
 }
 
 interface DOMSettableTokenList extends DOMTokenList {
@@ -5095,7 +5473,7 @@ interface DOMSettableTokenList extends DOMTokenList {
 
 declare var DOMSettableTokenList: {
     prototype: DOMSettableTokenList;
-    new(): DOMSettableTokenList;
+    new (): DOMSettableTokenList;
 }
 
 interface DOMStringList {
@@ -5107,7 +5485,7 @@ interface DOMStringList {
 
 declare var DOMStringList: {
     prototype: DOMStringList;
-    new(): DOMStringList;
+    new (): DOMStringList;
 }
 
 interface DOMStringMap {
@@ -5116,7 +5494,7 @@ interface DOMStringMap {
 
 declare var DOMStringMap: {
     prototype: DOMStringMap;
-    new(): DOMStringMap;
+    new (): DOMStringMap;
 }
 
 interface DOMTokenList {
@@ -5132,7 +5510,7 @@ interface DOMTokenList {
 
 declare var DOMTokenList: {
     prototype: DOMTokenList;
-    new(): DOMTokenList;
+    new (): DOMTokenList;
 }
 
 interface DataCue extends TextTrackCue {
@@ -5141,7 +5519,7 @@ interface DataCue extends TextTrackCue {
 
 declare var DataCue: {
     prototype: DataCue;
-    new(): DataCue;
+    new (): DataCue;
 }
 
 interface DataTransfer {
@@ -5157,7 +5535,7 @@ interface DataTransfer {
 
 declare var DataTransfer: {
     prototype: DataTransfer;
-    new(): DataTransfer;
+    new (): DataTransfer;
 }
 
 interface DataTransferItem {
@@ -5169,7 +5547,7 @@ interface DataTransferItem {
 
 declare var DataTransferItem: {
     prototype: DataTransferItem;
-    new(): DataTransferItem;
+    new (): DataTransferItem;
 }
 
 interface DataTransferItemList {
@@ -5183,7 +5561,7 @@ interface DataTransferItemList {
 
 declare var DataTransferItemList: {
     prototype: DataTransferItemList;
-    new(): DataTransferItemList;
+    new (): DataTransferItemList;
 }
 
 interface DeferredPermissionRequest {
@@ -5196,7 +5574,7 @@ interface DeferredPermissionRequest {
 
 declare var DeferredPermissionRequest: {
     prototype: DeferredPermissionRequest;
-    new(): DeferredPermissionRequest;
+    new (): DeferredPermissionRequest;
 }
 
 interface DelayNode extends AudioNode {
@@ -5205,7 +5583,7 @@ interface DelayNode extends AudioNode {
 
 declare var DelayNode: {
     prototype: DelayNode;
-    new(): DelayNode;
+    new (): DelayNode;
 }
 
 interface DeviceAcceleration {
@@ -5216,7 +5594,7 @@ interface DeviceAcceleration {
 
 declare var DeviceAcceleration: {
     prototype: DeviceAcceleration;
-    new(): DeviceAcceleration;
+    new (): DeviceAcceleration;
 }
 
 interface DeviceMotionEvent extends Event {
@@ -5229,7 +5607,7 @@ interface DeviceMotionEvent extends Event {
 
 declare var DeviceMotionEvent: {
     prototype: DeviceMotionEvent;
-    new(): DeviceMotionEvent;
+    new (): DeviceMotionEvent;
 }
 
 interface DeviceOrientationEvent extends Event {
@@ -5242,7 +5620,7 @@ interface DeviceOrientationEvent extends Event {
 
 declare var DeviceOrientationEvent: {
     prototype: DeviceOrientationEvent;
-    new(): DeviceOrientationEvent;
+    new (): DeviceOrientationEvent;
 }
 
 interface DeviceRotationRate {
@@ -5253,7 +5631,7 @@ interface DeviceRotationRate {
 
 declare var DeviceRotationRate: {
     prototype: DeviceRotationRate;
-    new(): DeviceRotationRate;
+    new (): DeviceRotationRate;
 }
 
 interface Document extends Node, GlobalEventHandlers, NodeSelector, DocumentEvent {
@@ -5917,12 +6295,12 @@ interface Document extends Node, GlobalEventHandlers, NodeSelector, DocumentEven
       * @param elementId String that specifies the ID value. Case-insensitive.
       */
     getElementById(elementId: string): HTMLElement;
-    getElementsByClassName(classNames: string): NodeList;
+    getElementsByClassName(classNames: string): NodeListOf<Element>;
     /**
       * Gets a collection of objects based on the value of the NAME or ID attribute.
       * @param elementName Gets a collection of objects based on the value of the NAME or ID attribute.
       */
-    getElementsByName(elementName: string): NodeList;
+    getElementsByName(elementName: string): NodeListOf<Element>;
     /**
       * Retrieves a collection of objects based on the specified element name.
       * @param name Specifies the name of an element.
@@ -6100,8 +6478,8 @@ interface Document extends Node, GlobalEventHandlers, NodeSelector, DocumentEven
     getElementsByTagName(tagname: "wbr"): NodeListOf<HTMLElement>;
     getElementsByTagName(tagname: "x-ms-webview"): NodeListOf<MSHTMLWebViewElement>;
     getElementsByTagName(tagname: "xmp"): NodeListOf<HTMLBlockElement>;
-    getElementsByTagName(tagname: string): NodeList;
-    getElementsByTagNameNS(namespaceURI: string, localName: string): NodeList;
+    getElementsByTagName(tagname: string): NodeListOf<Element>;
+    getElementsByTagNameNS(namespaceURI: string, localName: string): NodeListOf<Element>;
     /**
       * Returns an object representing the current selection of the document that is loaded into the object displaying a webpage.
       */
@@ -6122,7 +6500,7 @@ interface Document extends Node, GlobalEventHandlers, NodeSelector, DocumentEven
       * @param features Contains a list of items separated by commas. Each item consists of an option and a value, separated by an equals sign (for example, "fullscreen=yes, toolbar=yes"). The following values are supported.
       * @param replace Specifies whether the existing entry for the document is replaced in the history list.
       */
-    open(url?: string, name?: string, features?: string, replace?: boolean): Document | Window;
+    open(url?: string, name?: string, features?: string, replace?: boolean): Document;
     /** 
       * Returns a Boolean value that indicates whether a specified command can be successfully executed using execCommand, given the current state of the document.
       * @param commandId Specifies a command identifier.
@@ -6270,7 +6648,7 @@ interface Document extends Node, GlobalEventHandlers, NodeSelector, DocumentEven
 
 declare var Document: {
     prototype: Document;
-    new(): Document;
+    new (): Document;
 }
 
 interface DocumentFragment extends Node, NodeSelector {
@@ -6279,7 +6657,7 @@ interface DocumentFragment extends Node, NodeSelector {
 
 declare var DocumentFragment: {
     prototype: DocumentFragment;
-    new(): DocumentFragment;
+    new (): DocumentFragment;
 }
 
 interface DocumentType extends Node, ChildNode {
@@ -6294,7 +6672,7 @@ interface DocumentType extends Node, ChildNode {
 
 declare var DocumentType: {
     prototype: DocumentType;
-    new(): DocumentType;
+    new (): DocumentType;
 }
 
 interface DragEvent extends MouseEvent {
@@ -6305,7 +6683,7 @@ interface DragEvent extends MouseEvent {
 
 declare var DragEvent: {
     prototype: DragEvent;
-    new(): DragEvent;
+    new (): DragEvent;
 }
 
 interface DynamicsCompressorNode extends AudioNode {
@@ -6319,7 +6697,7 @@ interface DynamicsCompressorNode extends AudioNode {
 
 declare var DynamicsCompressorNode: {
     prototype: DynamicsCompressorNode;
-    new(): DynamicsCompressorNode;
+    new (): DynamicsCompressorNode;
 }
 
 interface EXT_texture_filter_anisotropic {
@@ -6329,7 +6707,7 @@ interface EXT_texture_filter_anisotropic {
 
 declare var EXT_texture_filter_anisotropic: {
     prototype: EXT_texture_filter_anisotropic;
-    new(): EXT_texture_filter_anisotropic;
+    new (): EXT_texture_filter_anisotropic;
     MAX_TEXTURE_MAX_ANISOTROPY_EXT: number;
     TEXTURE_MAX_ANISOTROPY_EXT: number;
 }
@@ -6374,6 +6752,8 @@ interface Element extends Node, GlobalEventHandlers, ElementTraversal, NodeSelec
     scrollTop: number;
     scrollWidth: number;
     tagName: string;
+    id: string;
+    className: string;
     getAttribute(name?: string): string;
     getAttributeNS(namespaceURI: string, localName: string): string;
     getAttributeNode(name: string): Attr;
@@ -6553,8 +6933,8 @@ interface Element extends Node, GlobalEventHandlers, ElementTraversal, NodeSelec
     getElementsByTagName(name: "wbr"): NodeListOf<HTMLElement>;
     getElementsByTagName(name: "x-ms-webview"): NodeListOf<MSHTMLWebViewElement>;
     getElementsByTagName(name: "xmp"): NodeListOf<HTMLBlockElement>;
-    getElementsByTagName(name: string): NodeList;
-    getElementsByTagNameNS(namespaceURI: string, localName: string): NodeList;
+    getElementsByTagName(name: string): NodeListOf<Element>;
+    getElementsByTagNameNS(namespaceURI: string, localName: string): NodeListOf<Element>;
     hasAttribute(name: string): boolean;
     hasAttributeNS(namespaceURI: string, localName: string): boolean;
     msGetRegionContent(): MSRangeCollection;
@@ -6577,6 +6957,7 @@ interface Element extends Node, GlobalEventHandlers, ElementTraversal, NodeSelec
     webkitMatchesSelector(selectors: string): boolean;
     webkitRequestFullScreen(): void;
     webkitRequestFullscreen(): void;
+    getElementsByClassName(classNames: string): NodeListOf<Element>;
     addEventListener(type: "MSGestureChange", listener: (ev: MSGestureEvent) => any, useCapture?: boolean): void;
     addEventListener(type: "MSGestureDoubleTap", listener: (ev: MSGestureEvent) => any, useCapture?: boolean): void;
     addEventListener(type: "MSGestureEnd", listener: (ev: MSGestureEvent) => any, useCapture?: boolean): void;
@@ -6618,7 +6999,7 @@ interface Element extends Node, GlobalEventHandlers, ElementTraversal, NodeSelec
 
 declare var Element: {
     prototype: Element;
-    new(): Element;
+    new (): Element;
 }
 
 interface ErrorEvent extends Event {
@@ -6632,7 +7013,7 @@ interface ErrorEvent extends Event {
 
 declare var ErrorEvent: {
     prototype: ErrorEvent;
-    new(): ErrorEvent;
+    new (): ErrorEvent;
 }
 
 interface Event {
@@ -6659,7 +7040,7 @@ interface Event {
 
 declare var Event: {
     prototype: Event;
-    new(type: string, eventInitDict?: EventInit): Event;
+    new (type: string, eventInitDict?: EventInit): Event;
     AT_TARGET: number;
     BUBBLING_PHASE: number;
     CAPTURING_PHASE: number;
@@ -6673,7 +7054,7 @@ interface EventTarget {
 
 declare var EventTarget: {
     prototype: EventTarget;
-    new(): EventTarget;
+    new (): EventTarget;
 }
 
 interface External {
@@ -6681,7 +7062,7 @@ interface External {
 
 declare var External: {
     prototype: External;
-    new(): External;
+    new (): External;
 }
 
 interface File extends Blob {
@@ -6691,7 +7072,7 @@ interface File extends Blob {
 
 declare var File: {
     prototype: File;
-    new(): File;
+    new (parts: (ArrayBuffer | ArrayBufferView | Blob | string)[], filename: string, properties?: FilePropertyBag): File;
 }
 
 interface FileList {
@@ -6702,7 +7083,7 @@ interface FileList {
 
 declare var FileList: {
     prototype: FileList;
-    new(): FileList;
+    new (): FileList;
 }
 
 interface FileReader extends EventTarget, MSBaseReader {
@@ -6716,7 +7097,7 @@ interface FileReader extends EventTarget, MSBaseReader {
 
 declare var FileReader: {
     prototype: FileReader;
-    new(): FileReader;
+    new (): FileReader;
 }
 
 interface FocusEvent extends UIEvent {
@@ -6726,7 +7107,7 @@ interface FocusEvent extends UIEvent {
 
 declare var FocusEvent: {
     prototype: FocusEvent;
-    new(typeArg: string, eventInitDict?: FocusEventInit): FocusEvent;
+    new (typeArg: string, eventInitDict?: FocusEventInit): FocusEvent;
 }
 
 interface FormData {
@@ -6735,7 +7116,7 @@ interface FormData {
 
 declare var FormData: {
     prototype: FormData;
-    new(): FormData;
+    new (form?: HTMLFormElement): FormData;
 }
 
 interface GainNode extends AudioNode {
@@ -6744,7 +7125,7 @@ interface GainNode extends AudioNode {
 
 declare var GainNode: {
     prototype: GainNode;
-    new(): GainNode;
+    new (): GainNode;
 }
 
 interface Gamepad {
@@ -6759,7 +7140,7 @@ interface Gamepad {
 
 declare var Gamepad: {
     prototype: Gamepad;
-    new(): Gamepad;
+    new (): Gamepad;
 }
 
 interface GamepadButton {
@@ -6769,7 +7150,7 @@ interface GamepadButton {
 
 declare var GamepadButton: {
     prototype: GamepadButton;
-    new(): GamepadButton;
+    new (): GamepadButton;
 }
 
 interface GamepadEvent extends Event {
@@ -6778,7 +7159,7 @@ interface GamepadEvent extends Event {
 
 declare var GamepadEvent: {
     prototype: GamepadEvent;
-    new(): GamepadEvent;
+    new (): GamepadEvent;
 }
 
 interface Geolocation {
@@ -6789,7 +7170,7 @@ interface Geolocation {
 
 declare var Geolocation: {
     prototype: Geolocation;
-    new(): Geolocation;
+    new (): Geolocation;
 }
 
 interface HTMLAllCollection extends HTMLCollection {
@@ -6798,7 +7179,7 @@ interface HTMLAllCollection extends HTMLCollection {
 
 declare var HTMLAllCollection: {
     prototype: HTMLAllCollection;
-    new(): HTMLAllCollection;
+    new (): HTMLAllCollection;
 }
 
 interface HTMLAnchorElement extends HTMLElement {
@@ -6884,7 +7265,7 @@ interface HTMLAnchorElement extends HTMLElement {
 
 declare var HTMLAnchorElement: {
     prototype: HTMLAnchorElement;
-    new(): HTMLAnchorElement;
+    new (): HTMLAnchorElement;
 }
 
 interface HTMLAppletElement extends HTMLElement {
@@ -6956,7 +7337,7 @@ interface HTMLAppletElement extends HTMLElement {
 
 declare var HTMLAppletElement: {
     prototype: HTMLAppletElement;
-    new(): HTMLAppletElement;
+    new (): HTMLAppletElement;
 }
 
 interface HTMLAreaElement extends HTMLElement {
@@ -7021,15 +7402,14 @@ interface HTMLAreaElement extends HTMLElement {
 
 declare var HTMLAreaElement: {
     prototype: HTMLAreaElement;
-    new(): HTMLAreaElement;
+    new (): HTMLAreaElement;
 }
 
 interface HTMLAreasCollection extends HTMLCollection {
     /**
       * Adds an element to the areas, controlRange, or options collection.
       */
-    add(element: HTMLElement, before?: HTMLElement): void;
-    add(element: HTMLElement, before?: number): void;
+    add(element: HTMLElement, before?: HTMLElement | number): void;
     /**
       * Removes an element from the collection.
       */
@@ -7038,7 +7418,7 @@ interface HTMLAreasCollection extends HTMLCollection {
 
 declare var HTMLAreasCollection: {
     prototype: HTMLAreasCollection;
-    new(): HTMLAreasCollection;
+    new (): HTMLAreasCollection;
 }
 
 interface HTMLAudioElement extends HTMLMediaElement {
@@ -7046,7 +7426,7 @@ interface HTMLAudioElement extends HTMLMediaElement {
 
 declare var HTMLAudioElement: {
     prototype: HTMLAudioElement;
-    new(): HTMLAudioElement;
+    new (): HTMLAudioElement;
 }
 
 interface HTMLBRElement extends HTMLElement {
@@ -7058,7 +7438,7 @@ interface HTMLBRElement extends HTMLElement {
 
 declare var HTMLBRElement: {
     prototype: HTMLBRElement;
-    new(): HTMLBRElement;
+    new (): HTMLBRElement;
 }
 
 interface HTMLBaseElement extends HTMLElement {
@@ -7074,7 +7454,7 @@ interface HTMLBaseElement extends HTMLElement {
 
 declare var HTMLBaseElement: {
     prototype: HTMLBaseElement;
-    new(): HTMLBaseElement;
+    new (): HTMLBaseElement;
 }
 
 interface HTMLBaseFontElement extends HTMLElement, DOML2DeprecatedColorProperty {
@@ -7091,7 +7471,7 @@ interface HTMLBaseFontElement extends HTMLElement, DOML2DeprecatedColorProperty 
 
 declare var HTMLBaseFontElement: {
     prototype: HTMLBaseFontElement;
-    new(): HTMLBaseFontElement;
+    new (): HTMLBaseFontElement;
 }
 
 interface HTMLBlockElement extends HTMLElement {
@@ -7108,7 +7488,7 @@ interface HTMLBlockElement extends HTMLElement {
 
 declare var HTMLBlockElement: {
     prototype: HTMLBlockElement;
-    new(): HTMLBlockElement;
+    new (): HTMLBlockElement;
 }
 
 interface HTMLBodyElement extends HTMLElement {
@@ -7264,7 +7644,7 @@ interface HTMLBodyElement extends HTMLElement {
 
 declare var HTMLBodyElement: {
     prototype: HTMLBodyElement;
-    new(): HTMLBodyElement;
+    new (): HTMLBodyElement;
 }
 
 interface HTMLButtonElement extends HTMLElement {
@@ -7339,7 +7719,7 @@ interface HTMLButtonElement extends HTMLElement {
 
 declare var HTMLButtonElement: {
     prototype: HTMLButtonElement;
-    new(): HTMLButtonElement;
+    new (): HTMLButtonElement;
 }
 
 interface HTMLCanvasElement extends HTMLElement {
@@ -7371,7 +7751,7 @@ interface HTMLCanvasElement extends HTMLElement {
 
 declare var HTMLCanvasElement: {
     prototype: HTMLCanvasElement;
-    new(): HTMLCanvasElement;
+    new (): HTMLCanvasElement;
 }
 
 interface HTMLCollection {
@@ -7392,7 +7772,7 @@ interface HTMLCollection {
 
 declare var HTMLCollection: {
     prototype: HTMLCollection;
-    new(): HTMLCollection;
+    new (): HTMLCollection;
 }
 
 interface HTMLDDElement extends HTMLElement {
@@ -7404,7 +7784,7 @@ interface HTMLDDElement extends HTMLElement {
 
 declare var HTMLDDElement: {
     prototype: HTMLDDElement;
-    new(): HTMLDDElement;
+    new (): HTMLDDElement;
 }
 
 interface HTMLDListElement extends HTMLElement {
@@ -7413,7 +7793,7 @@ interface HTMLDListElement extends HTMLElement {
 
 declare var HTMLDListElement: {
     prototype: HTMLDListElement;
-    new(): HTMLDListElement;
+    new (): HTMLDListElement;
 }
 
 interface HTMLDTElement extends HTMLElement {
@@ -7425,7 +7805,7 @@ interface HTMLDTElement extends HTMLElement {
 
 declare var HTMLDTElement: {
     prototype: HTMLDTElement;
-    new(): HTMLDTElement;
+    new (): HTMLDTElement;
 }
 
 interface HTMLDataListElement extends HTMLElement {
@@ -7434,7 +7814,7 @@ interface HTMLDataListElement extends HTMLElement {
 
 declare var HTMLDataListElement: {
     prototype: HTMLDataListElement;
-    new(): HTMLDataListElement;
+    new (): HTMLDataListElement;
 }
 
 interface HTMLDirectoryElement extends HTMLElement {
@@ -7443,7 +7823,7 @@ interface HTMLDirectoryElement extends HTMLElement {
 
 declare var HTMLDirectoryElement: {
     prototype: HTMLDirectoryElement;
-    new(): HTMLDirectoryElement;
+    new (): HTMLDirectoryElement;
 }
 
 interface HTMLDivElement extends HTMLElement {
@@ -7459,7 +7839,7 @@ interface HTMLDivElement extends HTMLElement {
 
 declare var HTMLDivElement: {
     prototype: HTMLDivElement;
-    new(): HTMLDivElement;
+    new (): HTMLDivElement;
 }
 
 interface HTMLDocument extends Document {
@@ -7467,20 +7847,18 @@ interface HTMLDocument extends Document {
 
 declare var HTMLDocument: {
     prototype: HTMLDocument;
-    new(): HTMLDocument;
+    new (): HTMLDocument;
 }
 
 interface HTMLElement extends Element {
     accessKey: string;
     children: HTMLCollection;
-    className: string;
     contentEditable: string;
     dataset: DOMStringMap;
     dir: string;
     draggable: boolean;
     hidden: boolean;
     hideFocus: boolean;
-    id: string;
     innerHTML: string;
     innerText: string;
     isContentEditable: boolean;
@@ -7567,7 +7945,6 @@ interface HTMLElement extends Element {
     contains(child: HTMLElement): boolean;
     dragDrop(): boolean;
     focus(): void;
-    getElementsByClassName(classNames: string): NodeList;
     insertAdjacentElement(position: string, insertedElement: Element): Element;
     insertAdjacentHTML(where: string, html: string): void;
     insertAdjacentText(where: string, text: string): void;
@@ -7681,7 +8058,7 @@ interface HTMLElement extends Element {
 
 declare var HTMLElement: {
     prototype: HTMLElement;
-    new(): HTMLElement;
+    new (): HTMLElement;
 }
 
 interface HTMLEmbedElement extends HTMLElement, GetSVGDocument {
@@ -7736,7 +8113,7 @@ interface HTMLEmbedElement extends HTMLElement, GetSVGDocument {
 
 declare var HTMLEmbedElement: {
     prototype: HTMLEmbedElement;
-    new(): HTMLEmbedElement;
+    new (): HTMLEmbedElement;
 }
 
 interface HTMLFieldSetElement extends HTMLElement {
@@ -7774,7 +8151,7 @@ interface HTMLFieldSetElement extends HTMLElement {
 
 declare var HTMLFieldSetElement: {
     prototype: HTMLFieldSetElement;
-    new(): HTMLFieldSetElement;
+    new (): HTMLFieldSetElement;
 }
 
 interface HTMLFontElement extends HTMLElement, DOML2DeprecatedColorProperty, DOML2DeprecatedSizeProperty {
@@ -7787,7 +8164,7 @@ interface HTMLFontElement extends HTMLElement, DOML2DeprecatedColorProperty, DOM
 
 declare var HTMLFontElement: {
     prototype: HTMLFontElement;
-    new(): HTMLFontElement;
+    new (): HTMLFontElement;
 }
 
 interface HTMLFormElement extends HTMLElement {
@@ -7862,7 +8239,7 @@ interface HTMLFormElement extends HTMLElement {
 
 declare var HTMLFormElement: {
     prototype: HTMLFormElement;
-    new(): HTMLFormElement;
+    new (): HTMLFormElement;
 }
 
 interface HTMLFrameElement extends HTMLElement, GetSVGDocument {
@@ -8042,7 +8419,7 @@ interface HTMLFrameElement extends HTMLElement, GetSVGDocument {
 
 declare var HTMLFrameElement: {
     prototype: HTMLFrameElement;
-    new(): HTMLFrameElement;
+    new (): HTMLFrameElement;
 }
 
 interface HTMLFrameSetElement extends HTMLElement {
@@ -8214,7 +8591,7 @@ interface HTMLFrameSetElement extends HTMLElement {
 
 declare var HTMLFrameSetElement: {
     prototype: HTMLFrameSetElement;
-    new(): HTMLFrameSetElement;
+    new (): HTMLFrameSetElement;
 }
 
 interface HTMLHRElement extends HTMLElement, DOML2DeprecatedColorProperty, DOML2DeprecatedSizeProperty {
@@ -8235,7 +8612,7 @@ interface HTMLHRElement extends HTMLElement, DOML2DeprecatedColorProperty, DOML2
 
 declare var HTMLHRElement: {
     prototype: HTMLHRElement;
-    new(): HTMLHRElement;
+    new (): HTMLHRElement;
 }
 
 interface HTMLHeadElement extends HTMLElement {
@@ -8244,7 +8621,7 @@ interface HTMLHeadElement extends HTMLElement {
 
 declare var HTMLHeadElement: {
     prototype: HTMLHeadElement;
-    new(): HTMLHeadElement;
+    new (): HTMLHeadElement;
 }
 
 interface HTMLHeadingElement extends HTMLElement {
@@ -8257,7 +8634,7 @@ interface HTMLHeadingElement extends HTMLElement {
 
 declare var HTMLHeadingElement: {
     prototype: HTMLHeadingElement;
-    new(): HTMLHeadingElement;
+    new (): HTMLHeadingElement;
 }
 
 interface HTMLHtmlElement extends HTMLElement {
@@ -8269,7 +8646,7 @@ interface HTMLHtmlElement extends HTMLElement {
 
 declare var HTMLHtmlElement: {
     prototype: HTMLHtmlElement;
-    new(): HTMLHtmlElement;
+    new (): HTMLHtmlElement;
 }
 
 interface HTMLIFrameElement extends HTMLElement, GetSVGDocument {
@@ -8459,7 +8836,7 @@ interface HTMLIFrameElement extends HTMLElement, GetSVGDocument {
 
 declare var HTMLIFrameElement: {
     prototype: HTMLIFrameElement;
-    new(): HTMLIFrameElement;
+    new (): HTMLIFrameElement;
 }
 
 interface HTMLImageElement extends HTMLElement {
@@ -8546,7 +8923,7 @@ interface HTMLImageElement extends HTMLElement {
 
 declare var HTMLImageElement: {
     prototype: HTMLImageElement;
-    new(): HTMLImageElement;
+    new (): HTMLImageElement;
     create(): HTMLImageElement;
 }
 
@@ -8758,7 +9135,7 @@ interface HTMLInputElement extends HTMLElement {
 
 declare var HTMLInputElement: {
     prototype: HTMLInputElement;
-    new(): HTMLInputElement;
+    new (): HTMLInputElement;
 }
 
 interface HTMLIsIndexElement extends HTMLElement {
@@ -8775,7 +9152,7 @@ interface HTMLIsIndexElement extends HTMLElement {
 
 declare var HTMLIsIndexElement: {
     prototype: HTMLIsIndexElement;
-    new(): HTMLIsIndexElement;
+    new (): HTMLIsIndexElement;
 }
 
 interface HTMLLIElement extends HTMLElement {
@@ -8788,7 +9165,7 @@ interface HTMLLIElement extends HTMLElement {
 
 declare var HTMLLIElement: {
     prototype: HTMLLIElement;
-    new(): HTMLLIElement;
+    new (): HTMLLIElement;
 }
 
 interface HTMLLabelElement extends HTMLElement {
@@ -8804,7 +9181,7 @@ interface HTMLLabelElement extends HTMLElement {
 
 declare var HTMLLabelElement: {
     prototype: HTMLLabelElement;
-    new(): HTMLLabelElement;
+    new (): HTMLLabelElement;
 }
 
 interface HTMLLegendElement extends HTMLElement {
@@ -8820,7 +9197,7 @@ interface HTMLLegendElement extends HTMLElement {
 
 declare var HTMLLegendElement: {
     prototype: HTMLLegendElement;
-    new(): HTMLLegendElement;
+    new (): HTMLLegendElement;
 }
 
 interface HTMLLinkElement extends HTMLElement, LinkStyle {
@@ -8862,7 +9239,7 @@ interface HTMLLinkElement extends HTMLElement, LinkStyle {
 
 declare var HTMLLinkElement: {
     prototype: HTMLLinkElement;
-    new(): HTMLLinkElement;
+    new (): HTMLLinkElement;
 }
 
 interface HTMLMapElement extends HTMLElement {
@@ -8878,7 +9255,7 @@ interface HTMLMapElement extends HTMLElement {
 
 declare var HTMLMapElement: {
     prototype: HTMLMapElement;
-    new(): HTMLMapElement;
+    new (): HTMLMapElement;
 }
 
 interface HTMLMarqueeElement extends HTMLElement {
@@ -9008,7 +9385,7 @@ interface HTMLMarqueeElement extends HTMLElement {
 
 declare var HTMLMarqueeElement: {
     prototype: HTMLMarqueeElement;
-    new(): HTMLMarqueeElement;
+    new (): HTMLMarqueeElement;
 }
 
 interface HTMLMediaElement extends HTMLElement {
@@ -9282,7 +9659,7 @@ interface HTMLMediaElement extends HTMLElement {
 
 declare var HTMLMediaElement: {
     prototype: HTMLMediaElement;
-    new(): HTMLMediaElement;
+    new (): HTMLMediaElement;
     HAVE_CURRENT_DATA: number;
     HAVE_ENOUGH_DATA: number;
     HAVE_FUTURE_DATA: number;
@@ -9301,7 +9678,7 @@ interface HTMLMenuElement extends HTMLElement {
 
 declare var HTMLMenuElement: {
     prototype: HTMLMenuElement;
-    new(): HTMLMenuElement;
+    new (): HTMLMenuElement;
 }
 
 interface HTMLMetaElement extends HTMLElement {
@@ -9333,7 +9710,7 @@ interface HTMLMetaElement extends HTMLElement {
 
 declare var HTMLMetaElement: {
     prototype: HTMLMetaElement;
-    new(): HTMLMetaElement;
+    new (): HTMLMetaElement;
 }
 
 interface HTMLModElement extends HTMLElement {
@@ -9349,7 +9726,7 @@ interface HTMLModElement extends HTMLElement {
 
 declare var HTMLModElement: {
     prototype: HTMLModElement;
-    new(): HTMLModElement;
+    new (): HTMLModElement;
 }
 
 interface HTMLNextIdElement extends HTMLElement {
@@ -9358,7 +9735,7 @@ interface HTMLNextIdElement extends HTMLElement {
 
 declare var HTMLNextIdElement: {
     prototype: HTMLNextIdElement;
-    new(): HTMLNextIdElement;
+    new (): HTMLNextIdElement;
 }
 
 interface HTMLOListElement extends HTMLElement {
@@ -9372,7 +9749,7 @@ interface HTMLOListElement extends HTMLElement {
 
 declare var HTMLOListElement: {
     prototype: HTMLOListElement;
-    new(): HTMLOListElement;
+    new (): HTMLOListElement;
 }
 
 interface HTMLObjectElement extends HTMLElement, GetSVGDocument {
@@ -9492,7 +9869,7 @@ interface HTMLObjectElement extends HTMLElement, GetSVGDocument {
 
 declare var HTMLObjectElement: {
     prototype: HTMLObjectElement;
-    new(): HTMLObjectElement;
+    new (): HTMLObjectElement;
 }
 
 interface HTMLOptGroupElement extends HTMLElement {
@@ -9529,7 +9906,7 @@ interface HTMLOptGroupElement extends HTMLElement {
 
 declare var HTMLOptGroupElement: {
     prototype: HTMLOptGroupElement;
-    new(): HTMLOptGroupElement;
+    new (): HTMLOptGroupElement;
 }
 
 interface HTMLOptionElement extends HTMLElement {
@@ -9566,7 +9943,7 @@ interface HTMLOptionElement extends HTMLElement {
 
 declare var HTMLOptionElement: {
     prototype: HTMLOptionElement;
-    new(): HTMLOptionElement;
+    new (): HTMLOptionElement;
     create(): HTMLOptionElement;
 }
 
@@ -9580,7 +9957,7 @@ interface HTMLParagraphElement extends HTMLElement {
 
 declare var HTMLParagraphElement: {
     prototype: HTMLParagraphElement;
-    new(): HTMLParagraphElement;
+    new (): HTMLParagraphElement;
 }
 
 interface HTMLParamElement extends HTMLElement {
@@ -9604,7 +9981,7 @@ interface HTMLParamElement extends HTMLElement {
 
 declare var HTMLParamElement: {
     prototype: HTMLParamElement;
-    new(): HTMLParamElement;
+    new (): HTMLParamElement;
 }
 
 interface HTMLPhraseElement extends HTMLElement {
@@ -9620,7 +9997,7 @@ interface HTMLPhraseElement extends HTMLElement {
 
 declare var HTMLPhraseElement: {
     prototype: HTMLPhraseElement;
-    new(): HTMLPhraseElement;
+    new (): HTMLPhraseElement;
 }
 
 interface HTMLPreElement extends HTMLElement {
@@ -9637,7 +10014,7 @@ interface HTMLPreElement extends HTMLElement {
 
 declare var HTMLPreElement: {
     prototype: HTMLPreElement;
-    new(): HTMLPreElement;
+    new (): HTMLPreElement;
 }
 
 interface HTMLProgressElement extends HTMLElement {
@@ -9661,7 +10038,7 @@ interface HTMLProgressElement extends HTMLElement {
 
 declare var HTMLProgressElement: {
     prototype: HTMLProgressElement;
-    new(): HTMLProgressElement;
+    new (): HTMLProgressElement;
 }
 
 interface HTMLQuoteElement extends HTMLElement {
@@ -9677,7 +10054,7 @@ interface HTMLQuoteElement extends HTMLElement {
 
 declare var HTMLQuoteElement: {
     prototype: HTMLQuoteElement;
-    new(): HTMLQuoteElement;
+    new (): HTMLQuoteElement;
 }
 
 interface HTMLScriptElement extends HTMLElement {
@@ -9714,7 +10091,7 @@ interface HTMLScriptElement extends HTMLElement {
 
 declare var HTMLScriptElement: {
     prototype: HTMLScriptElement;
-    new(): HTMLScriptElement;
+    new (): HTMLScriptElement;
 }
 
 interface HTMLSelectElement extends HTMLElement {
@@ -9777,8 +10154,7 @@ interface HTMLSelectElement extends HTMLElement {
       * @param element Variant of type Number that specifies the index position in the collection where the element is placed. If no value is given, the method places the element at the end of the collection.
       * @param before Variant of type Object that specifies an element to insert before, or null to append the object to the collection. 
       */
-    add(element: HTMLElement, before?: HTMLElement): void;
-    add(element: HTMLElement, before?: number): void;
+    add(element: HTMLElement, before?: HTMLElement | number): void;
     /**
       * Returns whether a form will validate when it is submitted, without having to submit it.
       */
@@ -9809,7 +10185,7 @@ interface HTMLSelectElement extends HTMLElement {
 
 declare var HTMLSelectElement: {
     prototype: HTMLSelectElement;
-    new(): HTMLSelectElement;
+    new (): HTMLSelectElement;
 }
 
 interface HTMLSourceElement extends HTMLElement {
@@ -9830,7 +10206,7 @@ interface HTMLSourceElement extends HTMLElement {
 
 declare var HTMLSourceElement: {
     prototype: HTMLSourceElement;
-    new(): HTMLSourceElement;
+    new (): HTMLSourceElement;
 }
 
 interface HTMLSpanElement extends HTMLElement {
@@ -9838,7 +10214,7 @@ interface HTMLSpanElement extends HTMLElement {
 
 declare var HTMLSpanElement: {
     prototype: HTMLSpanElement;
-    new(): HTMLSpanElement;
+    new (): HTMLSpanElement;
 }
 
 interface HTMLStyleElement extends HTMLElement, LinkStyle {
@@ -9855,7 +10231,7 @@ interface HTMLStyleElement extends HTMLElement, LinkStyle {
 
 declare var HTMLStyleElement: {
     prototype: HTMLStyleElement;
-    new(): HTMLStyleElement;
+    new (): HTMLStyleElement;
 }
 
 interface HTMLTableCaptionElement extends HTMLElement {
@@ -9871,7 +10247,7 @@ interface HTMLTableCaptionElement extends HTMLElement {
 
 declare var HTMLTableCaptionElement: {
     prototype: HTMLTableCaptionElement;
-    new(): HTMLTableCaptionElement;
+    new (): HTMLTableCaptionElement;
 }
 
 interface HTMLTableCellElement extends HTMLElement, HTMLTableAlignment {
@@ -9925,7 +10301,7 @@ interface HTMLTableCellElement extends HTMLElement, HTMLTableAlignment {
 
 declare var HTMLTableCellElement: {
     prototype: HTMLTableCellElement;
-    new(): HTMLTableCellElement;
+    new (): HTMLTableCellElement;
 }
 
 interface HTMLTableColElement extends HTMLElement, HTMLTableAlignment {
@@ -9946,7 +10322,7 @@ interface HTMLTableColElement extends HTMLElement, HTMLTableAlignment {
 
 declare var HTMLTableColElement: {
     prototype: HTMLTableColElement;
-    new(): HTMLTableColElement;
+    new (): HTMLTableColElement;
 }
 
 interface HTMLTableDataCellElement extends HTMLTableCellElement {
@@ -9954,7 +10330,7 @@ interface HTMLTableDataCellElement extends HTMLTableCellElement {
 
 declare var HTMLTableDataCellElement: {
     prototype: HTMLTableDataCellElement;
-    new(): HTMLTableDataCellElement;
+    new (): HTMLTableDataCellElement;
 }
 
 interface HTMLTableElement extends HTMLElement {
@@ -10065,7 +10441,7 @@ interface HTMLTableElement extends HTMLElement {
 
 declare var HTMLTableElement: {
     prototype: HTMLTableElement;
-    new(): HTMLTableElement;
+    new (): HTMLTableElement;
 }
 
 interface HTMLTableHeaderCellElement extends HTMLTableCellElement {
@@ -10077,7 +10453,7 @@ interface HTMLTableHeaderCellElement extends HTMLTableCellElement {
 
 declare var HTMLTableHeaderCellElement: {
     prototype: HTMLTableHeaderCellElement;
-    new(): HTMLTableHeaderCellElement;
+    new (): HTMLTableHeaderCellElement;
 }
 
 interface HTMLTableRowElement extends HTMLElement, HTMLTableAlignment {
@@ -10117,7 +10493,7 @@ interface HTMLTableRowElement extends HTMLElement, HTMLTableAlignment {
 
 declare var HTMLTableRowElement: {
     prototype: HTMLTableRowElement;
-    new(): HTMLTableRowElement;
+    new (): HTMLTableRowElement;
 }
 
 interface HTMLTableSectionElement extends HTMLElement, HTMLTableAlignment {
@@ -10144,7 +10520,7 @@ interface HTMLTableSectionElement extends HTMLElement, HTMLTableAlignment {
 
 declare var HTMLTableSectionElement: {
     prototype: HTMLTableSectionElement;
-    new(): HTMLTableSectionElement;
+    new (): HTMLTableSectionElement;
 }
 
 interface HTMLTextAreaElement extends HTMLElement {
@@ -10252,7 +10628,7 @@ interface HTMLTextAreaElement extends HTMLElement {
 
 declare var HTMLTextAreaElement: {
     prototype: HTMLTextAreaElement;
-    new(): HTMLTextAreaElement;
+    new (): HTMLTextAreaElement;
 }
 
 interface HTMLTitleElement extends HTMLElement {
@@ -10264,7 +10640,7 @@ interface HTMLTitleElement extends HTMLElement {
 
 declare var HTMLTitleElement: {
     prototype: HTMLTitleElement;
-    new(): HTMLTitleElement;
+    new (): HTMLTitleElement;
 }
 
 interface HTMLTrackElement extends HTMLElement {
@@ -10283,7 +10659,7 @@ interface HTMLTrackElement extends HTMLElement {
 
 declare var HTMLTrackElement: {
     prototype: HTMLTrackElement;
-    new(): HTMLTrackElement;
+    new (): HTMLTrackElement;
     ERROR: number;
     LOADED: number;
     LOADING: number;
@@ -10297,7 +10673,7 @@ interface HTMLUListElement extends HTMLElement {
 
 declare var HTMLUListElement: {
     prototype: HTMLUListElement;
-    new(): HTMLUListElement;
+    new (): HTMLUListElement;
 }
 
 interface HTMLUnknownElement extends HTMLElement {
@@ -10305,7 +10681,7 @@ interface HTMLUnknownElement extends HTMLElement {
 
 declare var HTMLUnknownElement: {
     prototype: HTMLUnknownElement;
-    new(): HTMLUnknownElement;
+    new (): HTMLUnknownElement;
 }
 
 interface HTMLVideoElement extends HTMLMediaElement {
@@ -10459,7 +10835,7 @@ interface HTMLVideoElement extends HTMLMediaElement {
 
 declare var HTMLVideoElement: {
     prototype: HTMLVideoElement;
-    new(): HTMLVideoElement;
+    new (): HTMLVideoElement;
 }
 
 interface HashChangeEvent extends Event {
@@ -10469,7 +10845,7 @@ interface HashChangeEvent extends Event {
 
 declare var HashChangeEvent: {
     prototype: HashChangeEvent;
-    new(type: string, eventInitDict?: HashChangeEventInit): HashChangeEvent;
+    new (type: string, eventInitDict?: HashChangeEventInit): HashChangeEvent;
 }
 
 interface History {
@@ -10484,7 +10860,7 @@ interface History {
 
 declare var History: {
     prototype: History;
-    new(): History;
+    new (): History;
 }
 
 interface IDBCursor {
@@ -10504,7 +10880,7 @@ interface IDBCursor {
 
 declare var IDBCursor: {
     prototype: IDBCursor;
-    new(): IDBCursor;
+    new (): IDBCursor;
     NEXT: string;
     NEXT_NO_DUPLICATE: string;
     PREV: string;
@@ -10517,7 +10893,7 @@ interface IDBCursorWithValue extends IDBCursor {
 
 declare var IDBCursorWithValue: {
     prototype: IDBCursorWithValue;
-    new(): IDBCursorWithValue;
+    new (): IDBCursorWithValue;
 }
 
 interface IDBDatabase extends EventTarget {
@@ -10530,14 +10906,14 @@ interface IDBDatabase extends EventTarget {
     createObjectStore(name: string, optionalParameters?: any): IDBObjectStore;
     deleteObjectStore(name: string): void;
     transaction(storeNames: any, mode?: string): IDBTransaction;
-    addEventListener(type: "abort", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
+    addEventListener(type: "abort", listener: (ev: Event) => any, useCapture?: boolean): void;
     addEventListener(type: "error", listener: (ev: ErrorEvent) => any, useCapture?: boolean): void;
     addEventListener(type: string, listener: EventListenerOrEventListenerObject, useCapture?: boolean): void;
 }
 
 declare var IDBDatabase: {
     prototype: IDBDatabase;
-    new(): IDBDatabase;
+    new (): IDBDatabase;
 }
 
 interface IDBFactory {
@@ -10548,7 +10924,7 @@ interface IDBFactory {
 
 declare var IDBFactory: {
     prototype: IDBFactory;
-    new(): IDBFactory;
+    new (): IDBFactory;
 }
 
 interface IDBIndex {
@@ -10565,7 +10941,7 @@ interface IDBIndex {
 
 declare var IDBIndex: {
     prototype: IDBIndex;
-    new(): IDBIndex;
+    new (): IDBIndex;
 }
 
 interface IDBKeyRange {
@@ -10577,7 +10953,7 @@ interface IDBKeyRange {
 
 declare var IDBKeyRange: {
     prototype: IDBKeyRange;
-    new(): IDBKeyRange;
+    new (): IDBKeyRange;
     bound(lower: any, upper: any, lowerOpen?: boolean, upperOpen?: boolean): IDBKeyRange;
     lowerBound(bound: any, open?: boolean): IDBKeyRange;
     only(value: any): IDBKeyRange;
@@ -10603,7 +10979,7 @@ interface IDBObjectStore {
 
 declare var IDBObjectStore: {
     prototype: IDBObjectStore;
-    new(): IDBObjectStore;
+    new (): IDBObjectStore;
 }
 
 interface IDBOpenDBRequest extends IDBRequest {
@@ -10618,7 +10994,7 @@ interface IDBOpenDBRequest extends IDBRequest {
 
 declare var IDBOpenDBRequest: {
     prototype: IDBOpenDBRequest;
-    new(): IDBOpenDBRequest;
+    new (): IDBOpenDBRequest;
 }
 
 interface IDBRequest extends EventTarget {
@@ -10636,7 +11012,7 @@ interface IDBRequest extends EventTarget {
 
 declare var IDBRequest: {
     prototype: IDBRequest;
-    new(): IDBRequest;
+    new (): IDBRequest;
 }
 
 interface IDBTransaction extends EventTarget {
@@ -10651,7 +11027,7 @@ interface IDBTransaction extends EventTarget {
     READ_ONLY: string;
     READ_WRITE: string;
     VERSION_CHANGE: string;
-    addEventListener(type: "abort", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
+    addEventListener(type: "abort", listener: (ev: Event) => any, useCapture?: boolean): void;
     addEventListener(type: "complete", listener: (ev: Event) => any, useCapture?: boolean): void;
     addEventListener(type: "error", listener: (ev: ErrorEvent) => any, useCapture?: boolean): void;
     addEventListener(type: string, listener: EventListenerOrEventListenerObject, useCapture?: boolean): void;
@@ -10659,7 +11035,7 @@ interface IDBTransaction extends EventTarget {
 
 declare var IDBTransaction: {
     prototype: IDBTransaction;
-    new(): IDBTransaction;
+    new (): IDBTransaction;
     READ_ONLY: string;
     READ_WRITE: string;
     VERSION_CHANGE: string;
@@ -10672,7 +11048,7 @@ interface IDBVersionChangeEvent extends Event {
 
 declare var IDBVersionChangeEvent: {
     prototype: IDBVersionChangeEvent;
-    new(): IDBVersionChangeEvent;
+    new (): IDBVersionChangeEvent;
 }
 
 interface ImageData {
@@ -10681,10 +11057,13 @@ interface ImageData {
     width: number;
 }
 
-declare var ImageData: {
+interface ImageDataConstructor {
     prototype: ImageData;
-    new(): ImageData;
+    new (width: number, height: number): ImageData;
+    new (array: Uint8ClampedArray, width: number, height: number): ImageData;
 }
+
+declare var ImageData: ImageDataConstructor;
 
 interface KeyboardEvent extends UIEvent {
     altKey: boolean;
@@ -10711,7 +11090,7 @@ interface KeyboardEvent extends UIEvent {
 
 declare var KeyboardEvent: {
     prototype: KeyboardEvent;
-    new(typeArg: string, eventInitDict?: KeyboardEventInit): KeyboardEvent;
+    new (typeArg: string, eventInitDict?: KeyboardEventInit): KeyboardEvent;
     DOM_KEY_LOCATION_JOYSTICK: number;
     DOM_KEY_LOCATION_LEFT: number;
     DOM_KEY_LOCATION_MOBILE: number;
@@ -10738,7 +11117,7 @@ interface Location {
 
 declare var Location: {
     prototype: Location;
-    new(): Location;
+    new (): Location;
 }
 
 interface LongRunningScriptDetectedEvent extends Event {
@@ -10748,7 +11127,7 @@ interface LongRunningScriptDetectedEvent extends Event {
 
 declare var LongRunningScriptDetectedEvent: {
     prototype: LongRunningScriptDetectedEvent;
-    new(): LongRunningScriptDetectedEvent;
+    new (): LongRunningScriptDetectedEvent;
 }
 
 interface MSApp {
@@ -10791,7 +11170,7 @@ interface MSAppAsyncOperation extends EventTarget {
 
 declare var MSAppAsyncOperation: {
     prototype: MSAppAsyncOperation;
-    new(): MSAppAsyncOperation;
+    new (): MSAppAsyncOperation;
     COMPLETED: number;
     ERROR: number;
     STARTED: number;
@@ -10804,7 +11183,7 @@ interface MSBlobBuilder {
 
 declare var MSBlobBuilder: {
     prototype: MSBlobBuilder;
-    new(): MSBlobBuilder;
+    new (): MSBlobBuilder;
 }
 
 interface MSCSSMatrix {
@@ -10844,7 +11223,7 @@ interface MSCSSMatrix {
 
 declare var MSCSSMatrix: {
     prototype: MSCSSMatrix;
-    new(text?: string): MSCSSMatrix;
+    new (text?: string): MSCSSMatrix;
 }
 
 interface MSGesture {
@@ -10855,7 +11234,7 @@ interface MSGesture {
 
 declare var MSGesture: {
     prototype: MSGesture;
-    new(): MSGesture;
+    new (): MSGesture;
 }
 
 interface MSGestureEvent extends UIEvent {
@@ -10886,7 +11265,7 @@ interface MSGestureEvent extends UIEvent {
 
 declare var MSGestureEvent: {
     prototype: MSGestureEvent;
-    new(): MSGestureEvent;
+    new (): MSGestureEvent;
     MSGESTURE_FLAG_BEGIN: number;
     MSGESTURE_FLAG_CANCEL: number;
     MSGESTURE_FLAG_END: number;
@@ -10901,7 +11280,7 @@ interface MSGraphicsTrust {
 
 declare var MSGraphicsTrust: {
     prototype: MSGraphicsTrust;
-    new(): MSGraphicsTrust;
+    new (): MSGraphicsTrust;
 }
 
 interface MSHTMLWebViewElement extends HTMLElement {
@@ -10932,7 +11311,7 @@ interface MSHTMLWebViewElement extends HTMLElement {
 
 declare var MSHTMLWebViewElement: {
     prototype: MSHTMLWebViewElement;
-    new(): MSHTMLWebViewElement;
+    new (): MSHTMLWebViewElement;
 }
 
 interface MSHeaderFooter {
@@ -10953,7 +11332,7 @@ interface MSHeaderFooter {
 
 declare var MSHeaderFooter: {
     prototype: MSHeaderFooter;
-    new(): MSHeaderFooter;
+    new (): MSHeaderFooter;
 }
 
 interface MSInputMethodContext extends EventTarget {
@@ -10975,7 +11354,7 @@ interface MSInputMethodContext extends EventTarget {
 
 declare var MSInputMethodContext: {
     prototype: MSInputMethodContext;
-    new(): MSInputMethodContext;
+    new (): MSInputMethodContext;
 }
 
 interface MSManipulationEvent extends UIEvent {
@@ -10996,7 +11375,7 @@ interface MSManipulationEvent extends UIEvent {
 
 declare var MSManipulationEvent: {
     prototype: MSManipulationEvent;
-    new(): MSManipulationEvent;
+    new (): MSManipulationEvent;
     MS_MANIPULATION_STATE_ACTIVE: number;
     MS_MANIPULATION_STATE_CANCELLED: number;
     MS_MANIPULATION_STATE_COMMITTED: number;
@@ -11020,7 +11399,7 @@ interface MSMediaKeyError {
 
 declare var MSMediaKeyError: {
     prototype: MSMediaKeyError;
-    new(): MSMediaKeyError;
+    new (): MSMediaKeyError;
     MS_MEDIA_KEYERR_CLIENT: number;
     MS_MEDIA_KEYERR_DOMAIN: number;
     MS_MEDIA_KEYERR_HARDWARECHANGE: number;
@@ -11036,7 +11415,7 @@ interface MSMediaKeyMessageEvent extends Event {
 
 declare var MSMediaKeyMessageEvent: {
     prototype: MSMediaKeyMessageEvent;
-    new(): MSMediaKeyMessageEvent;
+    new (): MSMediaKeyMessageEvent;
 }
 
 interface MSMediaKeyNeededEvent extends Event {
@@ -11045,7 +11424,7 @@ interface MSMediaKeyNeededEvent extends Event {
 
 declare var MSMediaKeyNeededEvent: {
     prototype: MSMediaKeyNeededEvent;
-    new(): MSMediaKeyNeededEvent;
+    new (): MSMediaKeyNeededEvent;
 }
 
 interface MSMediaKeySession extends EventTarget {
@@ -11058,7 +11437,7 @@ interface MSMediaKeySession extends EventTarget {
 
 declare var MSMediaKeySession: {
     prototype: MSMediaKeySession;
-    new(): MSMediaKeySession;
+    new (): MSMediaKeySession;
 }
 
 interface MSMediaKeys {
@@ -11068,7 +11447,7 @@ interface MSMediaKeys {
 
 declare var MSMediaKeys: {
     prototype: MSMediaKeys;
-    new(keySystem: string): MSMediaKeys;
+    new (keySystem: string): MSMediaKeys;
     isTypeSupported(keySystem: string, type?: string): boolean;
 }
 
@@ -11078,7 +11457,7 @@ interface MSMimeTypesCollection {
 
 declare var MSMimeTypesCollection: {
     prototype: MSMimeTypesCollection;
-    new(): MSMimeTypesCollection;
+    new (): MSMimeTypesCollection;
 }
 
 interface MSPluginsCollection {
@@ -11088,7 +11467,7 @@ interface MSPluginsCollection {
 
 declare var MSPluginsCollection: {
     prototype: MSPluginsCollection;
-    new(): MSPluginsCollection;
+    new (): MSPluginsCollection;
 }
 
 interface MSPointerEvent extends MouseEvent {
@@ -11111,7 +11490,7 @@ interface MSPointerEvent extends MouseEvent {
 
 declare var MSPointerEvent: {
     prototype: MSPointerEvent;
-    new(typeArg: string, eventInitDict?: PointerEventInit): MSPointerEvent;
+    new (typeArg: string, eventInitDict?: PointerEventInit): MSPointerEvent;
 }
 
 interface MSPrintManagerTemplatePrinter extends MSTemplatePrinter, EventTarget {
@@ -11129,7 +11508,7 @@ interface MSPrintManagerTemplatePrinter extends MSTemplatePrinter, EventTarget {
 
 declare var MSPrintManagerTemplatePrinter: {
     prototype: MSPrintManagerTemplatePrinter;
-    new(): MSPrintManagerTemplatePrinter;
+    new (): MSPrintManagerTemplatePrinter;
 }
 
 interface MSRangeCollection {
@@ -11140,7 +11519,7 @@ interface MSRangeCollection {
 
 declare var MSRangeCollection: {
     prototype: MSRangeCollection;
-    new(): MSRangeCollection;
+    new (): MSRangeCollection;
 }
 
 interface MSSiteModeEvent extends Event {
@@ -11150,7 +11529,7 @@ interface MSSiteModeEvent extends Event {
 
 declare var MSSiteModeEvent: {
     prototype: MSSiteModeEvent;
-    new(): MSSiteModeEvent;
+    new (): MSSiteModeEvent;
 }
 
 interface MSStream {
@@ -11161,7 +11540,7 @@ interface MSStream {
 
 declare var MSStream: {
     prototype: MSStream;
-    new(): MSStream;
+    new (): MSStream;
 }
 
 interface MSStreamReader extends EventTarget, MSBaseReader {
@@ -11176,7 +11555,7 @@ interface MSStreamReader extends EventTarget, MSBaseReader {
 
 declare var MSStreamReader: {
     prototype: MSStreamReader;
-    new(): MSStreamReader;
+    new (): MSStreamReader;
 }
 
 interface MSTemplatePrinter {
@@ -11233,7 +11612,7 @@ interface MSTemplatePrinter {
 
 declare var MSTemplatePrinter: {
     prototype: MSTemplatePrinter;
-    new(): MSTemplatePrinter;
+    new (): MSTemplatePrinter;
 }
 
 interface MSWebViewAsyncOperation extends EventTarget {
@@ -11258,7 +11637,7 @@ interface MSWebViewAsyncOperation extends EventTarget {
 
 declare var MSWebViewAsyncOperation: {
     prototype: MSWebViewAsyncOperation;
-    new(): MSWebViewAsyncOperation;
+    new (): MSWebViewAsyncOperation;
     COMPLETED: number;
     ERROR: number;
     STARTED: number;
@@ -11274,7 +11653,7 @@ interface MSWebViewSettings {
 
 declare var MSWebViewSettings: {
     prototype: MSWebViewSettings;
-    new(): MSWebViewSettings;
+    new (): MSWebViewSettings;
 }
 
 interface MediaElementAudioSourceNode extends AudioNode {
@@ -11282,7 +11661,7 @@ interface MediaElementAudioSourceNode extends AudioNode {
 
 declare var MediaElementAudioSourceNode: {
     prototype: MediaElementAudioSourceNode;
-    new(): MediaElementAudioSourceNode;
+    new (): MediaElementAudioSourceNode;
 }
 
 interface MediaError {
@@ -11297,7 +11676,7 @@ interface MediaError {
 
 declare var MediaError: {
     prototype: MediaError;
-    new(): MediaError;
+    new (): MediaError;
     MEDIA_ERR_ABORTED: number;
     MEDIA_ERR_DECODE: number;
     MEDIA_ERR_NETWORK: number;
@@ -11317,7 +11696,7 @@ interface MediaList {
 
 declare var MediaList: {
     prototype: MediaList;
-    new(): MediaList;
+    new (): MediaList;
 }
 
 interface MediaQueryList {
@@ -11329,7 +11708,7 @@ interface MediaQueryList {
 
 declare var MediaQueryList: {
     prototype: MediaQueryList;
-    new(): MediaQueryList;
+    new (): MediaQueryList;
 }
 
 interface MediaSource extends EventTarget {
@@ -11344,7 +11723,7 @@ interface MediaSource extends EventTarget {
 
 declare var MediaSource: {
     prototype: MediaSource;
-    new(): MediaSource;
+    new (): MediaSource;
     isTypeSupported(type: string): boolean;
 }
 
@@ -11355,7 +11734,7 @@ interface MessageChannel {
 
 declare var MessageChannel: {
     prototype: MessageChannel;
-    new(): MessageChannel;
+    new (): MessageChannel;
 }
 
 interface MessageEvent extends Event {
@@ -11368,7 +11747,7 @@ interface MessageEvent extends Event {
 
 declare var MessageEvent: {
     prototype: MessageEvent;
-    new(): MessageEvent;
+    new (type: string, eventInitDict?: MessageEventInit): MessageEvent;
 }
 
 interface MessagePort extends EventTarget {
@@ -11382,7 +11761,7 @@ interface MessagePort extends EventTarget {
 
 declare var MessagePort: {
     prototype: MessagePort;
-    new(): MessagePort;
+    new (): MessagePort;
 }
 
 interface MimeType {
@@ -11394,7 +11773,7 @@ interface MimeType {
 
 declare var MimeType: {
     prototype: MimeType;
-    new(): MimeType;
+    new (): MimeType;
 }
 
 interface MimeTypeArray {
@@ -11406,7 +11785,7 @@ interface MimeTypeArray {
 
 declare var MimeTypeArray: {
     prototype: MimeTypeArray;
-    new(): MimeTypeArray;
+    new (): MimeTypeArray;
 }
 
 interface MouseEvent extends UIEvent {
@@ -11440,7 +11819,7 @@ interface MouseEvent extends UIEvent {
 
 declare var MouseEvent: {
     prototype: MouseEvent;
-    new(typeArg: string, eventInitDict?: MouseEventInit): MouseEvent;
+    new (typeArg: string, eventInitDict?: MouseEventInit): MouseEvent;
 }
 
 interface MouseWheelEvent extends MouseEvent {
@@ -11452,7 +11831,7 @@ interface MouseWheelEvent extends MouseEvent {
 
 declare var MouseWheelEvent: {
     prototype: MouseWheelEvent;
-    new(): MouseWheelEvent;
+    new (): MouseWheelEvent;
 }
 
 interface MutationEvent extends Event {
@@ -11469,7 +11848,7 @@ interface MutationEvent extends Event {
 
 declare var MutationEvent: {
     prototype: MutationEvent;
-    new(): MutationEvent;
+    new (): MutationEvent;
     ADDITION: number;
     MODIFICATION: number;
     REMOVAL: number;
@@ -11483,7 +11862,7 @@ interface MutationObserver {
 
 declare var MutationObserver: {
     prototype: MutationObserver;
-    new(callback: MutationCallback): MutationObserver;
+    new (callback: MutationCallback): MutationObserver;
 }
 
 interface MutationRecord {
@@ -11500,7 +11879,7 @@ interface MutationRecord {
 
 declare var MutationRecord: {
     prototype: MutationRecord;
-    new(): MutationRecord;
+    new (): MutationRecord;
 }
 
 interface NamedNodeMap {
@@ -11517,7 +11896,7 @@ interface NamedNodeMap {
 
 declare var NamedNodeMap: {
     prototype: NamedNodeMap;
-    new(): NamedNodeMap;
+    new (): NamedNodeMap;
 }
 
 interface NavigationCompletedEvent extends NavigationEvent {
@@ -11527,7 +11906,7 @@ interface NavigationCompletedEvent extends NavigationEvent {
 
 declare var NavigationCompletedEvent: {
     prototype: NavigationCompletedEvent;
-    new(): NavigationCompletedEvent;
+    new (): NavigationCompletedEvent;
 }
 
 interface NavigationEvent extends Event {
@@ -11536,7 +11915,7 @@ interface NavigationEvent extends Event {
 
 declare var NavigationEvent: {
     prototype: NavigationEvent;
-    new(): NavigationEvent;
+    new (): NavigationEvent;
 }
 
 interface NavigationEventWithReferrer extends NavigationEvent {
@@ -11545,7 +11924,7 @@ interface NavigationEventWithReferrer extends NavigationEvent {
 
 declare var NavigationEventWithReferrer: {
     prototype: NavigationEventWithReferrer;
-    new(): NavigationEventWithReferrer;
+    new (): NavigationEventWithReferrer;
 }
 
 interface Navigator extends Object, NavigatorID, NavigatorOnLine, NavigatorContentUtils, NavigatorStorageUtils, NavigatorGeolocation, MSNavigatorDoNotTrack, MSFileSaver {
@@ -11574,7 +11953,7 @@ interface Navigator extends Object, NavigatorID, NavigatorOnLine, NavigatorConte
 
 declare var Navigator: {
     prototype: Navigator;
-    new(): Navigator;
+    new (): Navigator;
 }
 
 interface Node extends EventTarget {
@@ -11631,7 +12010,7 @@ interface Node extends EventTarget {
 
 declare var Node: {
     prototype: Node;
-    new(): Node;
+    new (): Node;
     ATTRIBUTE_NODE: number;
     CDATA_SECTION_NODE: number;
     COMMENT_NODE: number;
@@ -11684,7 +12063,7 @@ interface NodeIterator {
 
 declare var NodeIterator: {
     prototype: NodeIterator;
-    new(): NodeIterator;
+    new (): NodeIterator;
 }
 
 interface NodeList {
@@ -11695,7 +12074,7 @@ interface NodeList {
 
 declare var NodeList: {
     prototype: NodeList;
-    new(): NodeList;
+    new (): NodeList;
 }
 
 interface OES_element_index_uint {
@@ -11703,7 +12082,7 @@ interface OES_element_index_uint {
 
 declare var OES_element_index_uint: {
     prototype: OES_element_index_uint;
-    new(): OES_element_index_uint;
+    new (): OES_element_index_uint;
 }
 
 interface OES_standard_derivatives {
@@ -11712,7 +12091,7 @@ interface OES_standard_derivatives {
 
 declare var OES_standard_derivatives: {
     prototype: OES_standard_derivatives;
-    new(): OES_standard_derivatives;
+    new (): OES_standard_derivatives;
     FRAGMENT_SHADER_DERIVATIVE_HINT_OES: number;
 }
 
@@ -11721,7 +12100,7 @@ interface OES_texture_float {
 
 declare var OES_texture_float: {
     prototype: OES_texture_float;
-    new(): OES_texture_float;
+    new (): OES_texture_float;
 }
 
 interface OES_texture_float_linear {
@@ -11729,7 +12108,7 @@ interface OES_texture_float_linear {
 
 declare var OES_texture_float_linear: {
     prototype: OES_texture_float_linear;
-    new(): OES_texture_float_linear;
+    new (): OES_texture_float_linear;
 }
 
 interface OfflineAudioCompletionEvent extends Event {
@@ -11738,7 +12117,7 @@ interface OfflineAudioCompletionEvent extends Event {
 
 declare var OfflineAudioCompletionEvent: {
     prototype: OfflineAudioCompletionEvent;
-    new(): OfflineAudioCompletionEvent;
+    new (): OfflineAudioCompletionEvent;
 }
 
 interface OfflineAudioContext extends AudioContext {
@@ -11750,7 +12129,7 @@ interface OfflineAudioContext extends AudioContext {
 
 declare var OfflineAudioContext: {
     prototype: OfflineAudioContext;
-    new(numberOfChannels: number, length: number, sampleRate: number): OfflineAudioContext;
+    new (numberOfChannels: number, length: number, sampleRate: number): OfflineAudioContext;
 }
 
 interface OscillatorNode extends AudioNode {
@@ -11767,7 +12146,7 @@ interface OscillatorNode extends AudioNode {
 
 declare var OscillatorNode: {
     prototype: OscillatorNode;
-    new(): OscillatorNode;
+    new (): OscillatorNode;
 }
 
 interface PageTransitionEvent extends Event {
@@ -11776,7 +12155,7 @@ interface PageTransitionEvent extends Event {
 
 declare var PageTransitionEvent: {
     prototype: PageTransitionEvent;
-    new(): PageTransitionEvent;
+    new (): PageTransitionEvent;
 }
 
 interface PannerNode extends AudioNode {
@@ -11795,7 +12174,7 @@ interface PannerNode extends AudioNode {
 
 declare var PannerNode: {
     prototype: PannerNode;
-    new(): PannerNode;
+    new (): PannerNode;
 }
 
 interface PerfWidgetExternal {
@@ -11824,7 +12203,7 @@ interface PerfWidgetExternal {
 
 declare var PerfWidgetExternal: {
     prototype: PerfWidgetExternal;
-    new(): PerfWidgetExternal;
+    new (): PerfWidgetExternal;
 }
 
 interface Performance {
@@ -11847,7 +12226,7 @@ interface Performance {
 
 declare var Performance: {
     prototype: Performance;
-    new(): Performance;
+    new (): Performance;
 }
 
 interface PerformanceEntry {
@@ -11859,7 +12238,7 @@ interface PerformanceEntry {
 
 declare var PerformanceEntry: {
     prototype: PerformanceEntry;
-    new(): PerformanceEntry;
+    new (): PerformanceEntry;
 }
 
 interface PerformanceMark extends PerformanceEntry {
@@ -11867,7 +12246,7 @@ interface PerformanceMark extends PerformanceEntry {
 
 declare var PerformanceMark: {
     prototype: PerformanceMark;
-    new(): PerformanceMark;
+    new (): PerformanceMark;
 }
 
 interface PerformanceMeasure extends PerformanceEntry {
@@ -11875,7 +12254,7 @@ interface PerformanceMeasure extends PerformanceEntry {
 
 declare var PerformanceMeasure: {
     prototype: PerformanceMeasure;
-    new(): PerformanceMeasure;
+    new (): PerformanceMeasure;
 }
 
 interface PerformanceNavigation {
@@ -11890,7 +12269,7 @@ interface PerformanceNavigation {
 
 declare var PerformanceNavigation: {
     prototype: PerformanceNavigation;
-    new(): PerformanceNavigation;
+    new (): PerformanceNavigation;
     TYPE_BACK_FORWARD: number;
     TYPE_NAVIGATE: number;
     TYPE_RELOAD: number;
@@ -11924,7 +12303,7 @@ interface PerformanceNavigationTiming extends PerformanceEntry {
 
 declare var PerformanceNavigationTiming: {
     prototype: PerformanceNavigationTiming;
-    new(): PerformanceNavigationTiming;
+    new (): PerformanceNavigationTiming;
 }
 
 interface PerformanceResourceTiming extends PerformanceEntry {
@@ -11943,7 +12322,7 @@ interface PerformanceResourceTiming extends PerformanceEntry {
 
 declare var PerformanceResourceTiming: {
     prototype: PerformanceResourceTiming;
-    new(): PerformanceResourceTiming;
+    new (): PerformanceResourceTiming;
 }
 
 interface PerformanceTiming {
@@ -11973,7 +12352,7 @@ interface PerformanceTiming {
 
 declare var PerformanceTiming: {
     prototype: PerformanceTiming;
-    new(): PerformanceTiming;
+    new (): PerformanceTiming;
 }
 
 interface PeriodicWave {
@@ -11981,7 +12360,7 @@ interface PeriodicWave {
 
 declare var PeriodicWave: {
     prototype: PeriodicWave;
-    new(): PeriodicWave;
+    new (): PeriodicWave;
 }
 
 interface PermissionRequest extends DeferredPermissionRequest {
@@ -11991,7 +12370,7 @@ interface PermissionRequest extends DeferredPermissionRequest {
 
 declare var PermissionRequest: {
     prototype: PermissionRequest;
-    new(): PermissionRequest;
+    new (): PermissionRequest;
 }
 
 interface PermissionRequestedEvent extends Event {
@@ -12000,7 +12379,7 @@ interface PermissionRequestedEvent extends Event {
 
 declare var PermissionRequestedEvent: {
     prototype: PermissionRequestedEvent;
-    new(): PermissionRequestedEvent;
+    new (): PermissionRequestedEvent;
 }
 
 interface Plugin {
@@ -12016,7 +12395,7 @@ interface Plugin {
 
 declare var Plugin: {
     prototype: Plugin;
-    new(): Plugin;
+    new (): Plugin;
 }
 
 interface PluginArray {
@@ -12029,7 +12408,7 @@ interface PluginArray {
 
 declare var PluginArray: {
     prototype: PluginArray;
-    new(): PluginArray;
+    new (): PluginArray;
 }
 
 interface PointerEvent extends MouseEvent {
@@ -12052,7 +12431,7 @@ interface PointerEvent extends MouseEvent {
 
 declare var PointerEvent: {
     prototype: PointerEvent;
-    new(typeArg: string, eventInitDict?: PointerEventInit): PointerEvent;
+    new (typeArg: string, eventInitDict?: PointerEventInit): PointerEvent;
 }
 
 interface PopStateEvent extends Event {
@@ -12062,7 +12441,7 @@ interface PopStateEvent extends Event {
 
 declare var PopStateEvent: {
     prototype: PopStateEvent;
-    new(): PopStateEvent;
+    new (): PopStateEvent;
 }
 
 interface Position {
@@ -12072,7 +12451,7 @@ interface Position {
 
 declare var Position: {
     prototype: Position;
-    new(): Position;
+    new (): Position;
 }
 
 interface PositionError {
@@ -12086,7 +12465,7 @@ interface PositionError {
 
 declare var PositionError: {
     prototype: PositionError;
-    new(): PositionError;
+    new (): PositionError;
     PERMISSION_DENIED: number;
     POSITION_UNAVAILABLE: number;
     TIMEOUT: number;
@@ -12098,7 +12477,7 @@ interface ProcessingInstruction extends CharacterData {
 
 declare var ProcessingInstruction: {
     prototype: ProcessingInstruction;
-    new(): ProcessingInstruction;
+    new (): ProcessingInstruction;
 }
 
 interface ProgressEvent extends Event {
@@ -12110,7 +12489,7 @@ interface ProgressEvent extends Event {
 
 declare var ProgressEvent: {
     prototype: ProgressEvent;
-    new(): ProgressEvent;
+    new (type: string, eventInitDict?: ProgressEventInit): ProgressEvent;
 }
 
 interface Range {
@@ -12150,7 +12529,7 @@ interface Range {
 
 declare var Range: {
     prototype: Range;
-    new(): Range;
+    new (): Range;
     END_TO_END: number;
     END_TO_START: number;
     START_TO_END: number;
@@ -12164,7 +12543,7 @@ interface SVGAElement extends SVGElement, SVGStylable, SVGTransformable, SVGTest
 
 declare var SVGAElement: {
     prototype: SVGAElement;
-    new(): SVGAElement;
+    new (): SVGAElement;
 }
 
 interface SVGAngle {
@@ -12183,7 +12562,7 @@ interface SVGAngle {
 
 declare var SVGAngle: {
     prototype: SVGAngle;
-    new(): SVGAngle;
+    new (): SVGAngle;
     SVG_ANGLETYPE_DEG: number;
     SVG_ANGLETYPE_GRAD: number;
     SVG_ANGLETYPE_RAD: number;
@@ -12198,7 +12577,7 @@ interface SVGAnimatedAngle {
 
 declare var SVGAnimatedAngle: {
     prototype: SVGAnimatedAngle;
-    new(): SVGAnimatedAngle;
+    new (): SVGAnimatedAngle;
 }
 
 interface SVGAnimatedBoolean {
@@ -12208,7 +12587,7 @@ interface SVGAnimatedBoolean {
 
 declare var SVGAnimatedBoolean: {
     prototype: SVGAnimatedBoolean;
-    new(): SVGAnimatedBoolean;
+    new (): SVGAnimatedBoolean;
 }
 
 interface SVGAnimatedEnumeration {
@@ -12218,7 +12597,7 @@ interface SVGAnimatedEnumeration {
 
 declare var SVGAnimatedEnumeration: {
     prototype: SVGAnimatedEnumeration;
-    new(): SVGAnimatedEnumeration;
+    new (): SVGAnimatedEnumeration;
 }
 
 interface SVGAnimatedInteger {
@@ -12228,7 +12607,7 @@ interface SVGAnimatedInteger {
 
 declare var SVGAnimatedInteger: {
     prototype: SVGAnimatedInteger;
-    new(): SVGAnimatedInteger;
+    new (): SVGAnimatedInteger;
 }
 
 interface SVGAnimatedLength {
@@ -12238,7 +12617,7 @@ interface SVGAnimatedLength {
 
 declare var SVGAnimatedLength: {
     prototype: SVGAnimatedLength;
-    new(): SVGAnimatedLength;
+    new (): SVGAnimatedLength;
 }
 
 interface SVGAnimatedLengthList {
@@ -12248,7 +12627,7 @@ interface SVGAnimatedLengthList {
 
 declare var SVGAnimatedLengthList: {
     prototype: SVGAnimatedLengthList;
-    new(): SVGAnimatedLengthList;
+    new (): SVGAnimatedLengthList;
 }
 
 interface SVGAnimatedNumber {
@@ -12258,7 +12637,7 @@ interface SVGAnimatedNumber {
 
 declare var SVGAnimatedNumber: {
     prototype: SVGAnimatedNumber;
-    new(): SVGAnimatedNumber;
+    new (): SVGAnimatedNumber;
 }
 
 interface SVGAnimatedNumberList {
@@ -12268,7 +12647,7 @@ interface SVGAnimatedNumberList {
 
 declare var SVGAnimatedNumberList: {
     prototype: SVGAnimatedNumberList;
-    new(): SVGAnimatedNumberList;
+    new (): SVGAnimatedNumberList;
 }
 
 interface SVGAnimatedPreserveAspectRatio {
@@ -12278,7 +12657,7 @@ interface SVGAnimatedPreserveAspectRatio {
 
 declare var SVGAnimatedPreserveAspectRatio: {
     prototype: SVGAnimatedPreserveAspectRatio;
-    new(): SVGAnimatedPreserveAspectRatio;
+    new (): SVGAnimatedPreserveAspectRatio;
 }
 
 interface SVGAnimatedRect {
@@ -12288,7 +12667,7 @@ interface SVGAnimatedRect {
 
 declare var SVGAnimatedRect: {
     prototype: SVGAnimatedRect;
-    new(): SVGAnimatedRect;
+    new (): SVGAnimatedRect;
 }
 
 interface SVGAnimatedString {
@@ -12298,7 +12677,7 @@ interface SVGAnimatedString {
 
 declare var SVGAnimatedString: {
     prototype: SVGAnimatedString;
-    new(): SVGAnimatedString;
+    new (): SVGAnimatedString;
 }
 
 interface SVGAnimatedTransformList {
@@ -12308,7 +12687,7 @@ interface SVGAnimatedTransformList {
 
 declare var SVGAnimatedTransformList: {
     prototype: SVGAnimatedTransformList;
-    new(): SVGAnimatedTransformList;
+    new (): SVGAnimatedTransformList;
 }
 
 interface SVGCircleElement extends SVGElement, SVGStylable, SVGTransformable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired {
@@ -12320,7 +12699,7 @@ interface SVGCircleElement extends SVGElement, SVGStylable, SVGTransformable, SV
 
 declare var SVGCircleElement: {
     prototype: SVGCircleElement;
-    new(): SVGCircleElement;
+    new (): SVGCircleElement;
 }
 
 interface SVGClipPathElement extends SVGElement, SVGStylable, SVGTransformable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired, SVGUnitTypes {
@@ -12330,7 +12709,7 @@ interface SVGClipPathElement extends SVGElement, SVGStylable, SVGTransformable, 
 
 declare var SVGClipPathElement: {
     prototype: SVGClipPathElement;
-    new(): SVGClipPathElement;
+    new (): SVGClipPathElement;
 }
 
 interface SVGComponentTransferFunctionElement extends SVGElement {
@@ -12351,7 +12730,7 @@ interface SVGComponentTransferFunctionElement extends SVGElement {
 
 declare var SVGComponentTransferFunctionElement: {
     prototype: SVGComponentTransferFunctionElement;
-    new(): SVGComponentTransferFunctionElement;
+    new (): SVGComponentTransferFunctionElement;
     SVG_FECOMPONENTTRANSFER_TYPE_DISCRETE: number;
     SVG_FECOMPONENTTRANSFER_TYPE_GAMMA: number;
     SVG_FECOMPONENTTRANSFER_TYPE_IDENTITY: number;
@@ -12366,7 +12745,7 @@ interface SVGDefsElement extends SVGElement, SVGStylable, SVGTransformable, SVGT
 
 declare var SVGDefsElement: {
     prototype: SVGDefsElement;
-    new(): SVGDefsElement;
+    new (): SVGDefsElement;
 }
 
 interface SVGDescElement extends SVGElement, SVGStylable, SVGLangSpace {
@@ -12375,11 +12754,12 @@ interface SVGDescElement extends SVGElement, SVGStylable, SVGLangSpace {
 
 declare var SVGDescElement: {
     prototype: SVGDescElement;
-    new(): SVGDescElement;
+    new (): SVGDescElement;
 }
 
 interface SVGElement extends Element {
     id: string;
+    className: any;
     onclick: (ev: MouseEvent) => any;
     ondblclick: (ev: MouseEvent) => any;
     onfocusin: (ev: FocusEvent) => any;
@@ -12444,7 +12824,7 @@ interface SVGElement extends Element {
 
 declare var SVGElement: {
     prototype: SVGElement;
-    new(): SVGElement;
+    new (): SVGElement;
 }
 
 interface SVGElementInstance extends EventTarget {
@@ -12460,7 +12840,7 @@ interface SVGElementInstance extends EventTarget {
 
 declare var SVGElementInstance: {
     prototype: SVGElementInstance;
-    new(): SVGElementInstance;
+    new (): SVGElementInstance;
 }
 
 interface SVGElementInstanceList {
@@ -12470,7 +12850,7 @@ interface SVGElementInstanceList {
 
 declare var SVGElementInstanceList: {
     prototype: SVGElementInstanceList;
-    new(): SVGElementInstanceList;
+    new (): SVGElementInstanceList;
 }
 
 interface SVGEllipseElement extends SVGElement, SVGStylable, SVGTransformable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired {
@@ -12483,7 +12863,7 @@ interface SVGEllipseElement extends SVGElement, SVGStylable, SVGTransformable, S
 
 declare var SVGEllipseElement: {
     prototype: SVGEllipseElement;
-    new(): SVGEllipseElement;
+    new (): SVGEllipseElement;
 }
 
 interface SVGFEBlendElement extends SVGElement, SVGFilterPrimitiveStandardAttributes {
@@ -12512,7 +12892,7 @@ interface SVGFEBlendElement extends SVGElement, SVGFilterPrimitiveStandardAttrib
 
 declare var SVGFEBlendElement: {
     prototype: SVGFEBlendElement;
-    new(): SVGFEBlendElement;
+    new (): SVGFEBlendElement;
     SVG_FEBLEND_MODE_COLOR: number;
     SVG_FEBLEND_MODE_COLOR_BURN: number;
     SVG_FEBLEND_MODE_COLOR_DODGE: number;
@@ -12546,7 +12926,7 @@ interface SVGFEColorMatrixElement extends SVGElement, SVGFilterPrimitiveStandard
 
 declare var SVGFEColorMatrixElement: {
     prototype: SVGFEColorMatrixElement;
-    new(): SVGFEColorMatrixElement;
+    new (): SVGFEColorMatrixElement;
     SVG_FECOLORMATRIX_TYPE_HUEROTATE: number;
     SVG_FECOLORMATRIX_TYPE_LUMINANCETOALPHA: number;
     SVG_FECOLORMATRIX_TYPE_MATRIX: number;
@@ -12561,7 +12941,7 @@ interface SVGFEComponentTransferElement extends SVGElement, SVGFilterPrimitiveSt
 
 declare var SVGFEComponentTransferElement: {
     prototype: SVGFEComponentTransferElement;
-    new(): SVGFEComponentTransferElement;
+    new (): SVGFEComponentTransferElement;
 }
 
 interface SVGFECompositeElement extends SVGElement, SVGFilterPrimitiveStandardAttributes {
@@ -12584,7 +12964,7 @@ interface SVGFECompositeElement extends SVGElement, SVGFilterPrimitiveStandardAt
 
 declare var SVGFECompositeElement: {
     prototype: SVGFECompositeElement;
-    new(): SVGFECompositeElement;
+    new (): SVGFECompositeElement;
     SVG_FECOMPOSITE_OPERATOR_ARITHMETIC: number;
     SVG_FECOMPOSITE_OPERATOR_ATOP: number;
     SVG_FECOMPOSITE_OPERATOR_IN: number;
@@ -12616,7 +12996,7 @@ interface SVGFEConvolveMatrixElement extends SVGElement, SVGFilterPrimitiveStand
 
 declare var SVGFEConvolveMatrixElement: {
     prototype: SVGFEConvolveMatrixElement;
-    new(): SVGFEConvolveMatrixElement;
+    new (): SVGFEConvolveMatrixElement;
     SVG_EDGEMODE_DUPLICATE: number;
     SVG_EDGEMODE_NONE: number;
     SVG_EDGEMODE_UNKNOWN: number;
@@ -12634,7 +13014,7 @@ interface SVGFEDiffuseLightingElement extends SVGElement, SVGFilterPrimitiveStan
 
 declare var SVGFEDiffuseLightingElement: {
     prototype: SVGFEDiffuseLightingElement;
-    new(): SVGFEDiffuseLightingElement;
+    new (): SVGFEDiffuseLightingElement;
 }
 
 interface SVGFEDisplacementMapElement extends SVGElement, SVGFilterPrimitiveStandardAttributes {
@@ -12653,7 +13033,7 @@ interface SVGFEDisplacementMapElement extends SVGElement, SVGFilterPrimitiveStan
 
 declare var SVGFEDisplacementMapElement: {
     prototype: SVGFEDisplacementMapElement;
-    new(): SVGFEDisplacementMapElement;
+    new (): SVGFEDisplacementMapElement;
     SVG_CHANNEL_A: number;
     SVG_CHANNEL_B: number;
     SVG_CHANNEL_G: number;
@@ -12668,7 +13048,7 @@ interface SVGFEDistantLightElement extends SVGElement {
 
 declare var SVGFEDistantLightElement: {
     prototype: SVGFEDistantLightElement;
-    new(): SVGFEDistantLightElement;
+    new (): SVGFEDistantLightElement;
 }
 
 interface SVGFEFloodElement extends SVGElement, SVGFilterPrimitiveStandardAttributes {
@@ -12677,7 +13057,7 @@ interface SVGFEFloodElement extends SVGElement, SVGFilterPrimitiveStandardAttrib
 
 declare var SVGFEFloodElement: {
     prototype: SVGFEFloodElement;
-    new(): SVGFEFloodElement;
+    new (): SVGFEFloodElement;
 }
 
 interface SVGFEFuncAElement extends SVGComponentTransferFunctionElement {
@@ -12685,7 +13065,7 @@ interface SVGFEFuncAElement extends SVGComponentTransferFunctionElement {
 
 declare var SVGFEFuncAElement: {
     prototype: SVGFEFuncAElement;
-    new(): SVGFEFuncAElement;
+    new (): SVGFEFuncAElement;
 }
 
 interface SVGFEFuncBElement extends SVGComponentTransferFunctionElement {
@@ -12693,7 +13073,7 @@ interface SVGFEFuncBElement extends SVGComponentTransferFunctionElement {
 
 declare var SVGFEFuncBElement: {
     prototype: SVGFEFuncBElement;
-    new(): SVGFEFuncBElement;
+    new (): SVGFEFuncBElement;
 }
 
 interface SVGFEFuncGElement extends SVGComponentTransferFunctionElement {
@@ -12701,7 +13081,7 @@ interface SVGFEFuncGElement extends SVGComponentTransferFunctionElement {
 
 declare var SVGFEFuncGElement: {
     prototype: SVGFEFuncGElement;
-    new(): SVGFEFuncGElement;
+    new (): SVGFEFuncGElement;
 }
 
 interface SVGFEFuncRElement extends SVGComponentTransferFunctionElement {
@@ -12709,7 +13089,7 @@ interface SVGFEFuncRElement extends SVGComponentTransferFunctionElement {
 
 declare var SVGFEFuncRElement: {
     prototype: SVGFEFuncRElement;
-    new(): SVGFEFuncRElement;
+    new (): SVGFEFuncRElement;
 }
 
 interface SVGFEGaussianBlurElement extends SVGElement, SVGFilterPrimitiveStandardAttributes {
@@ -12722,7 +13102,7 @@ interface SVGFEGaussianBlurElement extends SVGElement, SVGFilterPrimitiveStandar
 
 declare var SVGFEGaussianBlurElement: {
     prototype: SVGFEGaussianBlurElement;
-    new(): SVGFEGaussianBlurElement;
+    new (): SVGFEGaussianBlurElement;
 }
 
 interface SVGFEImageElement extends SVGElement, SVGFilterPrimitiveStandardAttributes, SVGLangSpace, SVGURIReference, SVGExternalResourcesRequired {
@@ -12732,7 +13112,7 @@ interface SVGFEImageElement extends SVGElement, SVGFilterPrimitiveStandardAttrib
 
 declare var SVGFEImageElement: {
     prototype: SVGFEImageElement;
-    new(): SVGFEImageElement;
+    new (): SVGFEImageElement;
 }
 
 interface SVGFEMergeElement extends SVGElement, SVGFilterPrimitiveStandardAttributes {
@@ -12741,7 +13121,7 @@ interface SVGFEMergeElement extends SVGElement, SVGFilterPrimitiveStandardAttrib
 
 declare var SVGFEMergeElement: {
     prototype: SVGFEMergeElement;
-    new(): SVGFEMergeElement;
+    new (): SVGFEMergeElement;
 }
 
 interface SVGFEMergeNodeElement extends SVGElement {
@@ -12750,7 +13130,7 @@ interface SVGFEMergeNodeElement extends SVGElement {
 
 declare var SVGFEMergeNodeElement: {
     prototype: SVGFEMergeNodeElement;
-    new(): SVGFEMergeNodeElement;
+    new (): SVGFEMergeNodeElement;
 }
 
 interface SVGFEMorphologyElement extends SVGElement, SVGFilterPrimitiveStandardAttributes {
@@ -12766,7 +13146,7 @@ interface SVGFEMorphologyElement extends SVGElement, SVGFilterPrimitiveStandardA
 
 declare var SVGFEMorphologyElement: {
     prototype: SVGFEMorphologyElement;
-    new(): SVGFEMorphologyElement;
+    new (): SVGFEMorphologyElement;
     SVG_MORPHOLOGY_OPERATOR_DILATE: number;
     SVG_MORPHOLOGY_OPERATOR_ERODE: number;
     SVG_MORPHOLOGY_OPERATOR_UNKNOWN: number;
@@ -12781,7 +13161,7 @@ interface SVGFEOffsetElement extends SVGElement, SVGFilterPrimitiveStandardAttri
 
 declare var SVGFEOffsetElement: {
     prototype: SVGFEOffsetElement;
-    new(): SVGFEOffsetElement;
+    new (): SVGFEOffsetElement;
 }
 
 interface SVGFEPointLightElement extends SVGElement {
@@ -12792,7 +13172,7 @@ interface SVGFEPointLightElement extends SVGElement {
 
 declare var SVGFEPointLightElement: {
     prototype: SVGFEPointLightElement;
-    new(): SVGFEPointLightElement;
+    new (): SVGFEPointLightElement;
 }
 
 interface SVGFESpecularLightingElement extends SVGElement, SVGFilterPrimitiveStandardAttributes {
@@ -12807,7 +13187,7 @@ interface SVGFESpecularLightingElement extends SVGElement, SVGFilterPrimitiveSta
 
 declare var SVGFESpecularLightingElement: {
     prototype: SVGFESpecularLightingElement;
-    new(): SVGFESpecularLightingElement;
+    new (): SVGFESpecularLightingElement;
 }
 
 interface SVGFESpotLightElement extends SVGElement {
@@ -12823,7 +13203,7 @@ interface SVGFESpotLightElement extends SVGElement {
 
 declare var SVGFESpotLightElement: {
     prototype: SVGFESpotLightElement;
-    new(): SVGFESpotLightElement;
+    new (): SVGFESpotLightElement;
 }
 
 interface SVGFETileElement extends SVGElement, SVGFilterPrimitiveStandardAttributes {
@@ -12833,7 +13213,7 @@ interface SVGFETileElement extends SVGElement, SVGFilterPrimitiveStandardAttribu
 
 declare var SVGFETileElement: {
     prototype: SVGFETileElement;
-    new(): SVGFETileElement;
+    new (): SVGFETileElement;
 }
 
 interface SVGFETurbulenceElement extends SVGElement, SVGFilterPrimitiveStandardAttributes {
@@ -12854,7 +13234,7 @@ interface SVGFETurbulenceElement extends SVGElement, SVGFilterPrimitiveStandardA
 
 declare var SVGFETurbulenceElement: {
     prototype: SVGFETurbulenceElement;
-    new(): SVGFETurbulenceElement;
+    new (): SVGFETurbulenceElement;
     SVG_STITCHTYPE_NOSTITCH: number;
     SVG_STITCHTYPE_STITCH: number;
     SVG_STITCHTYPE_UNKNOWN: number;
@@ -12878,7 +13258,7 @@ interface SVGFilterElement extends SVGElement, SVGUnitTypes, SVGStylable, SVGLan
 
 declare var SVGFilterElement: {
     prototype: SVGFilterElement;
-    new(): SVGFilterElement;
+    new (): SVGFilterElement;
 }
 
 interface SVGForeignObjectElement extends SVGElement, SVGStylable, SVGTransformable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired {
@@ -12891,7 +13271,7 @@ interface SVGForeignObjectElement extends SVGElement, SVGStylable, SVGTransforma
 
 declare var SVGForeignObjectElement: {
     prototype: SVGForeignObjectElement;
-    new(): SVGForeignObjectElement;
+    new (): SVGForeignObjectElement;
 }
 
 interface SVGGElement extends SVGElement, SVGStylable, SVGTransformable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired {
@@ -12900,7 +13280,7 @@ interface SVGGElement extends SVGElement, SVGStylable, SVGTransformable, SVGTest
 
 declare var SVGGElement: {
     prototype: SVGGElement;
-    new(): SVGGElement;
+    new (): SVGGElement;
 }
 
 interface SVGGradientElement extends SVGElement, SVGStylable, SVGExternalResourcesRequired, SVGURIReference, SVGUnitTypes {
@@ -12916,7 +13296,7 @@ interface SVGGradientElement extends SVGElement, SVGStylable, SVGExternalResourc
 
 declare var SVGGradientElement: {
     prototype: SVGGradientElement;
-    new(): SVGGradientElement;
+    new (): SVGGradientElement;
     SVG_SPREADMETHOD_PAD: number;
     SVG_SPREADMETHOD_REFLECT: number;
     SVG_SPREADMETHOD_REPEAT: number;
@@ -12934,7 +13314,7 @@ interface SVGImageElement extends SVGElement, SVGStylable, SVGTransformable, SVG
 
 declare var SVGImageElement: {
     prototype: SVGImageElement;
-    new(): SVGImageElement;
+    new (): SVGImageElement;
 }
 
 interface SVGLength {
@@ -12959,7 +13339,7 @@ interface SVGLength {
 
 declare var SVGLength: {
     prototype: SVGLength;
-    new(): SVGLength;
+    new (): SVGLength;
     SVG_LENGTHTYPE_CM: number;
     SVG_LENGTHTYPE_EMS: number;
     SVG_LENGTHTYPE_EXS: number;
@@ -12986,7 +13366,7 @@ interface SVGLengthList {
 
 declare var SVGLengthList: {
     prototype: SVGLengthList;
-    new(): SVGLengthList;
+    new (): SVGLengthList;
 }
 
 interface SVGLineElement extends SVGElement, SVGStylable, SVGTransformable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired {
@@ -12999,7 +13379,7 @@ interface SVGLineElement extends SVGElement, SVGStylable, SVGTransformable, SVGT
 
 declare var SVGLineElement: {
     prototype: SVGLineElement;
-    new(): SVGLineElement;
+    new (): SVGLineElement;
 }
 
 interface SVGLinearGradientElement extends SVGGradientElement {
@@ -13011,7 +13391,7 @@ interface SVGLinearGradientElement extends SVGGradientElement {
 
 declare var SVGLinearGradientElement: {
     prototype: SVGLinearGradientElement;
-    new(): SVGLinearGradientElement;
+    new (): SVGLinearGradientElement;
 }
 
 interface SVGMarkerElement extends SVGElement, SVGStylable, SVGLangSpace, SVGExternalResourcesRequired, SVGFitToViewBox {
@@ -13035,7 +13415,7 @@ interface SVGMarkerElement extends SVGElement, SVGStylable, SVGLangSpace, SVGExt
 
 declare var SVGMarkerElement: {
     prototype: SVGMarkerElement;
-    new(): SVGMarkerElement;
+    new (): SVGMarkerElement;
     SVG_MARKERUNITS_STROKEWIDTH: number;
     SVG_MARKERUNITS_UNKNOWN: number;
     SVG_MARKERUNITS_USERSPACEONUSE: number;
@@ -13056,7 +13436,7 @@ interface SVGMaskElement extends SVGElement, SVGStylable, SVGTests, SVGLangSpace
 
 declare var SVGMaskElement: {
     prototype: SVGMaskElement;
-    new(): SVGMaskElement;
+    new (): SVGMaskElement;
 }
 
 interface SVGMatrix {
@@ -13081,7 +13461,7 @@ interface SVGMatrix {
 
 declare var SVGMatrix: {
     prototype: SVGMatrix;
-    new(): SVGMatrix;
+    new (): SVGMatrix;
 }
 
 interface SVGMetadataElement extends SVGElement {
@@ -13089,7 +13469,7 @@ interface SVGMetadataElement extends SVGElement {
 
 declare var SVGMetadataElement: {
     prototype: SVGMetadataElement;
-    new(): SVGMetadataElement;
+    new (): SVGMetadataElement;
 }
 
 interface SVGNumber {
@@ -13098,7 +13478,7 @@ interface SVGNumber {
 
 declare var SVGNumber: {
     prototype: SVGNumber;
-    new(): SVGNumber;
+    new (): SVGNumber;
 }
 
 interface SVGNumberList {
@@ -13114,7 +13494,7 @@ interface SVGNumberList {
 
 declare var SVGNumberList: {
     prototype: SVGNumberList;
-    new(): SVGNumberList;
+    new (): SVGNumberList;
 }
 
 interface SVGPathElement extends SVGElement, SVGStylable, SVGTransformable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired, SVGAnimatedPathData {
@@ -13145,7 +13525,7 @@ interface SVGPathElement extends SVGElement, SVGStylable, SVGTransformable, SVGT
 
 declare var SVGPathElement: {
     prototype: SVGPathElement;
-    new(): SVGPathElement;
+    new (): SVGPathElement;
 }
 
 interface SVGPathSeg {
@@ -13175,7 +13555,7 @@ interface SVGPathSeg {
 
 declare var SVGPathSeg: {
     prototype: SVGPathSeg;
-    new(): SVGPathSeg;
+    new (): SVGPathSeg;
     PATHSEG_ARC_ABS: number;
     PATHSEG_ARC_REL: number;
     PATHSEG_CLOSEPATH: number;
@@ -13210,7 +13590,7 @@ interface SVGPathSegArcAbs extends SVGPathSeg {
 
 declare var SVGPathSegArcAbs: {
     prototype: SVGPathSegArcAbs;
-    new(): SVGPathSegArcAbs;
+    new (): SVGPathSegArcAbs;
 }
 
 interface SVGPathSegArcRel extends SVGPathSeg {
@@ -13225,7 +13605,7 @@ interface SVGPathSegArcRel extends SVGPathSeg {
 
 declare var SVGPathSegArcRel: {
     prototype: SVGPathSegArcRel;
-    new(): SVGPathSegArcRel;
+    new (): SVGPathSegArcRel;
 }
 
 interface SVGPathSegClosePath extends SVGPathSeg {
@@ -13233,7 +13613,7 @@ interface SVGPathSegClosePath extends SVGPathSeg {
 
 declare var SVGPathSegClosePath: {
     prototype: SVGPathSegClosePath;
-    new(): SVGPathSegClosePath;
+    new (): SVGPathSegClosePath;
 }
 
 interface SVGPathSegCurvetoCubicAbs extends SVGPathSeg {
@@ -13247,7 +13627,7 @@ interface SVGPathSegCurvetoCubicAbs extends SVGPathSeg {
 
 declare var SVGPathSegCurvetoCubicAbs: {
     prototype: SVGPathSegCurvetoCubicAbs;
-    new(): SVGPathSegCurvetoCubicAbs;
+    new (): SVGPathSegCurvetoCubicAbs;
 }
 
 interface SVGPathSegCurvetoCubicRel extends SVGPathSeg {
@@ -13261,7 +13641,7 @@ interface SVGPathSegCurvetoCubicRel extends SVGPathSeg {
 
 declare var SVGPathSegCurvetoCubicRel: {
     prototype: SVGPathSegCurvetoCubicRel;
-    new(): SVGPathSegCurvetoCubicRel;
+    new (): SVGPathSegCurvetoCubicRel;
 }
 
 interface SVGPathSegCurvetoCubicSmoothAbs extends SVGPathSeg {
@@ -13273,7 +13653,7 @@ interface SVGPathSegCurvetoCubicSmoothAbs extends SVGPathSeg {
 
 declare var SVGPathSegCurvetoCubicSmoothAbs: {
     prototype: SVGPathSegCurvetoCubicSmoothAbs;
-    new(): SVGPathSegCurvetoCubicSmoothAbs;
+    new (): SVGPathSegCurvetoCubicSmoothAbs;
 }
 
 interface SVGPathSegCurvetoCubicSmoothRel extends SVGPathSeg {
@@ -13285,7 +13665,7 @@ interface SVGPathSegCurvetoCubicSmoothRel extends SVGPathSeg {
 
 declare var SVGPathSegCurvetoCubicSmoothRel: {
     prototype: SVGPathSegCurvetoCubicSmoothRel;
-    new(): SVGPathSegCurvetoCubicSmoothRel;
+    new (): SVGPathSegCurvetoCubicSmoothRel;
 }
 
 interface SVGPathSegCurvetoQuadraticAbs extends SVGPathSeg {
@@ -13297,7 +13677,7 @@ interface SVGPathSegCurvetoQuadraticAbs extends SVGPathSeg {
 
 declare var SVGPathSegCurvetoQuadraticAbs: {
     prototype: SVGPathSegCurvetoQuadraticAbs;
-    new(): SVGPathSegCurvetoQuadraticAbs;
+    new (): SVGPathSegCurvetoQuadraticAbs;
 }
 
 interface SVGPathSegCurvetoQuadraticRel extends SVGPathSeg {
@@ -13309,7 +13689,7 @@ interface SVGPathSegCurvetoQuadraticRel extends SVGPathSeg {
 
 declare var SVGPathSegCurvetoQuadraticRel: {
     prototype: SVGPathSegCurvetoQuadraticRel;
-    new(): SVGPathSegCurvetoQuadraticRel;
+    new (): SVGPathSegCurvetoQuadraticRel;
 }
 
 interface SVGPathSegCurvetoQuadraticSmoothAbs extends SVGPathSeg {
@@ -13319,7 +13699,7 @@ interface SVGPathSegCurvetoQuadraticSmoothAbs extends SVGPathSeg {
 
 declare var SVGPathSegCurvetoQuadraticSmoothAbs: {
     prototype: SVGPathSegCurvetoQuadraticSmoothAbs;
-    new(): SVGPathSegCurvetoQuadraticSmoothAbs;
+    new (): SVGPathSegCurvetoQuadraticSmoothAbs;
 }
 
 interface SVGPathSegCurvetoQuadraticSmoothRel extends SVGPathSeg {
@@ -13329,7 +13709,7 @@ interface SVGPathSegCurvetoQuadraticSmoothRel extends SVGPathSeg {
 
 declare var SVGPathSegCurvetoQuadraticSmoothRel: {
     prototype: SVGPathSegCurvetoQuadraticSmoothRel;
-    new(): SVGPathSegCurvetoQuadraticSmoothRel;
+    new (): SVGPathSegCurvetoQuadraticSmoothRel;
 }
 
 interface SVGPathSegLinetoAbs extends SVGPathSeg {
@@ -13339,7 +13719,7 @@ interface SVGPathSegLinetoAbs extends SVGPathSeg {
 
 declare var SVGPathSegLinetoAbs: {
     prototype: SVGPathSegLinetoAbs;
-    new(): SVGPathSegLinetoAbs;
+    new (): SVGPathSegLinetoAbs;
 }
 
 interface SVGPathSegLinetoHorizontalAbs extends SVGPathSeg {
@@ -13348,7 +13728,7 @@ interface SVGPathSegLinetoHorizontalAbs extends SVGPathSeg {
 
 declare var SVGPathSegLinetoHorizontalAbs: {
     prototype: SVGPathSegLinetoHorizontalAbs;
-    new(): SVGPathSegLinetoHorizontalAbs;
+    new (): SVGPathSegLinetoHorizontalAbs;
 }
 
 interface SVGPathSegLinetoHorizontalRel extends SVGPathSeg {
@@ -13357,7 +13737,7 @@ interface SVGPathSegLinetoHorizontalRel extends SVGPathSeg {
 
 declare var SVGPathSegLinetoHorizontalRel: {
     prototype: SVGPathSegLinetoHorizontalRel;
-    new(): SVGPathSegLinetoHorizontalRel;
+    new (): SVGPathSegLinetoHorizontalRel;
 }
 
 interface SVGPathSegLinetoRel extends SVGPathSeg {
@@ -13367,7 +13747,7 @@ interface SVGPathSegLinetoRel extends SVGPathSeg {
 
 declare var SVGPathSegLinetoRel: {
     prototype: SVGPathSegLinetoRel;
-    new(): SVGPathSegLinetoRel;
+    new (): SVGPathSegLinetoRel;
 }
 
 interface SVGPathSegLinetoVerticalAbs extends SVGPathSeg {
@@ -13376,7 +13756,7 @@ interface SVGPathSegLinetoVerticalAbs extends SVGPathSeg {
 
 declare var SVGPathSegLinetoVerticalAbs: {
     prototype: SVGPathSegLinetoVerticalAbs;
-    new(): SVGPathSegLinetoVerticalAbs;
+    new (): SVGPathSegLinetoVerticalAbs;
 }
 
 interface SVGPathSegLinetoVerticalRel extends SVGPathSeg {
@@ -13385,7 +13765,7 @@ interface SVGPathSegLinetoVerticalRel extends SVGPathSeg {
 
 declare var SVGPathSegLinetoVerticalRel: {
     prototype: SVGPathSegLinetoVerticalRel;
-    new(): SVGPathSegLinetoVerticalRel;
+    new (): SVGPathSegLinetoVerticalRel;
 }
 
 interface SVGPathSegList {
@@ -13401,7 +13781,7 @@ interface SVGPathSegList {
 
 declare var SVGPathSegList: {
     prototype: SVGPathSegList;
-    new(): SVGPathSegList;
+    new (): SVGPathSegList;
 }
 
 interface SVGPathSegMovetoAbs extends SVGPathSeg {
@@ -13411,7 +13791,7 @@ interface SVGPathSegMovetoAbs extends SVGPathSeg {
 
 declare var SVGPathSegMovetoAbs: {
     prototype: SVGPathSegMovetoAbs;
-    new(): SVGPathSegMovetoAbs;
+    new (): SVGPathSegMovetoAbs;
 }
 
 interface SVGPathSegMovetoRel extends SVGPathSeg {
@@ -13421,7 +13801,7 @@ interface SVGPathSegMovetoRel extends SVGPathSeg {
 
 declare var SVGPathSegMovetoRel: {
     prototype: SVGPathSegMovetoRel;
-    new(): SVGPathSegMovetoRel;
+    new (): SVGPathSegMovetoRel;
 }
 
 interface SVGPatternElement extends SVGElement, SVGStylable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired, SVGFitToViewBox, SVGURIReference, SVGUnitTypes {
@@ -13437,7 +13817,7 @@ interface SVGPatternElement extends SVGElement, SVGStylable, SVGTests, SVGLangSp
 
 declare var SVGPatternElement: {
     prototype: SVGPatternElement;
-    new(): SVGPatternElement;
+    new (): SVGPatternElement;
 }
 
 interface SVGPoint {
@@ -13448,7 +13828,7 @@ interface SVGPoint {
 
 declare var SVGPoint: {
     prototype: SVGPoint;
-    new(): SVGPoint;
+    new (): SVGPoint;
 }
 
 interface SVGPointList {
@@ -13464,7 +13844,7 @@ interface SVGPointList {
 
 declare var SVGPointList: {
     prototype: SVGPointList;
-    new(): SVGPointList;
+    new (): SVGPointList;
 }
 
 interface SVGPolygonElement extends SVGElement, SVGStylable, SVGTransformable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired, SVGAnimatedPoints {
@@ -13473,7 +13853,7 @@ interface SVGPolygonElement extends SVGElement, SVGStylable, SVGTransformable, S
 
 declare var SVGPolygonElement: {
     prototype: SVGPolygonElement;
-    new(): SVGPolygonElement;
+    new (): SVGPolygonElement;
 }
 
 interface SVGPolylineElement extends SVGElement, SVGStylable, SVGTransformable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired, SVGAnimatedPoints {
@@ -13482,7 +13862,7 @@ interface SVGPolylineElement extends SVGElement, SVGStylable, SVGTransformable, 
 
 declare var SVGPolylineElement: {
     prototype: SVGPolylineElement;
-    new(): SVGPolylineElement;
+    new (): SVGPolylineElement;
 }
 
 interface SVGPreserveAspectRatio {
@@ -13506,7 +13886,7 @@ interface SVGPreserveAspectRatio {
 
 declare var SVGPreserveAspectRatio: {
     prototype: SVGPreserveAspectRatio;
-    new(): SVGPreserveAspectRatio;
+    new (): SVGPreserveAspectRatio;
     SVG_MEETORSLICE_MEET: number;
     SVG_MEETORSLICE_SLICE: number;
     SVG_MEETORSLICE_UNKNOWN: number;
@@ -13533,7 +13913,7 @@ interface SVGRadialGradientElement extends SVGGradientElement {
 
 declare var SVGRadialGradientElement: {
     prototype: SVGRadialGradientElement;
-    new(): SVGRadialGradientElement;
+    new (): SVGRadialGradientElement;
 }
 
 interface SVGRect {
@@ -13545,7 +13925,7 @@ interface SVGRect {
 
 declare var SVGRect: {
     prototype: SVGRect;
-    new(): SVGRect;
+    new (): SVGRect;
 }
 
 interface SVGRectElement extends SVGElement, SVGStylable, SVGTransformable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired {
@@ -13560,7 +13940,7 @@ interface SVGRectElement extends SVGElement, SVGStylable, SVGTransformable, SVGT
 
 declare var SVGRectElement: {
     prototype: SVGRectElement;
-    new(): SVGRectElement;
+    new (): SVGRectElement;
 }
 
 interface SVGSVGElement extends SVGElement, DocumentEvent, SVGLocatable, SVGTests, SVGStylable, SVGLangSpace, SVGExternalResourcesRequired, SVGFitToViewBox, SVGZoomAndPan {
@@ -13663,7 +14043,7 @@ interface SVGSVGElement extends SVGElement, DocumentEvent, SVGLocatable, SVGTest
 
 declare var SVGSVGElement: {
     prototype: SVGSVGElement;
-    new(): SVGSVGElement;
+    new (): SVGSVGElement;
 }
 
 interface SVGScriptElement extends SVGElement, SVGExternalResourcesRequired, SVGURIReference {
@@ -13673,7 +14053,7 @@ interface SVGScriptElement extends SVGElement, SVGExternalResourcesRequired, SVG
 
 declare var SVGScriptElement: {
     prototype: SVGScriptElement;
-    new(): SVGScriptElement;
+    new (): SVGScriptElement;
 }
 
 interface SVGStopElement extends SVGElement, SVGStylable {
@@ -13683,7 +14063,7 @@ interface SVGStopElement extends SVGElement, SVGStylable {
 
 declare var SVGStopElement: {
     prototype: SVGStopElement;
-    new(): SVGStopElement;
+    new (): SVGStopElement;
 }
 
 interface SVGStringList {
@@ -13699,7 +14079,7 @@ interface SVGStringList {
 
 declare var SVGStringList: {
     prototype: SVGStringList;
-    new(): SVGStringList;
+    new (): SVGStringList;
 }
 
 interface SVGStyleElement extends SVGElement, SVGLangSpace {
@@ -13711,7 +14091,7 @@ interface SVGStyleElement extends SVGElement, SVGLangSpace {
 
 declare var SVGStyleElement: {
     prototype: SVGStyleElement;
-    new(): SVGStyleElement;
+    new (): SVGStyleElement;
 }
 
 interface SVGSwitchElement extends SVGElement, SVGStylable, SVGTransformable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired {
@@ -13720,7 +14100,7 @@ interface SVGSwitchElement extends SVGElement, SVGStylable, SVGTransformable, SV
 
 declare var SVGSwitchElement: {
     prototype: SVGSwitchElement;
-    new(): SVGSwitchElement;
+    new (): SVGSwitchElement;
 }
 
 interface SVGSymbolElement extends SVGElement, SVGStylable, SVGLangSpace, SVGExternalResourcesRequired, SVGFitToViewBox {
@@ -13729,7 +14109,7 @@ interface SVGSymbolElement extends SVGElement, SVGStylable, SVGLangSpace, SVGExt
 
 declare var SVGSymbolElement: {
     prototype: SVGSymbolElement;
-    new(): SVGSymbolElement;
+    new (): SVGSymbolElement;
 }
 
 interface SVGTSpanElement extends SVGTextPositioningElement {
@@ -13737,7 +14117,7 @@ interface SVGTSpanElement extends SVGTextPositioningElement {
 
 declare var SVGTSpanElement: {
     prototype: SVGTSpanElement;
-    new(): SVGTSpanElement;
+    new (): SVGTSpanElement;
 }
 
 interface SVGTextContentElement extends SVGElement, SVGStylable, SVGTests, SVGLangSpace, SVGExternalResourcesRequired {
@@ -13760,7 +14140,7 @@ interface SVGTextContentElement extends SVGElement, SVGStylable, SVGTests, SVGLa
 
 declare var SVGTextContentElement: {
     prototype: SVGTextContentElement;
-    new(): SVGTextContentElement;
+    new (): SVGTextContentElement;
     LENGTHADJUST_SPACING: number;
     LENGTHADJUST_SPACINGANDGLYPHS: number;
     LENGTHADJUST_UNKNOWN: number;
@@ -13772,7 +14152,7 @@ interface SVGTextElement extends SVGTextPositioningElement, SVGTransformable {
 
 declare var SVGTextElement: {
     prototype: SVGTextElement;
-    new(): SVGTextElement;
+    new (): SVGTextElement;
 }
 
 interface SVGTextPathElement extends SVGTextContentElement, SVGURIReference {
@@ -13790,7 +14170,7 @@ interface SVGTextPathElement extends SVGTextContentElement, SVGURIReference {
 
 declare var SVGTextPathElement: {
     prototype: SVGTextPathElement;
-    new(): SVGTextPathElement;
+    new (): SVGTextPathElement;
     TEXTPATH_METHODTYPE_ALIGN: number;
     TEXTPATH_METHODTYPE_STRETCH: number;
     TEXTPATH_METHODTYPE_UNKNOWN: number;
@@ -13809,7 +14189,7 @@ interface SVGTextPositioningElement extends SVGTextContentElement {
 
 declare var SVGTextPositioningElement: {
     prototype: SVGTextPositioningElement;
-    new(): SVGTextPositioningElement;
+    new (): SVGTextPositioningElement;
 }
 
 interface SVGTitleElement extends SVGElement, SVGStylable, SVGLangSpace {
@@ -13818,7 +14198,7 @@ interface SVGTitleElement extends SVGElement, SVGStylable, SVGLangSpace {
 
 declare var SVGTitleElement: {
     prototype: SVGTitleElement;
-    new(): SVGTitleElement;
+    new (): SVGTitleElement;
 }
 
 interface SVGTransform {
@@ -13842,7 +14222,7 @@ interface SVGTransform {
 
 declare var SVGTransform: {
     prototype: SVGTransform;
-    new(): SVGTransform;
+    new (): SVGTransform;
     SVG_TRANSFORM_MATRIX: number;
     SVG_TRANSFORM_ROTATE: number;
     SVG_TRANSFORM_SCALE: number;
@@ -13867,7 +14247,7 @@ interface SVGTransformList {
 
 declare var SVGTransformList: {
     prototype: SVGTransformList;
-    new(): SVGTransformList;
+    new (): SVGTransformList;
 }
 
 interface SVGUnitTypes {
@@ -13889,7 +14269,7 @@ interface SVGUseElement extends SVGElement, SVGStylable, SVGTransformable, SVGTe
 
 declare var SVGUseElement: {
     prototype: SVGUseElement;
-    new(): SVGUseElement;
+    new (): SVGUseElement;
 }
 
 interface SVGViewElement extends SVGElement, SVGExternalResourcesRequired, SVGFitToViewBox, SVGZoomAndPan {
@@ -13899,7 +14279,7 @@ interface SVGViewElement extends SVGElement, SVGExternalResourcesRequired, SVGFi
 
 declare var SVGViewElement: {
     prototype: SVGViewElement;
-    new(): SVGViewElement;
+    new (): SVGViewElement;
 }
 
 interface SVGZoomAndPan {
@@ -13919,7 +14299,7 @@ interface SVGZoomEvent extends UIEvent {
 
 declare var SVGZoomEvent: {
     prototype: SVGZoomEvent;
-    new(): SVGZoomEvent;
+    new (): SVGZoomEvent;
 }
 
 interface Screen extends EventTarget {
@@ -13939,8 +14319,7 @@ interface Screen extends EventTarget {
     systemXDPI: number;
     systemYDPI: number;
     width: number;
-    msLockOrientation(orientations: string): boolean;
-    msLockOrientation(orientations: string[]): boolean;
+    msLockOrientation(orientations: string | string[]): boolean;
     msUnlockOrientation(): void;
     addEventListener(type: "MSOrientationChange", listener: (ev: Event) => any, useCapture?: boolean): void;
     addEventListener(type: string, listener: EventListenerOrEventListenerObject, useCapture?: boolean): void;
@@ -13948,7 +14327,7 @@ interface Screen extends EventTarget {
 
 declare var Screen: {
     prototype: Screen;
-    new(): Screen;
+    new (): Screen;
 }
 
 interface ScriptNotifyEvent extends Event {
@@ -13958,7 +14337,7 @@ interface ScriptNotifyEvent extends Event {
 
 declare var ScriptNotifyEvent: {
     prototype: ScriptNotifyEvent;
-    new(): ScriptNotifyEvent;
+    new (): ScriptNotifyEvent;
 }
 
 interface ScriptProcessorNode extends AudioNode {
@@ -13970,7 +14349,7 @@ interface ScriptProcessorNode extends AudioNode {
 
 declare var ScriptProcessorNode: {
     prototype: ScriptProcessorNode;
-    new(): ScriptProcessorNode;
+    new (): ScriptProcessorNode;
 }
 
 interface Selection {
@@ -13999,7 +14378,7 @@ interface Selection {
 
 declare var Selection: {
     prototype: Selection;
-    new(): Selection;
+    new (): Selection;
 }
 
 interface SourceBuffer extends EventTarget {
@@ -14012,15 +14391,14 @@ interface SourceBuffer extends EventTarget {
     updating: boolean;
     videoTracks: VideoTrackList;
     abort(): void;
-    appendBuffer(data: ArrayBuffer): void;
-    appendBuffer(data: ArrayBufferView): void;
+    appendBuffer(data: ArrayBuffer | ArrayBufferView): void;
     appendStream(stream: MSStream, maxSize?: number): void;
     remove(start: number, end: number): void;
 }
 
 declare var SourceBuffer: {
     prototype: SourceBuffer;
-    new(): SourceBuffer;
+    new (): SourceBuffer;
 }
 
 interface SourceBufferList extends EventTarget {
@@ -14031,7 +14409,7 @@ interface SourceBufferList extends EventTarget {
 
 declare var SourceBufferList: {
     prototype: SourceBufferList;
-    new(): SourceBufferList;
+    new (): SourceBufferList;
 }
 
 interface StereoPannerNode extends AudioNode {
@@ -14040,7 +14418,7 @@ interface StereoPannerNode extends AudioNode {
 
 declare var StereoPannerNode: {
     prototype: StereoPannerNode;
-    new(): StereoPannerNode;
+    new (): StereoPannerNode;
 }
 
 interface Storage {
@@ -14056,7 +14434,7 @@ interface Storage {
 
 declare var Storage: {
     prototype: Storage;
-    new(): Storage;
+    new (): Storage;
 }
 
 interface StorageEvent extends Event {
@@ -14070,7 +14448,7 @@ interface StorageEvent extends Event {
 
 declare var StorageEvent: {
     prototype: StorageEvent;
-    new(): StorageEvent;
+    new (): StorageEvent;
 }
 
 interface StyleMedia {
@@ -14080,7 +14458,7 @@ interface StyleMedia {
 
 declare var StyleMedia: {
     prototype: StyleMedia;
-    new(): StyleMedia;
+    new (): StyleMedia;
 }
 
 interface StyleSheet {
@@ -14095,7 +14473,7 @@ interface StyleSheet {
 
 declare var StyleSheet: {
     prototype: StyleSheet;
-    new(): StyleSheet;
+    new (): StyleSheet;
 }
 
 interface StyleSheetList {
@@ -14106,7 +14484,7 @@ interface StyleSheetList {
 
 declare var StyleSheetList: {
     prototype: StyleSheetList;
-    new(): StyleSheetList;
+    new (): StyleSheetList;
 }
 
 interface StyleSheetPageList {
@@ -14117,42 +14495,27 @@ interface StyleSheetPageList {
 
 declare var StyleSheetPageList: {
     prototype: StyleSheetPageList;
-    new(): StyleSheetPageList;
+    new (): StyleSheetPageList;
 }
 
 interface SubtleCrypto {
-    decrypt(algorithm: string, key: CryptoKey, data: ArrayBufferView): any;
-    decrypt(algorithm: Algorithm, key: CryptoKey, data: ArrayBufferView): any;
-    deriveBits(algorithm: string, baseKey: CryptoKey, length: number): any;
-    deriveBits(algorithm: Algorithm, baseKey: CryptoKey, length: number): any;
-    deriveKey(algorithm: string, baseKey: CryptoKey, derivedKeyType: string, extractable: boolean, keyUsages: string[]): any;
-    deriveKey(algorithm: string, baseKey: CryptoKey, derivedKeyType: Algorithm, extractable: boolean, keyUsages: string[]): any;
-    deriveKey(algorithm: Algorithm, baseKey: CryptoKey, derivedKeyType: string, extractable: boolean, keyUsages: string[]): any;
-    deriveKey(algorithm: Algorithm, baseKey: CryptoKey, derivedKeyType: Algorithm, extractable: boolean, keyUsages: string[]): any;
-    digest(algorithm: string, data: ArrayBufferView): any;
-    digest(algorithm: Algorithm, data: ArrayBufferView): any;
-    encrypt(algorithm: string, key: CryptoKey, data: ArrayBufferView): any;
-    encrypt(algorithm: Algorithm, key: CryptoKey, data: ArrayBufferView): any;
+    decrypt(algorithm: string | Algorithm, key: CryptoKey, data: ArrayBufferView): any;
+    deriveBits(algorithm: string | Algorithm, baseKey: CryptoKey, length: number): any;
+    deriveKey(algorithm: string | Algorithm, baseKey: CryptoKey, derivedKeyType: string | Algorithm, extractable: boolean, keyUsages: string[]): any;
+    digest(algorithm: string | Algorithm, data: ArrayBufferView): any;
+    encrypt(algorithm: string | Algorithm, key: CryptoKey, data: ArrayBufferView): any;
     exportKey(format: string, key: CryptoKey): any;
-    generateKey(algorithm: string, extractable: boolean, keyUsages: string[]): any;
-    generateKey(algorithm: Algorithm, extractable: boolean, keyUsages: string[]): any;
-    importKey(format: string, keyData: ArrayBufferView, algorithm: string, extractable: boolean, keyUsages: string[]): any;
-    importKey(format: string, keyData: ArrayBufferView, algorithm: Algorithm, extractable: boolean, keyUsages: string[]): any;
-    sign(algorithm: string, key: CryptoKey, data: ArrayBufferView): any;
-    sign(algorithm: Algorithm, key: CryptoKey, data: ArrayBufferView): any;
-    unwrapKey(format: string, wrappedKey: ArrayBufferView, unwrappingKey: CryptoKey, unwrapAlgorithm: string, unwrappedKeyAlgorithm: string, extractable: boolean, keyUsages: string[]): any;
-    unwrapKey(format: string, wrappedKey: ArrayBufferView, unwrappingKey: CryptoKey, unwrapAlgorithm: string, unwrappedKeyAlgorithm: Algorithm, extractable: boolean, keyUsages: string[]): any;
-    unwrapKey(format: string, wrappedKey: ArrayBufferView, unwrappingKey: CryptoKey, unwrapAlgorithm: Algorithm, unwrappedKeyAlgorithm: string, extractable: boolean, keyUsages: string[]): any;
-    unwrapKey(format: string, wrappedKey: ArrayBufferView, unwrappingKey: CryptoKey, unwrapAlgorithm: Algorithm, unwrappedKeyAlgorithm: Algorithm, extractable: boolean, keyUsages: string[]): any;
-    verify(algorithm: string, key: CryptoKey, signature: ArrayBufferView, data: ArrayBufferView): any;
-    verify(algorithm: Algorithm, key: CryptoKey, signature: ArrayBufferView, data: ArrayBufferView): any;
-    wrapKey(format: string, key: CryptoKey, wrappingKey: CryptoKey, wrapAlgorithm: string): any;
-    wrapKey(format: string, key: CryptoKey, wrappingKey: CryptoKey, wrapAlgorithm: Algorithm): any;
+    generateKey(algorithm: string | Algorithm, extractable: boolean, keyUsages: string[]): any;
+    importKey(format: string, keyData: ArrayBufferView, algorithm: string | Algorithm, extractable: boolean, keyUsages: string[]): any;
+    sign(algorithm: string | Algorithm, key: CryptoKey, data: ArrayBufferView): any;
+    unwrapKey(format: string, wrappedKey: ArrayBufferView, unwrappingKey: CryptoKey, unwrapAlgorithm: string | Algorithm, unwrappedKeyAlgorithm: string | Algorithm, extractable: boolean, keyUsages: string[]): any;
+    verify(algorithm: string | Algorithm, key: CryptoKey, signature: ArrayBufferView, data: ArrayBufferView): any;
+    wrapKey(format: string, key: CryptoKey, wrappingKey: CryptoKey, wrapAlgorithm: string | Algorithm): any;
 }
 
 declare var SubtleCrypto: {
     prototype: SubtleCrypto;
-    new(): SubtleCrypto;
+    new (): SubtleCrypto;
 }
 
 interface Text extends CharacterData {
@@ -14163,7 +14526,7 @@ interface Text extends CharacterData {
 
 declare var Text: {
     prototype: Text;
-    new(): Text;
+    new (): Text;
 }
 
 interface TextEvent extends UIEvent {
@@ -14185,7 +14548,7 @@ interface TextEvent extends UIEvent {
 
 declare var TextEvent: {
     prototype: TextEvent;
-    new(): TextEvent;
+    new (): TextEvent;
     DOM_INPUT_METHOD_DROP: number;
     DOM_INPUT_METHOD_HANDWRITING: number;
     DOM_INPUT_METHOD_IME: number;
@@ -14204,7 +14567,7 @@ interface TextMetrics {
 
 declare var TextMetrics: {
     prototype: TextMetrics;
-    new(): TextMetrics;
+    new (): TextMetrics;
 }
 
 interface TextRange {
@@ -14249,7 +14612,7 @@ interface TextRange {
 
 declare var TextRange: {
     prototype: TextRange;
-    new(): TextRange;
+    new (): TextRange;
 }
 
 interface TextRangeCollection {
@@ -14260,7 +14623,7 @@ interface TextRangeCollection {
 
 declare var TextRangeCollection: {
     prototype: TextRangeCollection;
-    new(): TextRangeCollection;
+    new (): TextRangeCollection;
 }
 
 interface TextTrack extends EventTarget {
@@ -14292,7 +14655,7 @@ interface TextTrack extends EventTarget {
 
 declare var TextTrack: {
     prototype: TextTrack;
-    new(): TextTrack;
+    new (): TextTrack;
     DISABLED: number;
     ERROR: number;
     HIDDEN: number;
@@ -14319,7 +14682,7 @@ interface TextTrackCue extends EventTarget {
 
 declare var TextTrackCue: {
     prototype: TextTrackCue;
-    new(startTime: number, endTime: number, text: string): TextTrackCue;
+    new (startTime: number, endTime: number, text: string): TextTrackCue;
 }
 
 interface TextTrackCueList {
@@ -14331,7 +14694,7 @@ interface TextTrackCueList {
 
 declare var TextTrackCueList: {
     prototype: TextTrackCueList;
-    new(): TextTrackCueList;
+    new (): TextTrackCueList;
 }
 
 interface TextTrackList extends EventTarget {
@@ -14345,7 +14708,7 @@ interface TextTrackList extends EventTarget {
 
 declare var TextTrackList: {
     prototype: TextTrackList;
-    new(): TextTrackList;
+    new (): TextTrackList;
 }
 
 interface TimeRanges {
@@ -14356,7 +14719,7 @@ interface TimeRanges {
 
 declare var TimeRanges: {
     prototype: TimeRanges;
-    new(): TimeRanges;
+    new (): TimeRanges;
 }
 
 interface Touch {
@@ -14372,7 +14735,7 @@ interface Touch {
 
 declare var Touch: {
     prototype: Touch;
-    new(): Touch;
+    new (): Touch;
 }
 
 interface TouchEvent extends UIEvent {
@@ -14387,7 +14750,7 @@ interface TouchEvent extends UIEvent {
 
 declare var TouchEvent: {
     prototype: TouchEvent;
-    new(): TouchEvent;
+    new (): TouchEvent;
 }
 
 interface TouchList {
@@ -14398,7 +14761,7 @@ interface TouchList {
 
 declare var TouchList: {
     prototype: TouchList;
-    new(): TouchList;
+    new (): TouchList;
 }
 
 interface TrackEvent extends Event {
@@ -14407,7 +14770,7 @@ interface TrackEvent extends Event {
 
 declare var TrackEvent: {
     prototype: TrackEvent;
-    new(): TrackEvent;
+    new (): TrackEvent;
 }
 
 interface TransitionEvent extends Event {
@@ -14418,7 +14781,7 @@ interface TransitionEvent extends Event {
 
 declare var TransitionEvent: {
     prototype: TransitionEvent;
-    new(): TransitionEvent;
+    new (): TransitionEvent;
 }
 
 interface TreeWalker {
@@ -14438,7 +14801,7 @@ interface TreeWalker {
 
 declare var TreeWalker: {
     prototype: TreeWalker;
-    new(): TreeWalker;
+    new (): TreeWalker;
 }
 
 interface UIEvent extends Event {
@@ -14449,7 +14812,7 @@ interface UIEvent extends Event {
 
 declare var UIEvent: {
     prototype: UIEvent;
-    new(type: string, eventInitDict?: UIEventInit): UIEvent;
+    new (type: string, eventInitDict?: UIEventInit): UIEvent;
 }
 
 interface URL {
@@ -14464,7 +14827,7 @@ interface UnviewableContentIdentifiedEvent extends NavigationEventWithReferrer {
 
 declare var UnviewableContentIdentifiedEvent: {
     prototype: UnviewableContentIdentifiedEvent;
-    new(): UnviewableContentIdentifiedEvent;
+    new (): UnviewableContentIdentifiedEvent;
 }
 
 interface ValidityState {
@@ -14482,7 +14845,7 @@ interface ValidityState {
 
 declare var ValidityState: {
     prototype: ValidityState;
-    new(): ValidityState;
+    new (): ValidityState;
 }
 
 interface VideoPlaybackQuality {
@@ -14495,7 +14858,7 @@ interface VideoPlaybackQuality {
 
 declare var VideoPlaybackQuality: {
     prototype: VideoPlaybackQuality;
-    new(): VideoPlaybackQuality;
+    new (): VideoPlaybackQuality;
 }
 
 interface VideoTrack {
@@ -14509,7 +14872,7 @@ interface VideoTrack {
 
 declare var VideoTrack: {
     prototype: VideoTrack;
-    new(): VideoTrack;
+    new (): VideoTrack;
 }
 
 interface VideoTrackList extends EventTarget {
@@ -14529,7 +14892,7 @@ interface VideoTrackList extends EventTarget {
 
 declare var VideoTrackList: {
     prototype: VideoTrackList;
-    new(): VideoTrackList;
+    new (): VideoTrackList;
 }
 
 interface WEBGL_compressed_texture_s3tc {
@@ -14541,7 +14904,7 @@ interface WEBGL_compressed_texture_s3tc {
 
 declare var WEBGL_compressed_texture_s3tc: {
     prototype: WEBGL_compressed_texture_s3tc;
-    new(): WEBGL_compressed_texture_s3tc;
+    new (): WEBGL_compressed_texture_s3tc;
     COMPRESSED_RGBA_S3TC_DXT1_EXT: number;
     COMPRESSED_RGBA_S3TC_DXT3_EXT: number;
     COMPRESSED_RGBA_S3TC_DXT5_EXT: number;
@@ -14555,7 +14918,7 @@ interface WEBGL_debug_renderer_info {
 
 declare var WEBGL_debug_renderer_info: {
     prototype: WEBGL_debug_renderer_info;
-    new(): WEBGL_debug_renderer_info;
+    new (): WEBGL_debug_renderer_info;
     UNMASKED_RENDERER_WEBGL: number;
     UNMASKED_VENDOR_WEBGL: number;
 }
@@ -14566,7 +14929,7 @@ interface WEBGL_depth_texture {
 
 declare var WEBGL_depth_texture: {
     prototype: WEBGL_depth_texture;
-    new(): WEBGL_depth_texture;
+    new (): WEBGL_depth_texture;
     UNSIGNED_INT_24_8_WEBGL: number;
 }
 
@@ -14577,7 +14940,7 @@ interface WaveShaperNode extends AudioNode {
 
 declare var WaveShaperNode: {
     prototype: WaveShaperNode;
-    new(): WaveShaperNode;
+    new (): WaveShaperNode;
 }
 
 interface WebGLActiveInfo {
@@ -14588,7 +14951,7 @@ interface WebGLActiveInfo {
 
 declare var WebGLActiveInfo: {
     prototype: WebGLActiveInfo;
-    new(): WebGLActiveInfo;
+    new (): WebGLActiveInfo;
 }
 
 interface WebGLBuffer extends WebGLObject {
@@ -14596,7 +14959,7 @@ interface WebGLBuffer extends WebGLObject {
 
 declare var WebGLBuffer: {
     prototype: WebGLBuffer;
-    new(): WebGLBuffer;
+    new (): WebGLBuffer;
 }
 
 interface WebGLContextEvent extends Event {
@@ -14605,7 +14968,7 @@ interface WebGLContextEvent extends Event {
 
 declare var WebGLContextEvent: {
     prototype: WebGLContextEvent;
-    new(): WebGLContextEvent;
+    new (): WebGLContextEvent;
 }
 
 interface WebGLFramebuffer extends WebGLObject {
@@ -14613,7 +14976,7 @@ interface WebGLFramebuffer extends WebGLObject {
 
 declare var WebGLFramebuffer: {
     prototype: WebGLFramebuffer;
-    new(): WebGLFramebuffer;
+    new (): WebGLFramebuffer;
 }
 
 interface WebGLObject {
@@ -14621,7 +14984,7 @@ interface WebGLObject {
 
 declare var WebGLObject: {
     prototype: WebGLObject;
-    new(): WebGLObject;
+    new (): WebGLObject;
 }
 
 interface WebGLProgram extends WebGLObject {
@@ -14629,7 +14992,7 @@ interface WebGLProgram extends WebGLObject {
 
 declare var WebGLProgram: {
     prototype: WebGLProgram;
-    new(): WebGLProgram;
+    new (): WebGLProgram;
 }
 
 interface WebGLRenderbuffer extends WebGLObject {
@@ -14637,7 +15000,7 @@ interface WebGLRenderbuffer extends WebGLObject {
 
 declare var WebGLRenderbuffer: {
     prototype: WebGLRenderbuffer;
-    new(): WebGLRenderbuffer;
+    new (): WebGLRenderbuffer;
 }
 
 interface WebGLRenderingContext {
@@ -14656,11 +15019,8 @@ interface WebGLRenderingContext {
     blendEquationSeparate(modeRGB: number, modeAlpha: number): void;
     blendFunc(sfactor: number, dfactor: number): void;
     blendFuncSeparate(srcRGB: number, dstRGB: number, srcAlpha: number, dstAlpha: number): void;
-    bufferData(target: number, size: number, usage: number): void;
-    bufferData(target: number, size: ArrayBufferView, usage: number): void;
-    bufferData(target: number, size: any, usage: number): void;
-    bufferSubData(target: number, offset: number, data: ArrayBufferView): void;
-    bufferSubData(target: number, offset: number, data: any): void;
+    bufferData(target: number, size: number | ArrayBufferView | ArrayBuffer, usage: number): void;
+    bufferSubData(target: number, offset: number, data: ArrayBufferView | ArrayBuffer): void;
     checkFramebufferStatus(target: number): number;
     clear(mask: number): void;
     clearColor(red: number, green: number, blue: number, alpha: number): void;
@@ -15092,7 +15452,7 @@ interface WebGLRenderingContext {
 
 declare var WebGLRenderingContext: {
     prototype: WebGLRenderingContext;
-    new(): WebGLRenderingContext;
+    new (): WebGLRenderingContext;
     ACTIVE_ATTRIBUTES: number;
     ACTIVE_TEXTURE: number;
     ACTIVE_UNIFORMS: number;
@@ -15397,7 +15757,7 @@ interface WebGLShader extends WebGLObject {
 
 declare var WebGLShader: {
     prototype: WebGLShader;
-    new(): WebGLShader;
+    new (): WebGLShader;
 }
 
 interface WebGLShaderPrecisionFormat {
@@ -15408,7 +15768,7 @@ interface WebGLShaderPrecisionFormat {
 
 declare var WebGLShaderPrecisionFormat: {
     prototype: WebGLShaderPrecisionFormat;
-    new(): WebGLShaderPrecisionFormat;
+    new (): WebGLShaderPrecisionFormat;
 }
 
 interface WebGLTexture extends WebGLObject {
@@ -15416,7 +15776,7 @@ interface WebGLTexture extends WebGLObject {
 
 declare var WebGLTexture: {
     prototype: WebGLTexture;
-    new(): WebGLTexture;
+    new (): WebGLTexture;
 }
 
 interface WebGLUniformLocation {
@@ -15424,7 +15784,7 @@ interface WebGLUniformLocation {
 
 declare var WebGLUniformLocation: {
     prototype: WebGLUniformLocation;
-    new(): WebGLUniformLocation;
+    new (): WebGLUniformLocation;
 }
 
 interface WebKitCSSMatrix {
@@ -15464,7 +15824,7 @@ interface WebKitCSSMatrix {
 
 declare var WebKitCSSMatrix: {
     prototype: WebKitCSSMatrix;
-    new(text?: string): WebKitCSSMatrix;
+    new (text?: string): WebKitCSSMatrix;
 }
 
 interface WebKitPoint {
@@ -15474,7 +15834,7 @@ interface WebKitPoint {
 
 declare var WebKitPoint: {
     prototype: WebKitPoint;
-    new(x?: number, y?: number): WebKitPoint;
+    new (x?: number, y?: number): WebKitPoint;
 }
 
 interface WebSocket extends EventTarget {
@@ -15503,8 +15863,7 @@ interface WebSocket extends EventTarget {
 
 declare var WebSocket: {
     prototype: WebSocket;
-    new(url: string, protocols?: string): WebSocket;
-    new(url: string, protocols?: any): WebSocket;
+    new (url: string, protocols?: string | string[]): WebSocket;
     CLOSED: number;
     CLOSING: number;
     CONNECTING: number;
@@ -15525,7 +15884,7 @@ interface WheelEvent extends MouseEvent {
 
 declare var WheelEvent: {
     prototype: WheelEvent;
-    new(typeArg: string, eventInitDict?: WheelEventInit): WheelEvent;
+    new (typeArg: string, eventInitDict?: WheelEventInit): WheelEvent;
     DOM_DELTA_LINE: number;
     DOM_DELTA_PAGE: number;
     DOM_DELTA_PIXEL: number;
@@ -15647,7 +16006,7 @@ interface Window extends EventTarget, WindowTimers, WindowSessionStorage, Window
     onvolumechange: (ev: Event) => any;
     onwaiting: (ev: Event) => any;
     opener: Window;
-    orientation: string;
+    orientation: string | number;
     outerHeight: number;
     outerWidth: number;
     pageXOffset: number;
@@ -15670,6 +16029,7 @@ interface Window extends EventTarget, WindowTimers, WindowSessionStorage, Window
     toolbar: BarProp;
     top: Window;
     window: Window;
+    URL: URL;
     alert(message?: any): void;
     blur(): void;
     cancelAnimationFrame(handle: number): void;
@@ -15799,7 +16159,7 @@ interface Window extends EventTarget, WindowTimers, WindowSessionStorage, Window
 
 declare var Window: {
     prototype: Window;
-    new(): Window;
+    new (): Window;
 }
 
 interface Worker extends EventTarget, AbstractWorker {
@@ -15813,7 +16173,7 @@ interface Worker extends EventTarget, AbstractWorker {
 
 declare var Worker: {
     prototype: Worker;
-    new(stringUrl: string): Worker;
+    new (stringUrl: string): Worker;
 }
 
 interface XMLDocument extends Document {
@@ -15821,7 +16181,7 @@ interface XMLDocument extends Document {
 
 declare var XMLDocument: {
     prototype: XMLDocument;
-    new(): XMLDocument;
+    new (): XMLDocument;
 }
 
 interface XMLHttpRequest extends EventTarget, XMLHttpRequestEventTarget {
@@ -15853,7 +16213,7 @@ interface XMLHttpRequest extends EventTarget, XMLHttpRequestEventTarget {
     LOADING: number;
     OPENED: number;
     UNSENT: number;
-    addEventListener(type: "abort", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
+    addEventListener(type: "abort", listener: (ev: Event) => any, useCapture?: boolean): void;
     addEventListener(type: "error", listener: (ev: ErrorEvent) => any, useCapture?: boolean): void;
     addEventListener(type: "load", listener: (ev: Event) => any, useCapture?: boolean): void;
     addEventListener(type: "loadend", listener: (ev: ProgressEvent) => any, useCapture?: boolean): void;
@@ -15866,7 +16226,7 @@ interface XMLHttpRequest extends EventTarget, XMLHttpRequestEventTarget {
 
 declare var XMLHttpRequest: {
     prototype: XMLHttpRequest;
-    new(): XMLHttpRequest;
+    new (): XMLHttpRequest;
     DONE: number;
     HEADERS_RECEIVED: number;
     LOADING: number;
@@ -15881,7 +16241,7 @@ interface XMLHttpRequestUpload extends EventTarget, XMLHttpRequestEventTarget {
 
 declare var XMLHttpRequestUpload: {
     prototype: XMLHttpRequestUpload;
-    new(): XMLHttpRequestUpload;
+    new (): XMLHttpRequestUpload;
 }
 
 interface XMLSerializer {
@@ -15890,7 +16250,7 @@ interface XMLSerializer {
 
 declare var XMLSerializer: {
     prototype: XMLSerializer;
-    new(): XMLSerializer;
+    new (): XMLSerializer;
 }
 
 interface XPathEvaluator {
@@ -15901,7 +16261,7 @@ interface XPathEvaluator {
 
 declare var XPathEvaluator: {
     prototype: XPathEvaluator;
-    new(): XPathEvaluator;
+    new (): XPathEvaluator;
 }
 
 interface XPathExpression {
@@ -15910,7 +16270,7 @@ interface XPathExpression {
 
 declare var XPathExpression: {
     prototype: XPathExpression;
-    new(): XPathExpression;
+    new (): XPathExpression;
 }
 
 interface XPathNSResolver {
@@ -15919,7 +16279,7 @@ interface XPathNSResolver {
 
 declare var XPathNSResolver: {
     prototype: XPathNSResolver;
-    new(): XPathNSResolver;
+    new (): XPathNSResolver;
 }
 
 interface XPathResult {
@@ -15946,7 +16306,7 @@ interface XPathResult {
 
 declare var XPathResult: {
     prototype: XPathResult;
-    new(): XPathResult;
+    new (): XPathResult;
     ANY_TYPE: number;
     ANY_UNORDERED_NODE_TYPE: number;
     BOOLEAN_TYPE: number;
@@ -15972,7 +16332,7 @@ interface XSLTProcessor {
 
 declare var XSLTProcessor: {
     prototype: XSLTProcessor;
-    new(): XSLTProcessor;
+    new (): XSLTProcessor;
 }
 
 interface AbstractWorker {
@@ -15994,61 +16354,61 @@ interface DOML2DeprecatedSizeProperty {
 }
 
 interface DocumentEvent {
-    createEvent(eventInterface:"AnimationEvent"): AnimationEvent;
-    createEvent(eventInterface:"AriaRequestEvent"): AriaRequestEvent;
-    createEvent(eventInterface:"AudioProcessingEvent"): AudioProcessingEvent;
-    createEvent(eventInterface:"BeforeUnloadEvent"): BeforeUnloadEvent;
-    createEvent(eventInterface:"ClipboardEvent"): ClipboardEvent;
-    createEvent(eventInterface:"CloseEvent"): CloseEvent;
-    createEvent(eventInterface:"CommandEvent"): CommandEvent;
-    createEvent(eventInterface:"CompositionEvent"): CompositionEvent;
-    createEvent(eventInterface:"CustomEvent"): CustomEvent;
-    createEvent(eventInterface:"DeviceMotionEvent"): DeviceMotionEvent;
-    createEvent(eventInterface:"DeviceOrientationEvent"): DeviceOrientationEvent;
-    createEvent(eventInterface:"DragEvent"): DragEvent;
-    createEvent(eventInterface:"ErrorEvent"): ErrorEvent;
-    createEvent(eventInterface:"Event"): Event;
-    createEvent(eventInterface:"Events"): Event;
-    createEvent(eventInterface:"FocusEvent"): FocusEvent;
-    createEvent(eventInterface:"GamepadEvent"): GamepadEvent;
-    createEvent(eventInterface:"HashChangeEvent"): HashChangeEvent;
-    createEvent(eventInterface:"IDBVersionChangeEvent"): IDBVersionChangeEvent;
-    createEvent(eventInterface:"KeyboardEvent"): KeyboardEvent;
-    createEvent(eventInterface:"LongRunningScriptDetectedEvent"): LongRunningScriptDetectedEvent;
-    createEvent(eventInterface:"MSGestureEvent"): MSGestureEvent;
-    createEvent(eventInterface:"MSManipulationEvent"): MSManipulationEvent;
-    createEvent(eventInterface:"MSMediaKeyMessageEvent"): MSMediaKeyMessageEvent;
-    createEvent(eventInterface:"MSMediaKeyNeededEvent"): MSMediaKeyNeededEvent;
-    createEvent(eventInterface:"MSPointerEvent"): MSPointerEvent;
-    createEvent(eventInterface:"MSSiteModeEvent"): MSSiteModeEvent;
-    createEvent(eventInterface:"MessageEvent"): MessageEvent;
-    createEvent(eventInterface:"MouseEvent"): MouseEvent;
-    createEvent(eventInterface:"MouseEvents"): MouseEvent;
-    createEvent(eventInterface:"MouseWheelEvent"): MouseWheelEvent;
-    createEvent(eventInterface:"MutationEvent"): MutationEvent;
-    createEvent(eventInterface:"MutationEvents"): MutationEvent;
-    createEvent(eventInterface:"NavigationCompletedEvent"): NavigationCompletedEvent;
-    createEvent(eventInterface:"NavigationEvent"): NavigationEvent;
-    createEvent(eventInterface:"NavigationEventWithReferrer"): NavigationEventWithReferrer;
-    createEvent(eventInterface:"OfflineAudioCompletionEvent"): OfflineAudioCompletionEvent;
-    createEvent(eventInterface:"PageTransitionEvent"): PageTransitionEvent;
-    createEvent(eventInterface:"PermissionRequestedEvent"): PermissionRequestedEvent;
-    createEvent(eventInterface:"PointerEvent"): PointerEvent;
-    createEvent(eventInterface:"PopStateEvent"): PopStateEvent;
-    createEvent(eventInterface:"ProgressEvent"): ProgressEvent;
-    createEvent(eventInterface:"SVGZoomEvent"): SVGZoomEvent;
-    createEvent(eventInterface:"SVGZoomEvents"): SVGZoomEvent;
-    createEvent(eventInterface:"ScriptNotifyEvent"): ScriptNotifyEvent;
-    createEvent(eventInterface:"StorageEvent"): StorageEvent;
-    createEvent(eventInterface:"TextEvent"): TextEvent;
-    createEvent(eventInterface:"TouchEvent"): TouchEvent;
-    createEvent(eventInterface:"TrackEvent"): TrackEvent;
-    createEvent(eventInterface:"TransitionEvent"): TransitionEvent;
-    createEvent(eventInterface:"UIEvent"): UIEvent;
-    createEvent(eventInterface:"UIEvents"): UIEvent;
-    createEvent(eventInterface:"UnviewableContentIdentifiedEvent"): UnviewableContentIdentifiedEvent;
-    createEvent(eventInterface:"WebGLContextEvent"): WebGLContextEvent;
-    createEvent(eventInterface:"WheelEvent"): WheelEvent;
+    createEvent(eventInterface: "AnimationEvent"): AnimationEvent;
+    createEvent(eventInterface: "AriaRequestEvent"): AriaRequestEvent;
+    createEvent(eventInterface: "AudioProcessingEvent"): AudioProcessingEvent;
+    createEvent(eventInterface: "BeforeUnloadEvent"): BeforeUnloadEvent;
+    createEvent(eventInterface: "ClipboardEvent"): ClipboardEvent;
+    createEvent(eventInterface: "CloseEvent"): CloseEvent;
+    createEvent(eventInterface: "CommandEvent"): CommandEvent;
+    createEvent(eventInterface: "CompositionEvent"): CompositionEvent;
+    createEvent(eventInterface: "CustomEvent"): CustomEvent;
+    createEvent(eventInterface: "DeviceMotionEvent"): DeviceMotionEvent;
+    createEvent(eventInterface: "DeviceOrientationEvent"): DeviceOrientationEvent;
+    createEvent(eventInterface: "DragEvent"): DragEvent;
+    createEvent(eventInterface: "ErrorEvent"): ErrorEvent;
+    createEvent(eventInterface: "Event"): Event;
+    createEvent(eventInterface: "Events"): Event;
+    createEvent(eventInterface: "FocusEvent"): FocusEvent;
+    createEvent(eventInterface: "GamepadEvent"): GamepadEvent;
+    createEvent(eventInterface: "HashChangeEvent"): HashChangeEvent;
+    createEvent(eventInterface: "IDBVersionChangeEvent"): IDBVersionChangeEvent;
+    createEvent(eventInterface: "KeyboardEvent"): KeyboardEvent;
+    createEvent(eventInterface: "LongRunningScriptDetectedEvent"): LongRunningScriptDetectedEvent;
+    createEvent(eventInterface: "MSGestureEvent"): MSGestureEvent;
+    createEvent(eventInterface: "MSManipulationEvent"): MSManipulationEvent;
+    createEvent(eventInterface: "MSMediaKeyMessageEvent"): MSMediaKeyMessageEvent;
+    createEvent(eventInterface: "MSMediaKeyNeededEvent"): MSMediaKeyNeededEvent;
+    createEvent(eventInterface: "MSPointerEvent"): MSPointerEvent;
+    createEvent(eventInterface: "MSSiteModeEvent"): MSSiteModeEvent;
+    createEvent(eventInterface: "MessageEvent"): MessageEvent;
+    createEvent(eventInterface: "MouseEvent"): MouseEvent;
+    createEvent(eventInterface: "MouseEvents"): MouseEvent;
+    createEvent(eventInterface: "MouseWheelEvent"): MouseWheelEvent;
+    createEvent(eventInterface: "MutationEvent"): MutationEvent;
+    createEvent(eventInterface: "MutationEvents"): MutationEvent;
+    createEvent(eventInterface: "NavigationCompletedEvent"): NavigationCompletedEvent;
+    createEvent(eventInterface: "NavigationEvent"): NavigationEvent;
+    createEvent(eventInterface: "NavigationEventWithReferrer"): NavigationEventWithReferrer;
+    createEvent(eventInterface: "OfflineAudioCompletionEvent"): OfflineAudioCompletionEvent;
+    createEvent(eventInterface: "PageTransitionEvent"): PageTransitionEvent;
+    createEvent(eventInterface: "PermissionRequestedEvent"): PermissionRequestedEvent;
+    createEvent(eventInterface: "PointerEvent"): PointerEvent;
+    createEvent(eventInterface: "PopStateEvent"): PopStateEvent;
+    createEvent(eventInterface: "ProgressEvent"): ProgressEvent;
+    createEvent(eventInterface: "SVGZoomEvent"): SVGZoomEvent;
+    createEvent(eventInterface: "SVGZoomEvents"): SVGZoomEvent;
+    createEvent(eventInterface: "ScriptNotifyEvent"): ScriptNotifyEvent;
+    createEvent(eventInterface: "StorageEvent"): StorageEvent;
+    createEvent(eventInterface: "TextEvent"): TextEvent;
+    createEvent(eventInterface: "TouchEvent"): TouchEvent;
+    createEvent(eventInterface: "TrackEvent"): TrackEvent;
+    createEvent(eventInterface: "TransitionEvent"): TransitionEvent;
+    createEvent(eventInterface: "UIEvent"): UIEvent;
+    createEvent(eventInterface: "UIEvents"): UIEvent;
+    createEvent(eventInterface: "UnviewableContentIdentifiedEvent"): UnviewableContentIdentifiedEvent;
+    createEvent(eventInterface: "WebGLContextEvent"): WebGLContextEvent;
+    createEvent(eventInterface: "WheelEvent"): WheelEvent;
     createEvent(eventInterface: string): Event;
 }
 
@@ -16123,7 +16483,7 @@ interface MSBaseReader {
     DONE: number;
     EMPTY: number;
     LOADING: number;
-    addEventListener(type: "abort", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
+    addEventListener(type: "abort", listener: (ev: Event) => any, useCapture?: boolean): void;
     addEventListener(type: "error", listener: (ev: ErrorEvent) => any, useCapture?: boolean): void;
     addEventListener(type: "load", listener: (ev: Event) => any, useCapture?: boolean): void;
     addEventListener(type: "loadend", listener: (ev: ProgressEvent) => any, useCapture?: boolean): void;
@@ -16173,7 +16533,7 @@ interface NavigatorStorageUtils {
 
 interface NodeSelector {
     querySelector(selectors: string): Element;
-    querySelectorAll(selectors: string): NodeList;
+    querySelectorAll(selectors: string): NodeListOf<Element>;
 }
 
 interface RandomSource {
@@ -16221,7 +16581,7 @@ interface SVGLocatable {
 }
 
 interface SVGStylable {
-    className: SVGAnimatedString;
+    className: any;
     style: CSSStyleDeclaration;
 }
 
@@ -16279,7 +16639,7 @@ interface XMLHttpRequestEventTarget {
     onloadstart: (ev: Event) => any;
     onprogress: (ev: ProgressEvent) => any;
     ontimeout: (ev: ProgressEvent) => any;
-    addEventListener(type: "abort", listener: (ev: UIEvent) => any, useCapture?: boolean): void;
+    addEventListener(type: "abort", listener: (ev: Event) => any, useCapture?: boolean): void;
     addEventListener(type: "error", listener: (ev: ErrorEvent) => any, useCapture?: boolean): void;
     addEventListener(type: "load", listener: (ev: Event) => any, useCapture?: boolean): void;
     addEventListener(type: "loadend", listener: (ev: ProgressEvent) => any, useCapture?: boolean): void;
@@ -16301,15 +16661,34 @@ interface BlobPropertyBag {
     endings?: string;
 }
 
+interface FilePropertyBag {
+    type?: string;
+    lastModified?: number;
+}
+
 interface EventListenerObject {
     handleEvent(evt: Event): void;
 }
 
 declare type EventListenerOrEventListenerObject = EventListener | EventListenerObject;
 
+interface MessageEventInit extends EventInit {
+    data?: any;
+    origin?: string;
+    lastEventId?: string;
+    channel?: string;
+    source?: any;
+    ports?: MessagePort[];
+}
+
+interface ProgressEventInit extends EventInit {
+    lengthComputable?: boolean;
+    loaded?: number;
+    total?: number;
+}
+
 interface ErrorEventHandler {
-    (event: Event, source?: string, fileno?: number, columnNumber?: number): void;
-    (event: string, source?: string, fileno?: number, columnNumber?: number): void;
+    (message: string, filename?: string, lineno?: number, colno?: number, error?: Error): void;
 }
 interface PositionCallback {
     (position: Position): void;
@@ -16344,9 +16723,9 @@ interface DecodeErrorCallback {
 interface FunctionStringCallback {
     (data: string): void;
 }
-declare var Audio: {new(src?: string): HTMLAudioElement; };
-declare var Image: {new(width?: number, height?: number): HTMLImageElement; };
-declare var Option: {new(text?: string, value?: string, defaultSelected?: boolean, selected?: boolean): HTMLOptionElement; };
+declare var Audio: { new (src?: string): HTMLAudioElement; };
+declare var Image: { new (width?: number, height?: number): HTMLImageElement; };
+declare var Option: { new (text?: string, value?: string, defaultSelected?: boolean, selected?: boolean): HTMLOptionElement; };
 declare var animationStartTime: number;
 declare var applicationCache: ApplicationCache;
 declare var clientInformation: Navigator;
@@ -16462,7 +16841,7 @@ declare var onunload: (ev: Event) => any;
 declare var onvolumechange: (ev: Event) => any;
 declare var onwaiting: (ev: Event) => any;
 declare var opener: Window;
-declare var orientation: string;
+declare var orientation: string | number;
 declare var outerHeight: number;
 declare var outerWidth: number;
 declare var pageXOffset: number;
@@ -16485,6 +16864,7 @@ declare var styleMedia: StyleMedia;
 declare var toolbar: BarProp;
 declare var top: Window;
 declare var window: Window;
+declare var URL: URL;
 declare function alert(message?: any): void;
 declare function blur(): void;
 declare function cancelAnimationFrame(handle: number): void;
@@ -16637,7 +17017,6 @@ declare function addEventListener(type: "volumechange", listener: (ev: Event) =>
 declare function addEventListener(type: "waiting", listener: (ev: Event) => any, useCapture?: boolean): void;
 declare function addEventListener(type: "wheel", listener: (ev: WheelEvent) => any, useCapture?: boolean): void;
 declare function addEventListener(type: string, listener: EventListenerOrEventListenerObject, useCapture?: boolean): void;
-
 /////////////////////////////
 /// WorkerGlobalScope APIs 
 /////////////////////////////
