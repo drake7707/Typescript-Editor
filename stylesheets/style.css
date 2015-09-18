@@ -301,6 +301,10 @@ body {
     background-image: url('./icons/overlayStatic.png');
 }
 
+.label-modifier-abstract {
+    background-image: url('./icons/overlayAbstract.png');
+}
+
 .label-modifier-protected {
     background-image: url('./icons/overlayProtected.png');
 }
