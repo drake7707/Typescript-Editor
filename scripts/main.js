@@ -228,7 +228,7 @@ define(function (require, exports, module) {
 
         for (var i = 0; i < hierarchicalNodes.length; i++) {
             var node = hierarchicalNodes[i];
-            html += getNavigationListItemsFromNode(nodes[i], nodes[i].text, expandedItems);
+            html += getNavigationListItemsFromNode(node, node.text, expandedItems);
         }
 
 
