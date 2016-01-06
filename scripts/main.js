@@ -21,6 +21,7 @@ define(function (require, exports, module) {
     var TypeScriptLS = require('ace/mode/typescript/lightHarness').TypeScriptLS;
 
     var saveAs = require("lib/fileSaver");
+    var jsZip = require("lib/jszip");
 
     var aceEditorPosition = null;
     var appFileService = null;
@@ -1396,6 +1397,75 @@ define(function (require, exports, module) {
             return true;
         });
 
+        $("#lnkExportToProject").click(function (ev) {
+            
+            // create a index.html that references a main.css and main.js
+            // change the source mapping at the end of the generated js to match the main.ts
+            // change the <!-- %CSS% and js tags to their respective link and script src elements
+            // create a main.ts 
+            // create a main.js
+            // create a main.css
+
+            // scan for all typings used in the header of the ts, create a folder typings and add all the typing to seperate files there
+            // change the references to the typings/ relative directory
+            // scan for all scripts used in the html and create a folder libs and add all the js libraries there
+            // change the scripts to the libs/ relative directory
+
+            var zip = new jsZip();
+            
+            var htmlText = editorHTML.getValue();
+            var cssText = editorCSS.getValue();
+            var jsText = editorJavascript.getValue();
+            var tsText = editor.getValue();
+
+            var cssTag = "<link rel='stylesheet' href='main.css' />";
+            if (htmlText.indexOf("<!--%CSS%-->") == -1) // insert at the end of the head tag if %CSS% is not available
+                htmlText = htmlText.replace("</head>", cssTag + "\n" + "</head>");
+            else
+                htmlText = htmlText.replace("<!--%CSS%-->", cssTag);
+
+            var jsTag = "<script src='main.js'></script>"
+            var idx = htmlText.indexOf("<!--%Javascript%-->");
+            if (idx != -1) {
+                htmlText = htmlText.replace("<!--%Javascript%-->", jsTag);
+            }
+            else {
+                idx = htmlText.indexOf("</body>"); // insert the javascript at the end of the html body
+                if (idx != -1) {
+                    htmlText = htmlText.replace("</body>", jsTag + "\n" + "</body>");
+                }
+            }
+
+            var referenceTag = "/// <reference path=\"REPLACE_PATH\" />";
+            var regex = new RegExp(escapeRegExp(referenceTag).replace("REPLACE_PATH", "(.*)"), "g");
+            var match;
+            var newrefs = [];
+            while (match = regex.exec(tsText)) {
+
+                var content = getRemoteFile(match[1]);
+                var parts = match[1].split('/');;
+                var name = parts[parts.length - 1].split('?')[0];
+
+                newrefs.push("/// <reference path=\"typings/" + name + "\" />");
+                zip.file("typings/" + name, content);
+            }
+            tsText = tsText.replace(regex, "");
+            tsText = newrefs.join("\n") + "\n" + tsText;
+
+            jsText = jsText.replace("//# sourceMappingURL=temp.js.map", "//# sourceMappingURL=main.js.map")
+
+            zip.file("main.css", cssText);
+            zip.file("main.js", jsText);
+            zip.file("main.ts", tsText);
+            zip.file("index.html", htmlText);
+
+            var blob = zip.generate({ type: "blob" });
+            saveAs(blob, selectFileName + "-" + selectMilestone + ".zip");
+
+            ev.preventDefault();
+            return true;
+        });
+
         $("#lnkCreateGist").click(function (ev) {
             var data = {
                 "description": $("#txtDescription").val(),
@@ -1480,6 +1550,18 @@ define(function (require, exports, module) {
         })
         deferredAutosavecall.schedule(5 * 60 * 1000);
     });
+
+    function getRemoteFile(remote_url) {
+        var request = new XMLHttpRequest();
+        request.open('GET', remote_url, false);
+        request.send(null);
+        if (request.status === 200) {
+            return request.responseText;
+        }
+        else
+            return null;
+        return strReturn;
+    }
 
     function saveFile() {
         restService.saveFile(selectFileName, editorHTML.getValue(), editorCSS.getValue(), editor.getValue(), function onSucces() {
