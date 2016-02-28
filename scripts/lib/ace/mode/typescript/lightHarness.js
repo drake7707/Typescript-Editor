@@ -203,7 +203,15 @@ define(function (require, exports, module) {
 
         TypeScriptLS.prototype.getCompilationSettings = function () {
             var settings = ts.getDefaultCompilerOptions();
+            settings.removeComments = false;
+            settings.noImplicitReturns = true;
+            settings.noFallthroughCasesInSwitch = true;
+            settings.allowUnreachableCode = true;
             settings.sourceMap = true;
+            settings.preserveConstEnums = true;
+            settings.emitDecoratorMetadata = true;
+            settings.experimentalDecorators = true;
+
             return settings;
         };
 
