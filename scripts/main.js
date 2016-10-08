@@ -216,12 +216,23 @@ define(function (require, exports, module) {
         var hierarchicalNodes = [];
         for (var i = 0; i < nodes.length; i++) {
 
-            if (nodes[i].kind == "module") {
+            if (nodes[i].kind == "module" || nodes[i].kind == "script") {
                 moduleNodes[nodes[i].indent] = nodes[i];
             }
 
             if (nodes[i].indent > 0) {
-                moduleNodes[nodes[i].indent - 1].childItems.push(nodes[i]);
+                var m = moduleNodes[nodes[i].indent - 1];
+                if (typeof m !== "undefined") {
+
+                    var pos = m.childItems.length;
+                    for (var k = 0; k < m.childItems.length; k++) {
+                        if (m.childItems[k].text == nodes[i].text) {
+                            pos = k;
+                            break;
+                        }
+                    }
+                    m.childItems[pos] = nodes[i];
+                }
             }
             else
                 hierarchicalNodes.push(nodes[i]);
@@ -267,14 +278,19 @@ define(function (require, exports, module) {
         $("#navTreeSearch").html($("#navTree").html());
         $("#navTreeSearch .navCheck").prop("checked", true);
 
-        updateNavItemFromPosition();
+        updateNavItemFromPosition(true);
     }
 
 
-    function updateNavItemFromPosition() {
+    var _oldNavItemPos = -1;
+    function updateNavItemFromPosition(forceUpdate) {
         var curPos = aceEditorPosition.getCurrentCharPosition();
 
-        var navItems = $(".navItem");
+        if (!forceUpdate && _oldNavItemPos == curPos)
+            return;
+
+        _oldNavItemPos = curPos;
+        var navItems = $("#navTree .navItem");
         navItems.removeClass("selected");
 
         var smallestLengthNavItem = null;
@@ -289,6 +305,8 @@ define(function (require, exports, module) {
         }
         if (smallestLengthNavItem != null)
             $(navItems[smallestLengthNavItem]).addClass("selected");
+        else
+            console.log("Nav tree item not found for current position");
     }
 
     function filterNavTree() {
@@ -308,7 +326,7 @@ define(function (require, exports, module) {
 
         var items = $("#navTreeSearch .navItem");
         for (var i = 0; i < items.length; i++) {
-            if ($(items[i]).text().toLowerCase().contains(searchString)) {
+            if ($(items[i]).text().toLowerCase().indexOf(searchString) != -1) {
                 $(items[i]).parents("li").show();
             }
         }
@@ -341,9 +359,9 @@ define(function (require, exports, module) {
             overlay += '<span class="label-overlay ' + "label-modifier-" + modifiers[i] + '"></span>';
         }
 
-        
+
         for (var i = 0; i < modifiers.length; i++) {
-            
+
         }
 
         var span = '<span class="navItem ' + (isLeaf ? "leaf " : "") + kind + '" data-start="' + start + '" data-length="' + length + '">' + htmlEncode(text) + '</span>';
@@ -367,7 +385,7 @@ define(function (require, exports, module) {
             html = '<li class="leaf" data-start="' + start + '" data-length="' + length + '">' +
                         '<input type="checkbox" class="navCheck" style="visbility:hidden" id="' + id + '" ' + checked + ' />' +
                         '<label for="' + id + '">' +
-                            span + overlay + 
+                            span + overlay +
                         '</label>' +
                         '<ul>' + "" + "</ul>" +
                   '</li>';
@@ -420,7 +438,7 @@ define(function (require, exports, module) {
             } catch (ex) {
                 //TODO
             }
-            updateNavItemFromPosition();
+            updateNavItemFromPosition(false);
         }
     };
 
@@ -782,7 +800,12 @@ define(function (require, exports, module) {
             return true;
         })
 
-        $(".typescript-navigation").on("click", ".navItem.leaf", function (ev) {
+        $(".typescript-navigation").on("click", ".navItem", function (ev) {
+            if (!$(this).hasClass(".leaf")) {
+                var chkId = $(this).parent().attr("for");
+                var chk = $(document.getElementById(chkId));
+                chk.prop("checked", !chk.prop("checked"));
+            }
             doNewGotoDefinitionStep(parseInt($(this).attr("data-start")));
         });
 
@@ -1398,7 +1421,7 @@ define(function (require, exports, module) {
         });
 
         $("#lnkExportToProject").click(function (ev) {
-            
+
             // create a index.html that references a main.css and main.js
             // change the source mapping at the end of the generated js to match the main.ts
             // change the <!-- %CSS% and js tags to their respective link and script src elements
@@ -1412,7 +1435,7 @@ define(function (require, exports, module) {
             // change the scripts to the libs/ relative directory
 
             var zip = new jsZip();
-            
+
             var htmlText = editorHTML.getValue();
             var cssText = editorCSS.getValue();
             var jsText = editorJavascript.getValue();
