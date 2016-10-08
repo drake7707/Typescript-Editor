@@ -950,23 +950,23 @@ define(function (require, exports, module) {
             var el = document.getElementById($(activeTabs[i]).attr("data-target"));
             //    $(el).css("width", perc + "%");
 
-            $("#editorLayout tr:nth-child(1) th:nth-child(" + (idx + 1) + ")").css("width", perc + "%");
+            $("#editorLayout > tbody > tr:nth-child(1) > th:nth-child(" + (idx + 1) + ")").css("width", perc + "%");
             //$(el).show();
 
-            $("#editorLayout tr:nth-child(1) th:nth-child(" + (idx + 1) + ")").show();
-            $("#editorLayout tr:nth-child(2) td:nth-child(" + (idx + 1) + ")").show();
+            $("#editorLayout > tbody > tr:nth-child(1) > th:nth-child(" + (idx + 1) + ")").show();
+            $("#editorLayout > tbody > tr:nth-child(2) > td:nth-child(" + (idx + 1) + ")").show();
         }
 
         $("#editorLayout .lastvisible").removeClass("lastvisible");
         var lastActiveElementIndex = $(".tab.active:last").index();
-        $("#editorLayout tr:nth-child(2) td:nth-child(" + (lastActiveElementIndex + 1) + ")").addClass("lastvisible");
+        $("#editorLayout > tbody > tr:nth-child(2) > td:nth-child(" + (lastActiveElementIndex + 1) + ")").addClass("lastvisible");
 
         var tabs = $(".tab");
         for (var i = 0; i < tabs.length; i++) {
             if (!$(tabs[i]).hasClass("active")) {
 
-                $("#editorLayout tr:nth-child(1) th:nth-child(" + (i + 1) + ")").hide();
-                $("#editorLayout tr:nth-child(2) td:nth-child(" + (i + 1) + ")").hide();
+                $("#editorLayout > tbody > tr:nth-child(1) > th:nth-child(" + (i + 1) + ")").hide();
+                $("#editorLayout > tbody > tr:nth-child(2) > td:nth-child(" + (i + 1) + ")").hide();
                 //var el = document.getElementById($(tabs[i]).attr("data-target"));
                 //$(el).hide();
             }
