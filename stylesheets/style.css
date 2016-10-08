@@ -100,6 +100,46 @@ body {
     border-bottom: 1px solid #eee;
 }
 
+    .console-entry.status0 {
+    }
+
+    .console-entry.status1 {
+        color: orange;
+    }
+
+    .console-entry.status2 {
+        color: orangered;
+    }
+
+    .console-entry th {
+        font-size: 0.8em;
+        text-align: left;
+        padding: 3px !important;
+        border-bottom: 1px solid #AAA;
+        background-color: #CCC;
+    }
+    .console-entry td {
+        border-right-width:0px !important;
+    }
+
+    .console-entry table {
+        font-size: 1em;
+        width: 100%;
+    }
+
+    .console-entry tr:nth-child(2n) {
+        background-color: #F5F5F5;
+    }
+
+.dark .console-entry th {
+    background-color: #333;
+}
+
+
+.dark .console-entry tr:nth-child(2n) {
+    background-color: #373b40;
+}
+
 .editor-container {
     position: relative;
     /* padding:20px; */

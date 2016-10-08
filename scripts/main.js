@@ -305,8 +305,8 @@ define(function (require, exports, module) {
         }
         if (smallestLengthNavItem != null)
             $(navItems[smallestLengthNavItem]).addClass("selected");
-        else
-            console.log("Nav tree item not found for current position");
+        //   else
+        //       console.log("Nav tree item not found for current position");
     }
 
     function filterNavTree() {
@@ -1104,17 +1104,32 @@ define(function (require, exports, module) {
                 }
             };
         }
-        clearConsoleLog();
+        //clearConsoleLog();
+        addConsoleLog("###### Resetting output window ######");
+
         wnd.console.log = function (message) {
-            addConsoleLog(message);
+            addConsoleLog(message, 0);
+        }
+        wnd.console.warn = function (message) {
+            addConsoleLog(message, 1);
+        }
+        wnd.console.error = function (message) {
+            addConsoleLog(message, 2);
+        }
+        wnd.console.table = function (message) {
+            addConsoleLog(message, 3);
+        }
+        wnd.console.clear = function (message) {
+            consoleLogBuffer = [];
+            clearConsoleLog();
         }
 
         wnd.document.write(html);
         wnd.document.close();
     }
 
-    function addConsoleLog(message) {
-        consoleLogBuffer.push(message);
+    function addConsoleLog(message, status) {
+        consoleLogBuffer.push({ message: message, status: status });
     }
 
     function clearConsoleLog() {
@@ -1130,20 +1145,46 @@ define(function (require, exports, module) {
             var logger = $("#txtConsole").get(0);
             var completeHtml = logger.innerHTML;
 
+            // if it was longer than 100 items keep only the last 100
+            if (items.length > 100)
+                items = items.slice(items.length - 100, items.length - 1);
+
             for (var i = 0; i < items.length; i++) {
-                var message = items[i];
+                var message = items[i].message;
+                var status = items[i].status;
                 var html;
-                if (typeof message == 'object') {
-                    try {
-                        html = (JSON && JSON.stringify ? JSON.stringify(message) : message);
-                    } catch (e) {
-                        html = message;
+
+                if (status == 3) { // table
+                    if (Object.prototype.toString.call(message) === '[object Array]') {
+                        html = '<table><thead><th>(Index)</th><th>Value</th></tr></thead><tbody>';
+                        for (var k = 0; k < message.length; k++) {
+                            html += "<tr><td>" + k + "</td><td>" + message[k] + "</td></tr>";
+                        }
+                    }
+                    else if (typeof message == 'object') {
+                        html = '<table><thead><th>(Index)</th><th>Name</th><th>Value</th></tr></thead><tbody>';
+                        var idx = 0;
+                        for (var k in message) {
+                            if (message.hasOwnProperty(k)) {
+                                html += "<tr><td>" + idx + "</td><td>" + k + "</td><td>" + message[k] + "</td></tr>";
+                                idx++;
+                            }
+                        }
                     }
                 }
-                else
-                    html = message;
+                else {
+                    if (typeof message == 'object') {
+                        try {
+                            html = (JSON && JSON.stringify ? JSON.stringify(message) : message);
+                        } catch (e) {
+                            html = message;
+                        }
+                    }
+                    else
+                        html = message;
+                }
 
-                completeHtml += "<div class='console-entry'>" + html + "</div>";
+                completeHtml += "<div class='console-entry status" + status + "'>" + html + "</div>";
             }
 
             logger.innerHTML = completeHtml;
