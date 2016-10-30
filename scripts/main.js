@@ -1070,6 +1070,7 @@ define(function (require, exports, module) {
         }
     }
 
+    var consoleWindowDirty = false;
     function resetWindow(wnd, html) {
         // problem: the window element is not reset, so previous values are retained
 
@@ -1105,19 +1106,26 @@ define(function (require, exports, module) {
             };
         }
         //clearConsoleLog();
-        addConsoleLog("###### Resetting output window ######");
+        if (consoleWindowDirty)
+            addConsoleLog("###### Resetting output window ######");
+
+        consoleWindowDirty = false;
 
         wnd.console.log = function (message) {
             addConsoleLog(message, 0);
+            consoleWindowDirty = true;
         }
         wnd.console.warn = function (message) {
             addConsoleLog(message, 1);
+            consoleWindowDirty = true;
         }
         wnd.console.error = function (message) {
             addConsoleLog(message, 2);
+            consoleWindowDirty = true;
         }
         wnd.console.table = function (message) {
             addConsoleLog(message, 3);
+            consoleWindowDirty = true;
         }
         wnd.console.clear = function (message) {
             consoleLogBuffer = [];
@@ -1129,7 +1137,23 @@ define(function (require, exports, module) {
     }
 
     function addConsoleLog(message, status) {
-        consoleLogBuffer.push({ message: message, status: status });
+
+        var msg;
+        if (typeof message == 'object') {
+            try {
+                if (JSON)
+                    msg = JSON.parse(JSON.stringify(message));
+                else
+                    msg = message;
+            } catch (e) {
+                msg = message;
+            }
+        }
+        else {
+            msg = message;
+        }
+
+        consoleLogBuffer.push({ message: msg, status: status });
     }
 
     function clearConsoleLog() {
@@ -1158,7 +1182,8 @@ define(function (require, exports, module) {
                     if (Object.prototype.toString.call(message) === '[object Array]') {
                         html = '<table><thead><th>(Index)</th><th>Value</th></tr></thead><tbody>';
                         for (var k = 0; k < message.length; k++) {
-                            html += "<tr><td>" + k + "</td><td>" + message[k] + "</td></tr>";
+                            var msg = (message[k] && message[k].toString) ?  message[k].toString() : message[k];
+                            html += "<tr><td>" + k + "</td><td>" + msg + "</td></tr>";
                         }
                     }
                     else if (typeof message == 'object') {
@@ -1166,7 +1191,8 @@ define(function (require, exports, module) {
                         var idx = 0;
                         for (var k in message) {
                             if (message.hasOwnProperty(k)) {
-                                html += "<tr><td>" + idx + "</td><td>" + k + "</td><td>" + message[k] + "</td></tr>";
+                                var msg = (message[k] && message[k].toString) ? message[k].toString() : message[k];
+                                html += "<tr><td>" + idx + "</td><td>" + k + "</td><td>" + msg + "</td></tr>";
                                 idx++;
                             }
                         }
