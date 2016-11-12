@@ -25,9 +25,14 @@ define(function (require, exports, module) {
         }
         ScriptInfo.prototype.updateContent = function (content, isResident) {
             this.editRanges = [];
-            this.content = content.replace(/\r\n?/g, "\n");
+            var newContent = content.replace(/\r\n?/g, "\n");
             this.isResident = isResident;
-            this.version++;
+            // only update if the file is actually different, this is important because the TS compiler
+            // checks the version and will use the cached compilation as much as possible if the version is the same
+            if (newContent != this.content) {
+                this.content = newContent;
+                this.version++;
+            }
         };
 
         ScriptInfo.prototype.editContent = function (minChar, limChar, newText) {

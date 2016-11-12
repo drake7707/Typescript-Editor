@@ -187,7 +187,8 @@ define(function (require, exports, module) {
 
                 } catch (ex) {
                 }
-                deferredUpdateNavTree.schedule(1000);
+                if ($(".typescript-navigation").is(":visible"))
+                    deferredUpdateNavTree.schedule(1000);
 
                 // make sure to reset the timer while typing, the compiled event with calls updateOutputPane is called with a deferred call which means the timer will
                 // already be fired before the next updateOutputPane comes through. This makes it constantly update the pane while typing, resetting the timer
@@ -794,9 +795,8 @@ define(function (require, exports, module) {
                 $(".typescript-navigation").show();
                 $(".typescript-navigation").parent().find(".editor-container").css("width", "80%");
                 $(".toggle-navigationTree").find("i").attr("class", "icon-chevron-left");
+                deferredUpdateNavTree.schedule();
             }
-
-
             return true;
         })
 
