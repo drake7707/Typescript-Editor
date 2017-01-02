@@ -118,8 +118,9 @@ body {
         border-bottom: 1px solid #AAA;
         background-color: #CCC;
     }
+
     .console-entry td {
-        border-right-width:0px !important;
+        border-right-width: 0px !important;
     }
 
     .console-entry table {
@@ -235,6 +236,7 @@ body {
     background: white;
     overflow: hidden;
     border: 1px solid #ccc;
+    min-width: 150px;
 }
 
     .ace_autocomplete ul {
@@ -253,6 +255,18 @@ body {
         overflow: hidden;
     }
 
+.ace_autocomplete_comments {
+    position: absolute;
+    bottom: 0px;
+    max-height: 40px;
+    width: 100%;
+    background-color: #FFFFCC;
+    border-top: 1px solid #EEE;
+    font-family: Helvetica;
+    font-size: 0.8em;
+    padding: 3px;
+}
+
 .ace_autocomplete_selected {
     background: #eee;
 }
@@ -260,6 +274,20 @@ body {
     .ace_autocomplete_selected .label-name {
         font-weight: bold;
     }
+
+.dark .ace_autocomplete {
+     background-color: #444;
+     border: 1px solid #666;
+}
+
+.dark .ace_autocomplete_selected {
+     background-color: #666;
+}
+
+.dark .ace_autocomplete_comments {
+    background-color: #333;
+    border-top: 1px solid #666;
+}
 
 .label-kind {
     /*background:#666;*/

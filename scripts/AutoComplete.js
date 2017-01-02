@@ -112,6 +112,10 @@ define(function (require, exports, module) {
             self.compilation(cursor);
         };
 
+        this.escapeHTML = function (html) {
+            return html.replace(/'/g, '&apos;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
         this.showCompilation = function (infos) {
             if (infos.length > 0) {
                 var cursor = editor.getCursorPosition();
@@ -124,15 +128,18 @@ define(function (require, exports, module) {
                     var name = '<span class="label-name">' + info.name + '</span>';
 
                     var description = "";
+                    var documentation = "";
                     if (count < 50 && info.kind != "snippet") { // limit the amount of details to prevent lag
                         var details = compilationService.getCompilationDetails(self.scriptName, cursor, info.name);
                         if (typeof details !== "undefined") {
                             details.displayParts.forEach(function (el) { description += el.text; });
+
+                            details.documentation.forEach(function (el) { documentation += el.text; });
                             count++;
                         }
                     }
 
-                    var type = '<span class="label-type">' + description + '</span>';
+                    var type = '<span class="label-type">' + self.escapeHTML(description) + '</span>';
 
                     var modifiers = info.kindModifiers.split(',');
                     for (var i = 0; i < modifiers.length; i++) {
@@ -145,7 +152,10 @@ define(function (require, exports, module) {
                     for (var i = 0; i < modifiers.length; i++) {
                         overlay += '<span class="label-overlay ' + modifiers[i] + '"></span>';
                     }
-                    html += '<li class="label-autocomplete" data-name="' + info.name + '" data-kind="' + info.kind + '">' + kind + name + type + overlay + '</li>';
+
+                    documentation = documentation.replace(/'/g, '&apos;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+                    html += '<li class="label-autocomplete" data-name="' + info.name + '" data-kind="' + info.kind + '" data-doc="' + documentation +  '">' + kind + name + type + overlay + '</li>';
                 }
                 self.listElement.innerHTML = html;
                 self.view.ensureFocus();

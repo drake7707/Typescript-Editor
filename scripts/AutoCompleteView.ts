@@ -7,6 +7,8 @@ export class AutoCompleteView{
     public wrap;
     public listElement;
 
+    public commentsElement;
+
     constructor(public editor,public autoComplete){
         this.wrap = document.createElement('div');
         this.listElement = document.createElement('ul');
@@ -16,6 +18,10 @@ export class AutoCompleteView{
         this.wrap.style.position = 'fixed';
         this.wrap.style.zIndex = '1000';
         this.wrap.appendChild(this.listElement);
+
+        this.commentsElement = document.createElement("div");
+        this.commentsElement.className = "ace_autocomplete_comments";
+        this.wrap.appendChild(this.commentsElement);
     }
 
     show() {
@@ -57,8 +63,11 @@ export class AutoCompleteView{
         if (focus) {
             curr.className = '';
             focus.className = this.selectedClassName;
+            this.onFocusSet(focus);
             return this.adjustPosition();
         }
+        else
+            this.onFocusSet(null);
     };
 
     focusPrev () {
@@ -68,18 +77,40 @@ export class AutoCompleteView{
         if (focus) {
             curr.className = '';
             focus.className = this.selectedClassName;
+            this.onFocusSet(focus);
             return this.adjustPosition();
         }
+        else 
+            this.onFocusSet(null);
     };
 
     ensureFocus () {
         if (!this.current()) {
             if (this.listElement.firstChild) {
                 this.listElement.firstChild.className = this.selectedClassName;
+                this.onFocusSet(this.listElement.firstChild);
                 return this.adjustPosition();
             }
+            else
+                this.onFocusSet(null);
         }
+        
     };
+
+    onFocusSet(focus) {
+        if (focus == null) {
+            this.commentsElement.style.display = "none";
+            return;
+        }
+
+        let doc = focus.getAttribute("data-doc");
+        if (doc != null && doc != "") {
+            this.commentsElement.innerHTML = doc;
+            this.commentsElement.style.display = "block";
+        }
+        else 
+            this.commentsElement.style.display = "none";
+    }
 
     adjustPosition() {
         var elm, elmOuterHeight, newMargin, pos, preMargin, wrapHeight;
