@@ -47,16 +47,19 @@ define(function (require, exports, module) {
     var javascriptSourceMap = null; // the built source map between typescript and javascript, updated when compiled
     var lineNumberOffsetOnPage = 0; // the offset of where the javascript is injected into the html document, chrome reports the correct line number of the script, firefox reports the page number of an error
 
+    var libnames = [
+          "typescripts/lib.d.ts",
+          "typescripts/lib.es2015.promise.d.ts",
+          "typescripts/jquery.d.ts"
+    ];
+
     function loadTypeScriptLibrary() {
-        var libnames = [
-            "typescripts/lib.d.ts",
-            "typescripts/jquery.d.ts"
-        ];
-        libnames.forEach(function (libname) {
-            appFileService.readFile(libname, function (content) {
-                typeScriptLS.addScript(libname, content.replace(/\r\n?/g, "\n"), true);
-            });
-        });
+      
+        //libnames.forEach(function (libname) {
+        //    appFileService.readFile(libname, function (content) {
+        //        typeScriptLS.addScript(libname, content.replace(/\r\n?/g, "\n"), true);
+        //    });
+        //});
     }
 
     function updateHeader(filename, milestone, description) {
@@ -729,7 +732,7 @@ define(function (require, exports, module) {
         });
 
         workerOnCreate(function () {//TODO use worker init event            
-            ["typescripts/lib.d.ts", "typescripts/jquery.d.ts"].forEach(function (libname) {
+            libnames.forEach(function (libname) {
                 appFileService.readFile(libname, function (content) {
                     var params = {
                         data: {

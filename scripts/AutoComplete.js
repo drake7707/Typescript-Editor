@@ -134,7 +134,8 @@ define(function (require, exports, module) {
                         if (typeof details !== "undefined") {
                             details.displayParts.forEach(function (el) { description += el.text; });
 
-                            details.documentation.forEach(function (el) { documentation += el.text; });
+                            if (details.documentation)
+                                details.documentation.forEach(function (el) { documentation += el.text; });
                             count++;
                         }
                     }
@@ -155,7 +156,7 @@ define(function (require, exports, module) {
 
                     documentation = documentation.replace(/'/g, '&apos;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-                    html += '<li class="label-autocomplete" data-name="' + info.name + '" data-kind="' + info.kind + '" data-doc="' + documentation +  '">' + kind + name + type + overlay + '</li>';
+                    html += '<li class="label-autocomplete" data-name="' + info.name + '" data-kind="' + info.kind + '" data-doc="' + documentation + '">' + kind + name + type + overlay + '</li>';
                 }
                 self.listElement.innerHTML = html;
                 self.view.ensureFocus();

@@ -2,6 +2,8 @@
 ///   Just the ScriptInfo and the
 ///  TypeScriptLS classes.
 /// Notice the manual require calls for ./typescriptServices.
+///<reference path="typescriptServices.d.ts"/>
+
 define(function (require, exports, module) {
 
     var __extends = this.__extends || function (d, b) {
@@ -216,7 +218,7 @@ define(function (require, exports, module) {
             settings.preserveConstEnums = true;
             settings.emitDecoratorMetadata = true;
             settings.experimentalDecorators = true;
-
+            settings.lib = ["dom", "es15", "es2015.promise"];
             return settings;
         };
 
