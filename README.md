@@ -1,5 +1,5 @@
 # Typescript-Editor
-Scratchpad for testing out typescript 2.0.5 snippets
+Scratchpad for testing out typescript 2.1.4 snippets
 
 Test it out on: http://drake7707.github.io/Typescript-Editor/ (it will download an example if it's not available in the local storage)
 
@@ -12,7 +12,7 @@ If you want to persist things more safely you should probably create a small ser
 
 I used the Typescript on Ace editor from https://github.com/hi104/typescript-playground-on-ace as a starting point and just built it up from there.
 
-I've replaced the old typescriptservices with the latest last known good build from the 1.6.2 branch and adapted most things to use the new API, so you can use pretty much all the newest and latest things such as generics and so on.
+I've replaced the old typescriptservices with the latest last known good build from the corresponding branch and adapted most things to use the new API, so you can use pretty much all the newest and latest things such as generics and so on.
 
 --
 
