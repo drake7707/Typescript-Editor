@@ -55,11 +55,11 @@ define(function (require, exports, module) {
 
     function loadTypeScriptLibrary() {
       
-        //libnames.forEach(function (libname) {
-        //    appFileService.readFile(libname, function (content) {
-        //        typeScriptLS.addScript(libname, content.replace(/\r\n?/g, "\n"), true);
-        //    });
-        //});
+        libnames.forEach(function (libname) {
+            appFileService.readFile(libname, function (content) {
+                typeScriptLS.addScript(libname, content.replace(/\r\n?/g, "\n"), true);
+            });
+        });
     }
 
     function updateHeader(filename, milestone, description) {
