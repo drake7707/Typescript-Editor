@@ -7,13 +7,18 @@
 
     <link id="cssBootstrap" type="text/css" rel="stylesheet" href="stylesheets/bootstrap.css" />
     <link type="text/css" rel="stylesheet" href="stylesheets/style.css" />
+
+    <link type="text/css" rel="stylesheet" href="stylesheets/goldenlayout-base.css" />
+    <link type="text/css" rel="stylesheet" id="goldenLayoutTheme" href="stylesheets/goldenlayout-light-theme.css" />
+
+
 </head>
 <body>
     <div class="notification">
         <span id="lblNotification"></span>
     </div>
 
-    <div class="ltable fluid-container stretch-v">
+    <div class="ltable fluid-container stretch">
         <div class="lrow">
             <div class="lcell">
                 <div class="btn-toolbar">
@@ -63,6 +68,65 @@
                             </li>-->
                         </ul>
                     </div>
+
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="icon-th"></i> View
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="" href="" id="lnkViewHTML" data-shortcut="ctrl+0">
+                                    <i class="icon-list-alt"></i> HTML
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkViewCSS" data-shortcut="ctrl+1">
+                                    <i class="icon-list-alt"></i> CSS
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkViewTypescript" data-shortcut="ctrl+2">
+                                    <i class="icon-list-alt"></i> Typescript
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkViewJavascript" data-shortcut="ctrl+3">
+                                    <i class="icon-list-alt"></i> Javascript
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkViewConsole" data-shortcut="ctrl+4">
+                                    <i class="icon-list-alt"></i> Console
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkViewErrors" data-shortcut="ctrl+4">
+                                    <i class="icon-list-alt"></i> Errors
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkViewOutput" data-shortcut="ctrl+6">
+                                    <i class="icon-list-alt"></i> Output
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkViewNavigationTree" data-shortcut="ctrl+7">
+                                    <i class="icon-list-alt"></i> Navigation Tree
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkResetLayoutToDefault" data-shortcut="ctrl+7">
+                                    <i class="icon-list-alt"></i> Reset layout to default
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
                     <!--
                     <div class="btn-group">
                         <a class="btn" href="" id="lnkNew">
@@ -125,105 +189,45 @@
                         </a>
                     </div>
                 </div>
-                <div class="editor-tabs">
-                    <ul class="nav nav-tabs">
-                        <li class="tab active" data-target="tab-html" data-shortcut="ctrl+1"><a>HTML</a></li>
-                        <li class="tab" data-target="tab-css" data-shortcut="ctrl+2"><a>CSS</a></li>
-                        <li class="tab active" data-target="tab-typescript" data-shortcut="ctrl+3"><a>Typescript</a></li>
-                        <li class="tab" data-target="tab-javascript" data-shortcut="ctrl+4"><a>Javascript</a></li>
-                        <li class="tab" data-target="tab-console" data-shortcut="ctrl+5"><a>Console</a></li>
-                        <li class="tab" data-target="tab-output" data-shortcut="ctrl+6"><a>Output</a></li>
-                    </ul>
-                </div>
             </div>
         </div>
         <div class="lrow stretch-v">
-            <div class="lcell">
-                <div class="editor-area">
+            <div id="elementParking" style="display:none">
+                <!-- parking for unusued elements -->
+                <div id="editorHTML"></div>
+                <div id="editorCSS"></div>
+                <div id="navigationTree" class="typescript-navigation">
+                    <div>
+                        <div style="margin-left:40px">
+                            <input type="text" id="txtNavTreeFilter" placeholder="Filter..." />
+                        </div>
 
+                        <div class="button-icon" id="btnExpandAllNavTree"></div>
+                        <div class="button-icon" id="btnCollapseAllNavTree"></div>
 
-                    <table id="editorLayout">
-                        <tbody>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="warp-container" id="tab-html">
-                                        <div class="editor-container">
-                                            <div id="editorHTML">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="warp-container" id="tab-css">
-                                        <div class="editor-container">
-                                            <div id="editorCSS">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="warp-container" id="tab-typescript">
-                                        <div class="typescript-navigation" style="display:none">
-                                            <div>
-                                                <div style="margin-left:40px">
-                                                    <input type="text" id="txtNavTreeFilter" placeholder="Filter..." />
-                                                </div>
-                                                
-                                                <div class="button-icon" id="btnExpandAllNavTree"></div>
-                                                <div class="button-icon" id="btnCollapseAllNavTree"></div>
-                                                
-                                            </div>
-                                            <div style="position:relative;clear:both">
-                                                <ul class="css-treeview" id="navTree" style="position:absolute"></ul>
-                                                <ul class="css-treeview" id="navTreeSearch" style="position:absolute"></ul>
-                                            </div>
-                                        </div>
-                                        <div class="typescript-editorcontainer editor-container">
-                                            <div class="toggle-navigationTree" data-shortcut="ctrl+w"><i class="icon-chevron-right" title="Navigation tree"></i></div>
-                                            <div class="error-bar" id="errorsTypescript">
-                                            </div>
-                                            <div id="editorTypescript">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="warp-container" id="tab-javascript">
-                                        <div class="editor-container">
-                                            <div id="editorJavascript">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="warp-container" id="tab-console">
-                                        <div class="editor-container">
-                                            <div class="console" id="txtConsole">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="warp-container" id="tab-output">
-                                        <div class="editor-container">
-                                            <div id="outputFrame">
-                                                <iframe id="outputIFrame"></iframe>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    </div>
+                    <div style="position:relative;clear:both">
+                        <ul class="css-treeview" id="navTree" style="position:absolute"></ul>
+                        <ul class="css-treeview" id="navTreeSearch" style="position:absolute"></ul>
+                    </div>
                 </div>
+                <div id="editorTypescript">
+                </div>
+                <div id="editorJavascript">
+                </div>
+                <div id="outputFrame">
+                    <iframe id="outputIFrame"></iframe>
+                </div>
+                <div class="console" id="txtConsole">
+                </div>
+
+                <div class="errors" id="txtErrors">
+                    <div class="error-bar" id="errorsTypescript">
+                    </div>
+                </div>
+            </div>
+
+            <div class="lcell" id="goldenLayoutContainer">
             </div>
         </div>
     </div>
@@ -330,6 +334,8 @@
     <script type="text/javascript" src="./scripts/lib/jquery.js"></script>
     <script type="text/javascript" src="./scripts/lib/colResizable-1.5.min.js"></script>
     <script type="text/javascript" src="./scripts/lib/bootstrap.js"></script>
+    <script type="text/javascript" src="./scripts/lib/goldenlayout.js"></script>
+
     <script type="text/javascript" src="./scripts/lib/require.js" data-main="main"></script>
 </body>
 </html>

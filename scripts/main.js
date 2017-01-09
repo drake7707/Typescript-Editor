@@ -23,6 +23,8 @@ define(function (require, exports, module) {
     var saveAs = require("lib/fileSaver");
     var jsZip = require("lib/jszip");
 
+    var myLayout;
+
     var aceEditorPosition = null;
     var appFileService = null;
 
@@ -54,7 +56,7 @@ define(function (require, exports, module) {
     ];
 
     function loadTypeScriptLibrary() {
-      
+
         libnames.forEach(function (libname) {
             appFileService.readFile(libname, function (content) {
                 typeScriptLS.addScript(libname, content.replace(/\r\n?/g, "\n"), true);
@@ -745,21 +747,21 @@ define(function (require, exports, module) {
             });
         }, 100);
 
-        $(".tab").click(function (e) {
-            //var id = $(this).attr("data-target");
-            //var el = document.getElementById(id);
-            $(this).toggleClass("active");
-            //if ($(this).hasClass("active"))
-            //    $(el).show();
-            //else
-            //    $(el).hide();
+        //$(".tab").click(function (e) {
+        //    //var id = $(this).attr("data-target");
+        //    //var el = document.getElementById(id);
+        //    $(this).toggleClass("active");
+        //    //if ($(this).hasClass("active"))
+        //    //    $(el).show();
+        //    //else
+        //    //    $(el).hide();
 
-            updateSideBySide();
-        });
+        //    updateSideBySide();
+        //});
 
-        $(".tab[data-target=tab-output]").click(function (e) {
-            updateOutputPane();
-        });
+        //$(".tab[data-target=tab-output]").click(function (e) {
+        //    updateOutputPane();
+        //});
 
         $(".libLink").click(function (ev) {
             insertLibraryReferenceIfNotPresent($(this).attr("data-js"), $(this).attr("data-css"), $(this).attr("data-ts"));
@@ -775,6 +777,10 @@ define(function (require, exports, module) {
             curIdx++;
             curIdx = curIdx % lines.length;
             $("#errorsTypescript").attr("data-curidx", curIdx);
+        });
+        $(document).on("click", ".error-entry", function (ev) {
+            let line = parseInt($(this).attr("data-line"));
+            editor.gotoLine(line + 1, 0, true);
         });
 
         $("#lnkToggleTheme").click(function (ev) {
@@ -830,12 +836,78 @@ define(function (require, exports, module) {
                 $("#navTreeSearch .navCheck").prop("checked", false);
         });
 
+        $("#lnkViewHTML").click(function (ev) {
+            if (myLayout.root.getItemsById("componentHTML").length == 0) {
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentHTMLDef);
+            }
+            ev.preventDefault();
+            return true;
+        });
+
+        $("#lnkViewCSS").click(function (ev) {
+            if (myLayout.root.getItemsById("componentCSS").length == 0) {
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentCSSDef);
+            }
+            ev.preventDefault();
+            return true;
+        });
+
+        $("#lnkViewTypescript").click(function (ev) {
+            if (myLayout.root.getItemsById("componentTypescript").length == 0) {
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentTypescriptDef);
+            }
+            ev.preventDefault();
+            return true;
+        });
+
+        $("#lnkViewJavascript").click(function (ev) {
+            if (myLayout.root.getItemsById("componentJavascript").length == 0) {
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentJavascriptDef);
+            }
+            ev.preventDefault();
+            return true;
+        });
+        $("#lnkViewOutput").click(function (ev) {
+            if (myLayout.root.getItemsById("componentOutput").length == 0) {
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentOutputDef);
+            }
+            ev.preventDefault();
+            return true;
+        });
+        $("#lnkViewConsole").click(function (ev) {
+            if (myLayout.root.getItemsById("componentConsole").length == 0)
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentConsoleDef);
+            ev.preventDefault();
+            return true;
+        });
+        $("#lnkViewErrors").click(function (ev) {
+            if (myLayout.root.getItemsById("componentErrors").length == 0)
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentErrorsDef);
+            ev.preventDefault();
+            return true;
+        });
+
+        $("#lnkViewNavigationTree").click(function (ev) {
+            if (myLayout.root.getItemsById("componentNavigationTree").length == 0)
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentNavigationTreeDef);
+            ev.preventDefault();
+            return true;
+        });
+
+        $("#lnkResetLayoutToDefault").click(function (ev) {
+
+            if (window.localStorage) {
+                localStorage.removeItem('_layoutSavedState');
+            }
+            initializeLayout();
+
+            ev.preventDefault();
+            return true;
+        });
+
         filterNavTree();
 
-        window.setTimeout(function () {
-            updateSideBySide();
-        }, 25);
-
+        initializeLayout();
     }
 
     function addLibrary(libname) {
@@ -910,13 +982,6 @@ define(function (require, exports, module) {
                 formatCSS();
             }
         }]);
-
-
-        $(window).resize(function () {
-            updateSideBySide();
-
-        });
-
     }
 
     function setTheme(theme) {
@@ -925,11 +990,13 @@ define(function (require, exports, module) {
             editorTheme = "ace/theme/tomorrow_night";
             $(document.body).addClass("dark");
             $("#cssBootstrap").attr("href", "stylesheets/bootstrap-dark.css");
+            $("#goldenLayoutTheme").attr("href", "stylesheets/goldenlayout-dark-theme.css");
         }
         else {
             editorTheme = "ace/theme/github";
             $(document.body).removeClass("dark");
             $("#cssBootstrap").attr("href", "stylesheets/bootstrap.css");
+            $("#goldenLayoutTheme").attr("href", "stylesheets/goldenlayout-light-theme.css");
         }
 
         editorHTML.setTheme(editorTheme);
@@ -938,78 +1005,296 @@ define(function (require, exports, module) {
         editorJavascript.setTheme(editorTheme);
     }
 
-    function updateSideBySide() {
+    //function updateSideBySide() {
 
-        $("#editorLayout").colResizable({
-            disable: true,
+    //    $("#editorLayout").colResizable({
+    //        disable: true,
+    //    });
+
+
+    //    var activeTabs = $(".tab.active");
+    //    var perc = Math.floor(100 / activeTabs.length);
+    //    for (var i = 0; i < activeTabs.length; i++) {
+
+    //        var idx = $(activeTabs[i]).index();
+    //        var el = document.getElementById($(activeTabs[i]).attr("data-target"));
+    //        //    $(el).css("width", perc + "%");
+
+    //        $("#editorLayout > tbody > tr:nth-child(1) > th:nth-child(" + (idx + 1) + ")").css("width", perc + "%");
+    //        //$(el).show();
+
+    //        $("#editorLayout > tbody > tr:nth-child(1) > th:nth-child(" + (idx + 1) + ")").show();
+    //        $("#editorLayout > tbody > tr:nth-child(2) > td:nth-child(" + (idx + 1) + ")").show();
+    //    }
+
+    //    $("#editorLayout .lastvisible").removeClass("lastvisible");
+    //    var lastActiveElementIndex = $(".tab.active:last").index();
+    //    $("#editorLayout > tbody > tr:nth-child(2) > td:nth-child(" + (lastActiveElementIndex + 1) + ")").addClass("lastvisible");
+
+    //    var tabs = $(".tab");
+    //    for (var i = 0; i < tabs.length; i++) {
+    //        if (!$(tabs[i]).hasClass("active")) {
+
+    //            $("#editorLayout > tbody > tr:nth-child(1) > th:nth-child(" + (i + 1) + ")").hide();
+    //            $("#editorLayout > tbody > tr:nth-child(2) > td:nth-child(" + (i + 1) + ")").hide();
+    //            //var el = document.getElementById($(tabs[i]).attr("data-target"));
+    //            //$(el).hide();
+    //        }
+    //    }
+
+    //    initiateResizablePanes();
+
+    //    window.setTimeout(function () {
+    //        editorHTML.resize();
+    //        editorCSS.resize();
+    //        editor.resize();
+    //        editorJavascript.resize();
+    //    }, 25);
+    //}
+
+    //function initiateResizablePanes() {
+    //    $("#editorLayout").colResizable({
+    //        liveDrag: true,
+    //        draggingClass: "dragging",
+    //        onDrag: function (e) {
+    //            $("#outputFrame").hide(); // necessary otherwise the iframe will steal the mouse release event, breaking the resizing
+    //        },
+    //        onResize: function (e) {
+    //            $("#outputFrame").show();
+
+    //            // make sure to resize ace if needed
+    //            editorHTML.resize();
+    //            editorCSS.resize();
+    //            editor.resize();
+    //            editorJavascript.resize();
+    //        }
+    //    });
+    //}
+
+    function initializeLayout() {
+        var componentHTMLDef = {
+            type: 'component',
+            id: 'componentHTML',
+            componentName: 'componentHTML',
+            title: 'HTML',
+            componentState: { text: 'HTML' }
+        };
+        var componentCSSDef = {
+            type: 'component',
+            id: 'componentCSS',
+            componentName: 'componentCSS',
+            title: 'CSS',
+            componentState: { text: 'CSS' }
+        };
+        var componentTypescriptDef = {
+            type: 'component',
+            id: 'componentTypescript',
+            componentName: 'componentTypescript',
+            title: 'Typescript',
+            componentState: { text: 'Typescript' }
+        };
+        var componentJavascriptDef = {
+            type: 'component',
+            id: 'componentJavascript',
+            componentName: 'componentJavascript',
+            title: 'Javascript',
+            componentState: { text: 'Javascript' }
+        };
+        var componentOutputDef = {
+            type: 'component',
+            id: 'componentOutput',
+            componentName: 'componentOutput',
+            title: 'Output',
+            componentState: { label: 'Output' }
+        };
+        var componentConsoleDef = {
+            type: 'component',
+            id: 'componentConsole',
+            componentName: 'componentConsole',
+            title: 'Console',
+            componentState: { label: 'Console' }
+        };
+        var componentErrorsDef = {
+            type: 'component',
+            id: 'componentErrors',
+            componentName: 'componentErrors',
+            title: 'Errors',
+            componentState: { label: 'Errors' }
+        };
+        var componentNavigationTreeDef = {
+            type: 'component',
+            id: 'componentNavigationTree',
+            componentName: 'componentNavigationTree',
+            title: 'Overview',
+            componentState: { label: 'Overview' }
+        };
+
+        var defaultConfig = {
+            settings: {
+                hasHeaders: true,
+                constrainDragToContainer: true,
+                reorderEnabled: true,
+                selectionEnabled: false,
+                showPopoutIcon: false,
+                showMaximiseIcon: true,
+                showCloseIcon: true
+            },
+            content: [{
+                type: 'row',
+                content: [
+                    {
+                        type: 'column',
+                        width: 20,
+                        content: [
+                            componentNavigationTreeDef,
+                        ]
+                    },
+                    {
+                        type: 'stack',
+                        id: 'mainstack',
+                        isClosable: false,
+                        width: 50,
+                        content: [
+                            componentHTMLDef,
+                            componentCSSDef,
+                            componentTypescriptDef,
+                            componentJavascriptDef
+                        ]
+                    },
+                    {
+                        type: 'column',
+                        width: 30,
+                        content: [
+                                componentOutputDef,
+                              {
+                                  type: 'stack',
+                                  content: [
+                                      componentErrorsDef,
+                                      componentConsoleDef
+                                  ]
+                              }
+                        ]
+                    }
+                ]
+            }]
+        };
+
+        var config;
+        if (window.localStorage) {
+            savedState = localStorage.getItem('_layoutSavedState');
+            if (savedState != null)
+                config = JSON.parse(savedState);
+            else
+                config = defaultConfig;
+        }
+        else
+            config = defaultConfig;
+
+        myLayout = new GoldenLayout(config, $('#goldenLayoutContainer'));
+        myLayout.registerComponent('componentHTML', function (container, componentState) {
+            container.getElement().append($("#editorHTML"));
+            container.on("destroy", function (ev) { // return to parking
+                $("#elementParking").append($("#editorHTML"));
+            });
+        });
+        myLayout.registerComponent('componentCSS', function (container, componentState) {
+            container.getElement().append($("#editorCSS"));
+            container.on("destroy", function (ev) { // return to parking
+                $("#elementParking").append($("#editorCSS"));
+            });
+        });
+        myLayout.registerComponent('componentTypescript', function (container, componentState) {
+            container.getElement().append($("#editorTypescript"));
+            container.on("destroy", function (ev) { // return to parking
+                $("#elementParking").append($("#editorTypescript"));
+            });
+        });
+        myLayout.registerComponent('componentJavascript', function (container, componentState) {
+            container.getElement().append($("#editorJavascript"));
+            container.on("destroy", function (ev) { // return to parking
+                $("#elementParking").append($("#editorJavascript"));
+            });
+        });
+        myLayout.registerComponent('componentOutput', function (container, componentState) {
+            container.getElement().append($("#outputFrame"));
+            container.on("destroy", function (ev) { // return to parking
+                $("#elementParking").append($("#outputFrame"));
+            });
+        });
+        myLayout.registerComponent('componentConsole', function (container, componentState) {
+            container.getElement().append($("#txtConsole"));
+            container.on("destroy", function (ev) { // return to parking
+                $("#elementParking").append($("#txtConsole"));
+            });
+        });
+        myLayout.registerComponent('componentErrors', function (container, componentState) {
+            container.getElement().append($("#txtErrors"));
+            container.on("destroy", function (ev) { // return to parking
+                $("#elementParking").append($("#txtErrors"));
+            });
+        });
+        myLayout.registerComponent('componentNavigationTree', function (container, componentState) {
+            container.getElement().append($("#navigationTree"));
+            container.on("destroy", function (ev) { // return to parking
+                $("#elementParking").append($("#navigationTree"));
+            });
         });
 
-
-        var activeTabs = $(".tab.active");
-        var perc = Math.floor(100 / activeTabs.length);
-        for (var i = 0; i < activeTabs.length; i++) {
-
-            var idx = $(activeTabs[i]).index();
-            var el = document.getElementById($(activeTabs[i]).attr("data-target"));
-            //    $(el).css("width", perc + "%");
-
-            $("#editorLayout > tbody > tr:nth-child(1) > th:nth-child(" + (idx + 1) + ")").css("width", perc + "%");
-            //$(el).show();
-
-            $("#editorLayout > tbody > tr:nth-child(1) > th:nth-child(" + (idx + 1) + ")").show();
-            $("#editorLayout > tbody > tr:nth-child(2) > td:nth-child(" + (idx + 1) + ")").show();
-        }
-
-        $("#editorLayout .lastvisible").removeClass("lastvisible");
-        var lastActiveElementIndex = $(".tab.active:last").index();
-        $("#editorLayout > tbody > tr:nth-child(2) > td:nth-child(" + (lastActiveElementIndex + 1) + ")").addClass("lastvisible");
-
-        var tabs = $(".tab");
-        for (var i = 0; i < tabs.length; i++) {
-            if (!$(tabs[i]).hasClass("active")) {
-
-                $("#editorLayout > tbody > tr:nth-child(1) > th:nth-child(" + (i + 1) + ")").hide();
-                $("#editorLayout > tbody > tr:nth-child(2) > td:nth-child(" + (i + 1) + ")").hide();
-                //var el = document.getElementById($(tabs[i]).attr("data-target"));
-                //$(el).hide();
-            }
-        }
-
-        initiateResizablePanes();
-
-        window.setTimeout(function () {
+        myLayout.on("stateChanged", function (ev) {
             editorHTML.resize();
             editorCSS.resize();
             editor.resize();
             editorJavascript.resize();
-        }, 25);
-    }
 
-    function initiateResizablePanes() {
-        $("#editorLayout").colResizable({
-            liveDrag: true,
-            draggingClass: "dragging",
-            onDrag: function (e) {
-                $("#outputFrame").hide(); // necessary otherwise the iframe will steal the mouse release event, breaking the resizing
-            },
-            onResize: function (e) {
-                $("#outputFrame").show();
+            var state = JSON.stringify(myLayout.toConfig());
+            if (window.localStorage)
+                window.localStorage.setItem('_layoutSavedState', state);
 
-                // make sure to resize ace if needed
-                editorHTML.resize();
-                editorCSS.resize();
-                editor.resize();
-                editorJavascript.resize();
-            }
+            
         });
+
+
+        myLayout.on('tabCreated', function (tab) {
+            tab._dragListener.on('dragStart', function () {
+                $("#outputFrame").hide(); // necessary otherwise the iframe will steal the mouse release event, breaking the resizing
+            });
+
+            tab._dragListener.on('dragStop', function () {
+                $("#outputFrame").show(); // necessary otherwise the iframe will steal the mouse release event, breaking the resizing
+            });
+        });
+
+        // custom events added to goldenlayout
+        myLayout.on('splitterDragStart', function () {
+            $("#outputFrame").hide(); // necessary otherwise the iframe will steal the mouse release event, breaking the resizing
+        });
+        myLayout.on('splitterDragStop', function () {
+            $("#outputFrame").show(); // necessary otherwise the iframe will steal the mouse release event, breaking the resizing
+        });
+         
+
+        myLayout.init();
+
+        //$(window).resize(function () {
+        //    myLayout.updateSize($(window).width() - 20, myLayout.container.height());
+        //});
     }
+
 
     function updateErrors() {
         var annotations = editor.getSession().getAnnotations();
 
+        $("#txtErrors").find(".error-entry").empty().detach();
+
         if (annotations.length > 0) {
             var lines = [];
-            annotations.forEach(function (a) { lines.push(a.row) });
+            annotations.forEach(function (a) {
+                lines.push(a.row);
+
+                let entry = $("<div class='error-entry' data-line='" + a.row + "'><div class='lineNr'>" + a.row + "</div><div class='error-content'></div></div>");
+                $(entry).find(".error-content").text(a.text);
+                $("#txtErrors").append(entry);
+            });
 
             $("#errorsTypescript").text(annotations.length + " error(s)");
             $("#errorsTypescript").attr("data-lines", lines.join(","));
@@ -1185,7 +1470,7 @@ define(function (require, exports, module) {
                     if (Object.prototype.toString.call(message) === '[object Array]') {
                         html = '<table><thead><th>(Index)</th><th>Value</th></tr></thead><tbody>';
                         for (var k = 0; k < message.length; k++) {
-                            var msg = (message[k] && message[k].toString) ?  message[k].toString() : message[k];
+                            var msg = (message[k] && message[k].toString) ? message[k].toString() : message[k];
                             html += "<tr><td>" + k + "</td><td>" + msg + "</td></tr>";
                         }
                     }
@@ -1350,7 +1635,7 @@ define(function (require, exports, module) {
     function updateOutputPane() {
         resetOutputPaneTimer();
         outputUpdateTimer = window.setTimeout(function () {
-            if ($("#tab-output").is(":visible")) {
+            if (myLayout && myLayout.root.getItemsById("componentOutput").length > 0) {
                 var htmlText = getOutputHTML($("#chkRunJavascript").hasClass("active"));
 
                 var jiframe = $("<iframe class='outputframe' id='outputIFrame'></iframe>");

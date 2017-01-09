@@ -88,13 +88,34 @@ body {
     position: relative;
 }
 
-.console {
+.console, .errors {
     height: 100%;
     position: absolute;
     font-size: 0.75em;
     overflow-y: scroll;
     width: 100%;
+    background-color: #FFF;
 }
+
+.dark .console, .dark .errors {
+    background-color: #1D1F21;
+}
+
+.error-entry {
+    border-bottom: 1px solid #eee;
+    cursor:pointer;
+}
+
+.error-entry .lineNr {
+    width:10%;
+    float:left;
+    padding:2px;
+}
+.error-entry .error-content {
+    width:90%;
+    padding:2px;
+}
+
 
 .console-entry {
     border-bottom: 1px solid #eee;
@@ -173,7 +194,6 @@ body {
     background-color: #FFCCCC;
     font-family: Monaco, Menlo, 'Ubuntu Mono', Consolas, source-code-pro, monospace;
     padding-left: 3px;
-    font-size: 0.9em;
     font-weight: bold;
     cursor: pointer;
     color: black;
@@ -183,7 +203,7 @@ body {
 #editorHTML, #editorCSS, #editorJavascript, #editorTypescript {
     position: absolute;
     max-height: 10000px;
-    top: 20px;
+    top: 0;
     right: 0;
     bottom: 0;
     left: 0;
@@ -276,12 +296,12 @@ body {
     }
 
 .dark .ace_autocomplete {
-     background-color: #444;
-     border: 1px solid #666;
+    background-color: #444;
+    border: 1px solid #666;
 }
 
 .dark .ace_autocomplete_selected {
-     background-color: #666;
+    background-color: #666;
 }
 
 .dark .ace_autocomplete_comments {
@@ -417,11 +437,15 @@ body {
 .typescript-navigation {
     height: 100%;
     float: left;
-    width: 20%;
+    width: 100%;
     word-wrap: inherit;
     position: absolute;
     overflow-y: scroll;
     overflow-x: hidden;
+    background-color:#FFF;
+}
+.dark .typescript-navigation {
+    background-color:#1D1F21;
 }
 
 .dark input[type=text] {
@@ -598,4 +622,10 @@ body {
             padding: 0;
         }
     }
+}
+
+/* ------------------------ */
+
+.lm_content {
+    position: relative;
 }
