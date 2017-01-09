@@ -115,7 +115,8 @@ define(function (require, exports, module) {
 
             if (name.substr(0, 7) == "http://" || name.substr(0, 8) == "https://") {
                 var content = resolveExternalReference(name);
-                this.addScript(name, content, false);
+                if(content != null)
+                    this.addScript(name, content, false);
             }
 
             for (var i = 0; i < this.scripts.length; i++) {
