@@ -899,6 +899,19 @@ define(function (require, exports, module) {
             if (window.localStorage) {
                 localStorage.removeItem('_layoutSavedState');
             }
+
+            // return everything to element parking
+            $("#elementParking").append($("#editorHTML"));
+            $("#elementParking").append($("#editorCSS"));
+            $("#elementParking").append($("#editorTypescript"));
+            $("#elementParking").append($("#editorJavascript"));
+            $("#elementParking").append($("#outputFrame"));
+            $("#elementParking").append($("#txtConsole"));
+            $("#elementParking").append($("#txtErrors"));
+            $("#elementParking").append($("#navigationTree"));
+
+            $('#goldenLayoutContainer').empty();
+
             initializeLayout();
 
             ev.preventDefault();
@@ -1250,7 +1263,7 @@ define(function (require, exports, module) {
             if (window.localStorage)
                 window.localStorage.setItem('_layoutSavedState', state);
 
-            
+
         });
 
 
@@ -1271,13 +1284,14 @@ define(function (require, exports, module) {
         myLayout.on('splitterDragStop', function () {
             $("#outputFrame").show(); // necessary otherwise the iframe will steal the mouse release event, breaking the resizing
         });
-         
+
 
         myLayout.init();
 
-        //$(window).resize(function () {
-        //    myLayout.updateSize($(window).width() - 20, myLayout.container.height());
-        //});
+        $(window).resize(function () {
+            myLayout.updateSize($(window).width()-20, myLayout.container.height());
+        });
+        myLayout.updateSize($(window).width() - 20, myLayout.container.height());
     }
 
 
