@@ -781,7 +781,7 @@ define(function (require, exports, module) {
             $("#errorsTypescript").attr("data-curidx", curIdx);
         });
         $(document).on("click", ".error-entry", function (ev) {
-            let line = parseInt($(this).attr("data-line"));
+            var line = parseInt($(this).attr("data-line"));
             editor.gotoLine(line + 1, 0, true);
         });
 
@@ -1337,7 +1337,7 @@ define(function (require, exports, module) {
             annotations.forEach(function (a) {
                 lines.push(a.row);
 
-                let entry = $("<div class='error-entry' data-line='" + a.row + "'><div class='lineNr'>" + a.row + "</div><div class='error-content'></div></div>");
+                var entry = $("<div class='error-entry' data-line='" + a.row + "'><div class='lineNr'>" + a.row + "</div><div class='error-content'></div></div>");
                 $(entry).find(".error-content").text(a.text);
                 $("#txtErrors").append(entry);
             });
