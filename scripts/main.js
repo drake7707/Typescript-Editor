@@ -654,6 +654,8 @@ define(function (require, exports, module) {
         document.getElementById('editorHTML').style.fontSize = '14px';
         document.getElementById('editorCSS').style.fontSize = '14px';
 
+     
+
         loadTypeScriptLibrary();
 
         editor.addEventListener("change", onUpdateTypescriptDocument);
@@ -1016,6 +1018,9 @@ define(function (require, exports, module) {
         editorCSS.setTheme(editorTheme);
         editor.setTheme(editorTheme);
         editorJavascript.setTheme(editorTheme);
+
+        if (window.localStorage)
+            window.localStorage.setItem('_theme', theme);
     }
 
     //function updateSideBySide() {
@@ -1194,7 +1199,7 @@ define(function (require, exports, module) {
 
         var config;
         if (window.localStorage) {
-            savedState = localStorage.getItem('_layoutSavedState');
+            var savedState = localStorage.getItem('_layoutSavedState');
             if (savedState != null)
                 config = JSON.parse(savedState);
             else
@@ -1202,6 +1207,7 @@ define(function (require, exports, module) {
         }
         else
             config = defaultConfig;
+
 
         myLayout = new GoldenLayout(config, $('#goldenLayoutContainer'));
         myLayout.registerComponent('componentHTML', function (container, componentState) {
@@ -1288,8 +1294,34 @@ define(function (require, exports, module) {
 
         myLayout.init();
 
+        var scrollbars = $('.ace_scrollbar')
+         .css('overflow', 'hidden');
+
+
+        var scrollbarSettings = { suppressScrollX: true, includePadding: true, minScrollbarLength: 12 };
+        scrollbars.filter('.ace_scrollbar-v').perfectScrollbar(scrollbarSettings);
+        scrollbars.filter('.ace_scrollbar-h').perfectScrollbar(scrollbarSettings);
+        $("#navigationTree").perfectScrollbar(scrollbarSettings);
+        $("#txtErrors").perfectScrollbar(scrollbarSettings);
+        $("#txtConsole").perfectScrollbar(scrollbarSettings);
+
+        var editors = [editor, editorCSS, editorHTML, editorJavascript];
+        for (var i = 0; i < editors.length; i++) {
+            var e = editors[i];
+            e.$blockScrolling = Infinity;
+            var container = e.renderer.getContainerElement();
+            $(e).hover(
+                function () { scrollbars.addClass('hover'); },
+                function () { scrollbars.removeClass('hover'); }
+            );
+            var session = e.getSession();
+            session.on('change', function () {
+                scrollbars.perfectScrollbar('update');
+            });
+        }
         $(window).resize(function () {
-            myLayout.updateSize($(window).width()-20, myLayout.container.height());
+            myLayout.updateSize($(window).width() - 20, myLayout.container.height());
+            scrollbars.perfectScrollbar('update');
         });
         myLayout.updateSize($(window).width() - 20, myLayout.container.height());
     }

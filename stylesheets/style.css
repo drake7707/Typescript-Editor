@@ -1,5 +1,5 @@
 body {
-    overflow:hidden;
+    overflow: hidden;
 }
 
 .ltable {
@@ -104,18 +104,19 @@ body {
 
 .error-entry {
     border-bottom: 1px solid #eee;
-    cursor:pointer;
+    cursor: pointer;
 }
 
-.error-entry .lineNr {
-    width:10%;
-    float:left;
-    padding:2px;
-}
-.error-entry .error-content {
-    width:90%;
-    padding:2px;
-}
+    .error-entry .lineNr {
+        width: 10%;
+        float: left;
+        padding: 2px;
+    }
+
+    .error-entry .error-content {
+        width: 90%;
+        padding: 2px;
+    }
 
 
 .console-entry {
@@ -443,10 +444,11 @@ body {
     position: absolute;
     overflow-y: scroll;
     overflow-x: hidden;
-    background-color:#FFF;
+    background-color: #FFF;
 }
+
 .dark .typescript-navigation {
-    background-color:#1D1F21;
+    background-color: #1D1F21;
 }
 
 .dark input[type=text] {
@@ -502,6 +504,15 @@ body {
 .dark .navItem.selected {
     background-color: rgb(80,80,80);
 }
+
+
+/* to make scrollbars always visible */
+.ps-container > .ps-scrollbar-x-rail,
+.ps-container > .ps-scrollbar-y-rail {
+    opacity: 0.6 !important;
+}
+
+
 /*
  * CSS3 Treeview. No JavaScript
  * @version 1.0
