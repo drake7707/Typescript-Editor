@@ -14,6 +14,4 @@ I used the Typescript on Ace editor from https://github.com/hi104/typescript-pla
 
 I've replaced the old typescriptservices with the latest last known good build from the corresponding branch and adapted most things to use the new API, so you can use pretty much all the newest and latest things such as generics and so on.
 
---
-
-If the layout reminds you of JSBin, you're absolutely right. I used JSBin a lot in the past as a javascript scratchpad but I never got the typescript working well (and I really want to use typescript with intellisense and autocompletion), which was exactly why I started this project.
+![Screenshot](http://i.imgur.com/h6LI14o.png)
