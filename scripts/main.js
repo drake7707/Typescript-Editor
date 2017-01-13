@@ -461,7 +461,7 @@ define(function (require, exports, module) {
             var html = "";
 
 
-            let prefixLength = 0;
+            var prefixLength = 0;
             for (var i = 0; i < items.length; i++) {
 
                 var row = "";
