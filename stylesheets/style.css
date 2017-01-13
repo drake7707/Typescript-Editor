@@ -253,6 +253,19 @@ body {
     color: white;
 }
 
+#quickInfo {
+    background: white;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    min-width: 150px;
+    font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    padding:1px;
+}
+
+#quickInfo .highlight {
+    font-weight:bold;
+}
+
 .ace_autocomplete {
     height: 226px;
     background: white;
@@ -298,7 +311,7 @@ body {
     }
 
 .dark .ace_autocomplete {
-    background-color: #444;
+    background-color: #1D1F21;
     border: 1px solid #666;
 }
 
@@ -309,6 +322,11 @@ body {
 .dark .ace_autocomplete_comments {
     background-color: #333;
     border-top: 1px solid #666;
+}
+
+.dark #quickInfo {
+    background-color:#1D1F21;
+    border: 1px solid #666;
 }
 
 .label-kind {

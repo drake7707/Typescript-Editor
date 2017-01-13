@@ -6,6 +6,7 @@ define(function (require, exports, module) {
 
     var AceRange = require('ace/range').Range;
     var AutoComplete = require('AutoComplete').AutoComplete;
+
     var lang = require("ace/lib/lang");
     var EditorPosition = require('EditorPosition').EditorPosition;
     var CompilationService = require('CompilationService').CompilationService;
@@ -436,11 +437,12 @@ define(function (require, exports, module) {
     }
 
     var deferredShowOccurrences = deferredCall(showOccurrences);
-
+    var deferredShowSignatureHelperItems = deferredCall(showSignatureHelperItems);
     function onChangeCursor(e) {
         if (!syncStop) {
             try {
                 deferredShowOccurrences.schedule(200);
+                deferredShowSignatureHelperItems.schedule(100);
             } catch (ex) {
                 //TODO
             }
@@ -448,6 +450,65 @@ define(function (require, exports, module) {
         }
     };
 
+    function showSignatureHelperItems() {
+
+       
+
+        typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
+        var result = languageService.getSignatureHelpItems(selectFileName + ".ts", aceEditorPosition.getCurrentCharPosition());
+        if (typeof result !== "undefined") {
+            var items = result.items;
+            var html = "";
+
+
+            let prefixLength = 0;
+            for (var i = 0; i < items.length; i++) {
+
+                var row = "";
+
+                var itemPrefixLength = 0;
+                items[i].prefixDisplayParts.forEach(function (el) { row += el.text; itemPrefixLength += el.text.length; });
+                if (prefixLength < itemPrefixLength)
+                    prefixLength = itemPrefixLength;
+
+                for (var p = 0; p < items[i].parameters.length; p++) {
+
+                    if (p == result.argumentIndex)
+                        row += "**BOLD**";
+                    items[i].parameters[p].displayParts.forEach(function (el) { row += el.text });
+
+                    if (p == result.argumentIndex)
+                        row += "**/BOLD**";
+
+                    if (p != items[i].parameters.length - 1)
+                        items[i].separatorDisplayParts.forEach(function (el) { row += el.text });
+                }
+                items[i].suffixDisplayParts.forEach(function (el) { row += el.text });
+
+                row = row.replace(/'/g, '&apos;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                row = row.replace("**BOLD**", "<span class='highlight'>");
+                row = row.replace("**/BOLD**", "</span>");
+
+                html += "<div class='quickinfo-row'>" + row + "</div>";
+            }
+            $("#quickInfo").html(html);
+
+            var pos = aceEditorPosition.getAcePositionFromChars(result.applicableSpan.start-prefixLength);
+            var coords = editor.renderer.textToScreenCoordinates(pos.row, pos.column);
+
+            $("#quickInfo").css({
+                position: "absolute",
+                zIndex: 999, // autocomplete is 1000
+                left: Math.max(coords.pageX, 0),
+                top: Math.max(coords.pageY + 20, 0)
+            });
+            $("#quickInfo").show();
+        }
+        else {
+            $("#quickInfo").empty();
+            $("#quickInfo").hide();
+        }
+    }
 
     function showOccurrences() {
         typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
@@ -654,7 +715,7 @@ define(function (require, exports, module) {
         document.getElementById('editorHTML').style.fontSize = '14px';
         document.getElementById('editorCSS').style.fontSize = '14px';
 
-     
+
 
         loadTypeScriptLibrary();
 
@@ -971,6 +1032,14 @@ define(function (require, exports, module) {
             bindKey: "F12",
             exec: function (editor) {
                 gotoDefinition();
+            }
+        }]);
+
+        editor.commands.addCommands([{
+            name: "hideQuickInfo",
+            bindKey: "Esc",
+            exec: function (editor) {
+                $("#quickInfo").empty().hide();
             }
         }]);
 
