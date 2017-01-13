@@ -1298,7 +1298,7 @@ define(function (require, exports, module) {
          .css('overflow', 'hidden');
 
 
-        var scrollbarSettings = { suppressScrollX: true, includePadding: true, minScrollbarLength: 12 };
+        var scrollbarSettings = { suppressScrollX: false, includePadding: true, minScrollbarLength: 12 };
         scrollbars.filter('.ace_scrollbar-v').perfectScrollbar(scrollbarSettings);
         scrollbars.filter('.ace_scrollbar-h').perfectScrollbar(scrollbarSettings);
         $("#navigationTree").perfectScrollbar(scrollbarSettings);
@@ -1320,10 +1320,10 @@ define(function (require, exports, module) {
             });
         }
         $(window).resize(function () {
-            myLayout.updateSize($(window).width() - 20, myLayout.container.height());
+            myLayout.updateSize($(window).width() - 6, myLayout.container.height() - 6);
             scrollbars.perfectScrollbar('update');
         });
-        myLayout.updateSize($(window).width() - 20, myLayout.container.height());
+        myLayout.updateSize($(window).width() - 6, myLayout.container.height() - 6);
     }
 
 

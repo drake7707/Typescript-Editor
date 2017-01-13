@@ -207,8 +207,8 @@ oop.inherits(HScrollBar, ScrollBar);
     this.onScroll = function() {
         if (!this.skipEvent) {
             // DO NOT FIRE THIS EVENT, THIS WILL NOT WORK WITH perfect-scrollbar
-            //this.scrollLeft = this.element.scrollLeft;
-            //this._emit("scroll", {data: this.scrollLeft});
+            this.scrollLeft = this.element.scrollLeft;
+            this._emit("scroll", {data: this.scrollLeft});
         }
         this.skipEvent = false;
     };

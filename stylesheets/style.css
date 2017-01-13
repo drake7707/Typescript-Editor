@@ -593,7 +593,7 @@ body {
     .css-treeview label {
         /*background-position: 18px 0;*/
         background-position: -16px 0;
-        width: 500px;
+        /*width: 500px;*/
         position: relative;
     }
 
