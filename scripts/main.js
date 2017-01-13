@@ -899,64 +899,6 @@ define(function (require, exports, module) {
                 $("#navTreeSearch .navCheck").prop("checked", false);
         });
 
-        $("#lnkViewHTML").click(function (ev) {
-            if (myLayout.root.getItemsById("componentHTML").length == 0) {
-                myLayout.root.getItemsById("mainstack")[0].addChild(componentHTMLDef);
-            }
-            ev.preventDefault();
-            return true;
-        });
-
-        $("#lnkViewCSS").click(function (ev) {
-            if (myLayout.root.getItemsById("componentCSS").length == 0) {
-                myLayout.root.getItemsById("mainstack")[0].addChild(componentCSSDef);
-            }
-            ev.preventDefault();
-            return true;
-        });
-
-        $("#lnkViewTypescript").click(function (ev) {
-            if (myLayout.root.getItemsById("componentTypescript").length == 0) {
-                myLayout.root.getItemsById("mainstack")[0].addChild(componentTypescriptDef);
-            }
-            ev.preventDefault();
-            return true;
-        });
-
-        $("#lnkViewJavascript").click(function (ev) {
-            if (myLayout.root.getItemsById("componentJavascript").length == 0) {
-                myLayout.root.getItemsById("mainstack")[0].addChild(componentJavascriptDef);
-            }
-            ev.preventDefault();
-            return true;
-        });
-        $("#lnkViewOutput").click(function (ev) {
-            if (myLayout.root.getItemsById("componentOutput").length == 0) {
-                myLayout.root.getItemsById("mainstack")[0].addChild(componentOutputDef);
-            }
-            ev.preventDefault();
-            return true;
-        });
-        $("#lnkViewConsole").click(function (ev) {
-            if (myLayout.root.getItemsById("componentConsole").length == 0)
-                myLayout.root.getItemsById("mainstack")[0].addChild(componentConsoleDef);
-            ev.preventDefault();
-            return true;
-        });
-        $("#lnkViewErrors").click(function (ev) {
-            if (myLayout.root.getItemsById("componentErrors").length == 0)
-                myLayout.root.getItemsById("mainstack")[0].addChild(componentErrorsDef);
-            ev.preventDefault();
-            return true;
-        });
-
-        $("#lnkViewNavigationTree").click(function (ev) {
-            if (myLayout.root.getItemsById("componentNavigationTree").length == 0)
-                myLayout.root.getItemsById("mainstack")[0].addChild(componentNavigationTreeDef);
-            ev.preventDefault();
-            return true;
-        });
-
         $("#lnkResetLayoutToDefault").click(function (ev) {
 
             if (window.localStorage) {
@@ -1392,6 +1334,68 @@ define(function (require, exports, module) {
             myLayout.updateSize($(window).width() - 6, myLayout.container.height() - 6);
             scrollbars.perfectScrollbar('update');
         });
+
+
+
+        $("#lnkViewHTML").click(function (ev) {
+            if (myLayout.root.getItemsById("componentHTML").length == 0) {
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentHTMLDef);
+            }
+            ev.preventDefault();
+            return true;
+        });
+
+        $("#lnkViewCSS").click(function (ev) {
+            if (myLayout.root.getItemsById("componentCSS").length == 0) {
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentCSSDef);
+            }
+            ev.preventDefault();
+            return true;
+        });
+
+        $("#lnkViewTypescript").click(function (ev) {
+            if (myLayout.root.getItemsById("componentTypescript").length == 0) {
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentTypescriptDef);
+            }
+            ev.preventDefault();
+            return true;
+        });
+
+        $("#lnkViewJavascript").click(function (ev) {
+            if (myLayout.root.getItemsById("componentJavascript").length == 0) {
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentJavascriptDef);
+            }
+            ev.preventDefault();
+            return true;
+        });
+        $("#lnkViewOutput").click(function (ev) {
+            if (myLayout.root.getItemsById("componentOutput").length == 0) {
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentOutputDef);
+            }
+            ev.preventDefault();
+            return true;
+        });
+        $("#lnkViewConsole").click(function (ev) {
+            if (myLayout.root.getItemsById("componentConsole").length == 0)
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentConsoleDef);
+            ev.preventDefault();
+            return true;
+        });
+        $("#lnkViewErrors").click(function (ev) {
+            if (myLayout.root.getItemsById("componentErrors").length == 0)
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentErrorsDef);
+            ev.preventDefault();
+            return true;
+        });
+
+        $("#lnkViewNavigationTree").click(function (ev) {
+            if (myLayout.root.getItemsById("componentNavigationTree").length == 0)
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentNavigationTreeDef);
+            ev.preventDefault();
+            return true;
+        });
+
+
         myLayout.updateSize($(window).width() - 6, myLayout.container.height() - 6);
     }
 
