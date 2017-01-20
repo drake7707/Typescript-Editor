@@ -1578,7 +1578,7 @@ define(function (require, exports, module) {
 
             // if it was longer than 100 items keep only the last 100
             if (items.length > 100)
-                items = items.slice(items.length - 100, items.length - 1);
+                items = items.slice(items.length - 100, items.length);
 
             for (var i = 0; i < items.length; i++) {
                 var message = items[i].message;
@@ -1623,7 +1623,7 @@ define(function (require, exports, module) {
             logger.innerHTML = completeHtml;
             logger.scrollTop = logger.scrollHeight;
 
-            var nrOfItems = $("#txtConsole").children().length;
+            var nrOfItems = $("#txtConsole").find(".console-entry").length;
             if (nrOfItems > 100) {
                 var nrToRemove = nrOfItems - 100;
                 $("#txtConsole").find(".console-entry:lt(" + nrToRemove + ")").remove();
