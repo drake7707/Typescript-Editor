@@ -104,7 +104,7 @@ define(function (require, exports, module) {
         }).schedule(100);
 
         deferredUpdateNavTree();
-
+        deferredShowTasks();
         updateOutputPane();
     }
 
@@ -195,6 +195,8 @@ define(function (require, exports, module) {
                 }
                 if ($(".typescript-navigation").is(":visible"))
                     deferredUpdateNavTree.schedule(1000);
+
+                deferredShowTasks.schedule(1000);
 
                 // make sure to reset the timer while typing, the compiled event with calls updateOutputPane is called with a deferred call which means the timer will
                 // already be fired before the next updateOutputPane comes through. This makes it constantly update the pane while typing, resetting the timer
@@ -438,6 +440,7 @@ define(function (require, exports, module) {
 
     var deferredShowOccurrences = deferredCall(showOccurrences);
     var deferredShowSignatureHelperItems = deferredCall(showSignatureHelperItems);
+    var deferredShowTasks = deferredCall(showTasks);
     function onChangeCursor(e) {
         if (!syncStop) {
             try {
@@ -450,10 +453,25 @@ define(function (require, exports, module) {
         }
     };
 
+    function showTasks() {
+        var todoItems = languageService.getTodoComments(selectFileName + ".ts", [{ text: "TODO" }]);
+
+        $("#txtTasks").find(".task-entry").empty().detach();
+
+        todoItems.forEach(function (t) {
+            // t.message
+            // t.position
+
+            var pos = aceEditorPosition.getAcePositionFromChars(t.position);
+            pos.row + 1
+            
+            var entry = $("<div class='task-entry' data-row='" + pos.row + "' data-col='" + pos.col + "'><div class='lineNr'>" + (pos.row + 1) + "</div><div class='task-content'></div></div>");
+            $(entry).find(".task-content").text(t.message);
+            $("#txtTasks").append(entry);
+        });
+    }
+
     function showSignatureHelperItems() {
-
-       
-
         typeScriptLS.updateScript(selectFileName + ".ts", editor.getSession().getDocument().getValue(), false);
         var result = languageService.getSignatureHelpItems(selectFileName + ".ts", aceEditorPosition.getCurrentCharPosition());
         if (typeof result !== "undefined") {
@@ -848,6 +866,12 @@ define(function (require, exports, module) {
             editor.gotoLine(line + 1, 0, true);
         });
 
+        $(document).on("click", ".task-entry", function (ev) {
+            var row = parseInt($(this).attr("data-row"));
+            var col = parseInt($(this).attr("data-col"));
+            editor.gotoLine(row+1, col, true);
+        });    
+
         $("#lnkToggleTheme").click(function (ev) {
             if ($(document.body).hasClass("dark"))
                 setTheme("light");
@@ -916,7 +940,8 @@ define(function (require, exports, module) {
             $("#elementParking").append($("#consoleContainer"));
             $("#elementParking").append($("#txtErrors"));
             $("#elementParking").append($("#navigationTree"));
-
+            $("#elementParking").append($("#taskContainer"));
+            
             $('#goldenLayoutContainer').empty();
 
             initializeLayout();
@@ -1152,6 +1177,13 @@ define(function (require, exports, module) {
             title: 'Errors',
             componentState: { label: 'Errors' }
         };
+        var componentTasksDef = {
+            type: 'component',
+            id: 'componentTasks',
+            componentName: 'componentTasks',
+            title: 'Tasks',
+            componentState: { label: 'Tasks' }
+        };
         var componentNavigationTreeDef = {
             type: 'component',
             id: 'componentNavigationTree',
@@ -1201,7 +1233,8 @@ define(function (require, exports, module) {
                                   type: 'stack',
                                   content: [
                                       componentErrorsDef,
-                                      componentConsoleDef
+                                      componentConsoleDef,
+                                      componentTasksDef,
                                   ]
                               }
                         ]
@@ -1265,6 +1298,13 @@ define(function (require, exports, module) {
                 $("#elementParking").append($("#txtErrors"));
             });
         });
+        myLayout.registerComponent('componentTasks', function (container, componentState) {
+            container.getElement().append($("#taskContainer"));
+            container.on("destroy", function (ev) { // return to parking
+                $("#elementParking").append($("#taskContainer"));
+            });
+        });
+        
         myLayout.registerComponent('componentNavigationTree', function (container, componentState) {
             container.getElement().append($("#navigationTree"));
             container.on("destroy", function (ev) { // return to parking
@@ -1317,6 +1357,7 @@ define(function (require, exports, module) {
         $("#navigationTree").perfectScrollbar(scrollbarSettings);
         $("#txtErrors").perfectScrollbar(scrollbarSettings);
         $("#txtConsole").perfectScrollbar(scrollbarSettings);
+        $("#txtTasks").perfectScrollbar(scrollbarSettings);
 
         var editors = [editor, editorCSS, editorHTML, editorJavascript];
         for (var i = 0; i < editors.length; i++) {
@@ -1389,7 +1430,13 @@ define(function (require, exports, module) {
             ev.preventDefault();
             return true;
         });
-
+        $("#lnkViewTasks").click(function (ev) {
+            if (myLayout.root.getItemsById("componentTasks").length == 0)
+                myLayout.root.getItemsById("mainstack")[0].addChild(componentTasksDef);
+            ev.preventDefault();
+            return true;
+        });
+        
         $("#lnkViewNavigationTree").click(function (ev) {
             if (myLayout.root.getItemsById("componentNavigationTree").length == 0)
                 myLayout.root.getItemsById("mainstack")[0].addChild(componentNavigationTreeDef);

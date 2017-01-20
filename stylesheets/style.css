@@ -103,7 +103,7 @@ body {
         opacity: 1;
     }
 
-.console, .errors {
+.console, .errors, .tasks {
     height: 100%;
     position: absolute;
     font-size: 0.75em;
@@ -116,18 +116,18 @@ body {
     background-color: #1D1F21;
 }
 
-.error-entry, .todo-entry {
+.error-entry, .task-entry {
     border-bottom: 1px solid #eee;
     cursor: pointer;
 }
 
-    .error-entry .lineNr {
+    .error-entry .lineNr, .task-entry .lineNr {
         width: 10%;
         float: left;
         padding: 2px;
     }
 
-    .error-entry .error-content {
+    .error-entry .error-content, .task-entry .task-content {
         width: 90%;
         padding: 2px;
     }
@@ -169,7 +169,7 @@ body {
         background-color: #F5F5F5;
     }
 
-.dark .console-entry, .dark .error-entry, .dark .todo-entry {
+.dark .console-entry, .dark .error-entry, .dark .task-entry {
     border-bottom: 1px solid #444;
 }
 
