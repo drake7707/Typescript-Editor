@@ -496,11 +496,13 @@ define(function (require, exports, module) {
             var pos = aceEditorPosition.getAcePositionFromChars(result.applicableSpan.start-prefixLength);
             var coords = editor.renderer.textToScreenCoordinates(pos.row, pos.column);
 
+
+            var quickInfoParentOffset = $("#quickInfo").parent().offset();
             $("#quickInfo").css({
                 position: "absolute",
                 zIndex: 999, // autocomplete is 1000
-                left: Math.max(coords.pageX, 0),
-                top: Math.max(coords.pageY + 20, 0)
+                left: Math.max(coords.pageX, 0) - quickInfoParentOffset.left,
+                top: Math.max(coords.pageY + 20, 0) - quickInfoParentOffset.top
             });
             $("#quickInfo").show();
         }
@@ -908,7 +910,7 @@ define(function (require, exports, module) {
             // return everything to element parking
             $("#elementParking").append($("#editorHTML"));
             $("#elementParking").append($("#editorCSS"));
-            $("#elementParking").append($("#editorTypescript"));
+            $("#elementParking").append($("#typescriptContainer"));
             $("#elementParking").append($("#editorJavascript"));
             $("#elementParking").append($("#outputFrame"));
             $("#elementParking").append($("#consoleContainer"));
@@ -1234,7 +1236,7 @@ define(function (require, exports, module) {
             });
         });
         myLayout.registerComponent('componentTypescript', function (container, componentState) {
-            container.getElement().append($("#editorTypescript"));
+            container.getElement().append($("#typescriptContainer"));
             container.on("destroy", function (ev) { // return to parking
                 $("#elementParking").append($("#editorTypescript"));
             });

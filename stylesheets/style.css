@@ -116,7 +116,7 @@ body {
     background-color: #1D1F21;
 }
 
-.error-entry {
+.error-entry, .todo-entry {
     border-bottom: 1px solid #eee;
     cursor: pointer;
 }
@@ -169,7 +169,7 @@ body {
         background-color: #F5F5F5;
     }
 
-.dark .console-entry {
+.dark .console-entry, .dark .error-entry, .dark .todo-entry {
     border-bottom: 1px solid #444;
 }
 
