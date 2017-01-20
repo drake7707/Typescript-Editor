@@ -911,7 +911,7 @@ define(function (require, exports, module) {
             $("#elementParking").append($("#editorTypescript"));
             $("#elementParking").append($("#editorJavascript"));
             $("#elementParking").append($("#outputFrame"));
-            $("#elementParking").append($("#txtConsole"));
+            $("#elementParking").append($("#consoleContainer"));
             $("#elementParking").append($("#txtErrors"));
             $("#elementParking").append($("#navigationTree"));
 
@@ -1252,9 +1252,9 @@ define(function (require, exports, module) {
             });
         });
         myLayout.registerComponent('componentConsole', function (container, componentState) {
-            container.getElement().append($("#txtConsole"));
+            container.getElement().append($("#consoleContainer"));
             container.on("destroy", function (ev) { // return to parking
-                $("#elementParking").append($("#txtConsole"));
+                $("#elementParking").append($("#consoleContainer"));
             });
         });
         myLayout.registerComponent('componentErrors', function (container, componentState) {
@@ -2004,6 +2004,10 @@ define(function (require, exports, module) {
         $("#btnUpdateDescription").click(function (ev) {
             $('#modalUpdateDescription').modal('hide');
             restService.updateDescription(selectFileName, $("#txtDescription").val());
+        });
+
+        $("#btnClearConsole").click(function (ev) {
+            clearConsoleLog();
         });
 
         $(window).bind('keydown', function (event) {
