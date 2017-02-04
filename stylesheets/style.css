@@ -631,6 +631,7 @@ body {
         background-position: -16px 0;
         /*width: 500px;*/
         position: relative;
+        white-space: nowrap;
     }
 
         .css-treeview label .label-overlay {
