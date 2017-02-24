@@ -137,13 +137,17 @@ define(function (require, exports, module) {
 
             errors.forEach(function (error) {
                 var pos = DocumentPositionUtil.getPosition(self.doc, error.start);
+
+                var hasCodeFixesAvailable = self.languageService.getCodeFixesAtPosition("temp.ts", error.start, error.start + error.length, [error.code]).length > 0;
+
                 annotations.push({
                     row: pos.row,
                     column: pos.column,
                     text: typeof error.messageText === "string" ? error.messageText : error.messageText.messageText, // work around a bug in typescript i think
                     minChar: error.start,
                     limChar: error.start + error.length,
-                    type: "error",
+                    code: error.code,
+                    type: hasCodeFixesAvailable ? "errorfix" : "error",
                     raw: typeof error.messageText === "string" ? error.messageText : error.messageText.messageText
                 });
             });

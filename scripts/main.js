@@ -671,6 +671,52 @@ define(function (require, exports, module) {
         }
     }
 
+    function applyCodeFix() {
+
+        var curPos = aceEditorPosition.getCurrentCharPosition();
+        var annotations = editor.getSession().getAnnotations();
+        for (var i = 0; i < annotations.length; i++) {
+            var start = annotations[i].minChar;
+            var end = annotations[i].limChar;
+            var code = annotations[i].code;
+
+            if (curPos >= start && curPos < start + end && typeof code !== "undefined") {
+                var codeFixes = languageService.getCodeFixesAtPosition(selectFileName + ".ts", start, end, [code]);
+                if (codeFixes.length > 0) {
+                    applyCodeFixWith(codeFixes[0]);
+                }
+
+                break; // TODO have a nice context menu where the user selects the fix instead of applying it directly
+            }
+        }
+       // alert("Apply code fix, TODO");
+    }
+    function applyCodeFixWith(codeFix) {
+        // sort by start position ? // TODO
+        for (var i = 0; i < codeFix.changes.length; i++) {
+
+            var change = codeFix.changes[i];
+
+            for (var j = 0; j < change.textChanges.length; j++) {
+
+                if (change.textChanges[j].span.length == 0) {
+                    // insert
+                    var pos = aceEditorPosition.getAcePositionFromChars(change.textChanges[j].span.start);
+                    editor.getSession().getDocument().insert(pos, change.textChanges[j].newText);
+                }
+                else {
+                    // replace
+                    var getpos = aceEditorPosition.getAcePositionFromChars;
+                    var start = aceEditorPosition.getAcePositionFromChars(change.textChanges[j].span.start);
+                    var end = aceEditorPosition.getAcePositionFromChars(change.textChanges[j].span.start + change.textChanges[j].span.length);
+                    var range = new AceRange(start.row, start.column, end.row, end.column);
+                    editor.session.replace(range, change.textChanges[j].newText);
+
+                }
+            }
+        }
+    }
+
     function getPositionInTypescriptFromJavascript(linenr, col, sourcemap) {
         var lines = sourcemap.mappings.split(';');
 
@@ -828,13 +874,15 @@ define(function (require, exports, module) {
             });
             errorMarkers = [];
 
+            
             e.data.forEach(function (error) {
                 var getpos = aceEditorPosition.getAcePositionFromChars;
                 var start = getpos(error.minChar);
                 var end = getpos(error.limChar);
                 var range = new AceRange(start.row, start.column, end.row, end.column);
-                errorMarkers.push(session.addMarker(range, "typescript-error", "text", true));
 
+                errorMarkers.push(session.addMarker(range,"typescript-error", "text", true));
+               
                 // remove the runtime errors
                 runtimeErrorMarkers.forEach(function (id) {
                     session.removeMarker(id);
@@ -1034,18 +1082,37 @@ define(function (require, exports, module) {
         }]);
 
         editor.commands.addCommands([{
-            name: "hideQuickInfo",
-            bindKey: "Esc",
-            exec: function (editor) {
-                $("#quickInfo").empty().hide();
-            }
-        }]);
-
-        editor.commands.addCommands([{
             name: "gotoPreviousPosition",
             bindKey: "Shift-F12",
             exec: function (editor) {
                 gotoPreviousPosition();
+            }
+        }]);
+
+
+        // for azerty
+        editor.commands.addCommands([{
+            name: "applyCodeFix",
+            bindKey: "Ctrl-;",
+            exec: function (editor) {
+                applyCodeFix();
+            }
+        }]);
+        // for qwerty
+        editor.commands.addCommands([{
+            name: "applyCodeFix",
+            bindKey: "Ctrl-.",
+            exec: function (editor) {
+                applyCodeFix();
+            }
+        }]);
+
+
+        editor.commands.addCommands([{
+            name: "hideQuickInfo",
+            bindKey: "Esc",
+            exec: function (editor) {
+                $("#quickInfo").empty().hide();
             }
         }]);
 

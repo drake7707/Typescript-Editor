@@ -687,3 +687,14 @@ body {
 .lm_content {
     position: relative;
 }
+
+
+/*-------------------------*/
+
+
+
+.ace_gutter-cell.ace_errorfix {
+    background-image:  url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAwFBMVEXYQk/dW2bjd4DniJDokJfsoKfH1e6vtsJRaotLYHlccIevucSFrNCzwMyEo7z59sL9/Oz48q/9++T77rL777L88sS6rXn88sa1p3Pvx0f94H/86a/60WT702X43I796K7uujnvuD/ttz//57XtsD/srz/vvWHzv2Pyv2Pxvmbxv2bsqkDsrEP///////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4Bt0NAAAAL3RSTlP/////////////////////////////////////////////////////////////AFqlOPcAAAABYktHRD8+YzB1AAAACXBIWXMAAABIAAAASABGyWs+AAAAgklEQVQY013P6RKCIBQF4ItBli1ule2WqGV2eP/HExVTOsz9881wF1J/IV1oMwGU9bcuMUL1llK+PvhBfkn1K0Z47pJ9Ememk4ZHGEQB9engfvLhkyOYcHrA+YobCXAIMnsc5kdiHJwNsMbChq3r2V82y1XXdGagPWY6VqnhQLOYnQbb5CFRHKTehwAAAABJRU5ErkJggg==');
+    background-repeat: no-repeat;
+    background-position: 2px center;
+}

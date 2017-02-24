@@ -91,9 +91,12 @@ var Gutter = function(parentEl) {
                 rowInfo.text.push(annoText);
 
             var type = annotation.type;
-            if (type == "error")
+
+            if (type == "errorfix")
+                rowInfo.className = " ace_errorfix";
+            else if (type == "error")
                 rowInfo.className = " ace_error";
-            else if (type == "warning" && rowInfo.className != " ace_error")
+            else if (type == "warning" && rowInfo.className != " ace_error" && rowInfo.className != " ace_errorfix")
                 rowInfo.className = " ace_warning";
             else if (type == "info" && (!rowInfo.className))
                 rowInfo.className = " ace_info";
