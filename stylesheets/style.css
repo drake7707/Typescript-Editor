@@ -278,11 +278,16 @@ body {
     min-width: 150px;
     font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
     padding: 1px;
+    pointer-events: none; /*required so you can click through to the element below it */
 }
 
     #quickInfo .highlight {
         font-weight: bold;
     }
+
+.quickinfo-row {
+    border-bottom: 1px solid #EEE;
+}
 
 .ace_autocomplete {
     height: 226px;
@@ -345,6 +350,10 @@ body {
 .dark #quickInfo {
     background-color: #1D1F21;
     border: 1px solid #666;
+}
+
+.dark .quickinfo-row {
+    border-bottom: 1px solid #333;
 }
 
 .label-kind {

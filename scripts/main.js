@@ -511,16 +511,45 @@ define(function (require, exports, module) {
             }
             $("#quickInfo").html(html);
 
-            var pos = aceEditorPosition.getAcePositionFromChars(result.applicableSpan.start-prefixLength);
+            var pos = aceEditorPosition.getAcePositionFromChars(result.applicableSpan.start - prefixLength);
+            var posWithoutPrefix = aceEditorPosition.getAcePositionFromChars(result.applicableSpan.start);
+            if (pos.row < posWithoutPrefix.row) {
+                // removing the prefix of the function causes the position to jump back one row
+                // this happens when generics are implicitely used, for example .toDictionary(|... will have a prefix .toDictionary<Key,Value> 
+                // which isn't present in the actual code and will wrap too far
+                pos.row = posWithoutPrefix.row;
+                pos.column = 0;
+            }
             var coords = editor.renderer.textToScreenCoordinates(pos.row, pos.column);
-
-
+            
+            
             var quickInfoParentOffset = $("#quickInfo").parent().offset();
+            var quickInfoParentHeight = $("#quickInfo").parent().height();
+
+            var quickInfoTop = Math.max(coords.pageY + 20, 0) - quickInfoParentOffset.top;
+            var quickInfoHeight = $("#quickInfo").height();
+            // check if it covers the cursor
+            // and move it down if it does
+
+            var cursorPos = editor.getCursorPosition();
+            var cursorCoords = editor.renderer.textToScreenCoordinates(cursorPos.row, cursorPos.column);
+            var cursorY = cursorCoords.pageY - quickInfoParentOffset.top;
+            if (cursorY+20 > quickInfoTop) {
+                // the row where the cursor is on falls below the quick info
+                quickInfoTop = cursorY + 20; // move it below the cursor
+            }
+            // check if it falls off the bottom
+            // move it above the line then
+            if (quickInfoTop + quickInfoHeight > quickInfoParentHeight) {
+                // move it above the line
+                quickInfoTop = Math.max(coords.pageY, 0) - quickInfoParentOffset.top - quickInfoHeight;
+            }
+
             $("#quickInfo").css({
                 position: "absolute",
                 zIndex: 999, // autocomplete is 1000
                 left: Math.max(coords.pageX, 0) - quickInfoParentOffset.left,
-                top: Math.max(coords.pageY + 20, 0) - quickInfoParentOffset.top
+                top: quickInfoTop
             });
             $("#quickInfo").show();
         }
