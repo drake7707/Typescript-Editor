@@ -53,6 +53,7 @@ define(function (require, exports, module) {
             this.ls = null;
             this.scripts = [];
             this.maxScriptVersions = 100;
+            this.resolvedUrls = {};
         }
 
         TypeScriptLS.prototype.addFile = function (name, isResident) {
@@ -93,13 +94,31 @@ define(function (require, exports, module) {
             return names;
         };
 
-        function resolveExternalReference(url) {
-            var request = new XMLHttpRequest();
-            request.open('GET', url, false);
-            request.send(null);
+        function resolveExternalReference(url, resolvedUrls) {
 
-            if (request.status === 200) {
-                return request.responseText;
+            var cache = resolvedUrls[url];
+            if (typeof cache === "undefined") {
+                cache = resolvedUrls[url] = {
+                    time: 0
+                };
+            }
+            
+            if (new Date().getTime() - cache.time > 300000) {
+                resolvedUrls[url].time = new Date().getTime();
+                try {
+                    var request = new XMLHttpRequest();
+                    request.open('GET', url, false);
+                    request.send(null);
+
+                    if (request.status === 200) {
+                        return request.responseText;
+                    }
+                    else
+                        return null;
+                }
+                catch (e) {
+                    return null;
+                }
             }
             else
                 return null;
@@ -114,7 +133,7 @@ define(function (require, exports, module) {
             }
 
             if (name.substr(0, 7) == "http://" || name.substr(0, 8) == "https://") {
-                var content = resolveExternalReference(name);
+                var content = resolveExternalReference(name, this.resolvedUrls);
                 if(content != null)
                     this.addScript(name, content, false);
             }

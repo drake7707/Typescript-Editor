@@ -51,9 +51,9 @@ define(function (require, exports, module) {
     var lineNumberOffsetOnPage = 0; // the offset of where the javascript is injected into the html document, chrome reports the correct line number of the script, firefox reports the page number of an error
 
     var libnames = [
-          "typescripts/lib.d.ts",
-          "typescripts/lib.es2015.promise.d.ts",
-          "typescripts/jquery.d.ts"
+        "typescripts/lib.d.ts",
+        "typescripts/lib.es2015.promise.d.ts",
+        "typescripts/jquery.d.ts"
     ];
 
     function loadTypeScriptLibrary() {
@@ -263,7 +263,7 @@ define(function (require, exports, module) {
         for (var i = 0; i < innerNodes.length; i++) {
             var ul = $(innerNodes[i]);
             ul.children("li").sort(function (a, b) { return ($(b).data('start')) < ($(a).data('start')) ? 1 : -1; })
-              .appendTo(ul);
+                .appendTo(ul);
         }
 
         // remove duplicate global functions
@@ -383,21 +383,21 @@ define(function (require, exports, module) {
         var padding = node.indent * 20;
         if (childrenHtml.length > 0) {
             html = '<li data-start="' + start + '" data-length="' + length + '">' +
-                        '<input type="checkbox" class="navCheck" id="' + id + '" ' + checked + ' />' +
-                        '<label for="' + id + '">' +
-                            span + overlay +
-                        '</label>' +
-                        '<ul>' + childrenHtml + "</ul>" +
-                    '</li>';
+                '<input type="checkbox" class="navCheck" id="' + id + '" ' + checked + ' />' +
+                '<label for="' + id + '">' +
+                span + overlay +
+                '</label>' +
+                '<ul>' + childrenHtml + "</ul>" +
+                '</li>';
         }
         else {
             html = '<li class="leaf" data-start="' + start + '" data-length="' + length + '">' +
-                        '<input type="checkbox" class="navCheck" style="visbility:hidden" id="' + id + '" ' + checked + ' />' +
-                        '<label for="' + id + '">' +
-                            span + overlay +
-                        '</label>' +
-                        '<ul>' + "" + "</ul>" +
-                  '</li>';
+                '<input type="checkbox" class="navCheck" style="visbility:hidden" id="' + id + '" ' + checked + ' />' +
+                '<label for="' + id + '">' +
+                span + overlay +
+                '</label>' +
+                '<ul>' + "" + "</ul>" +
+                '</li>';
         }
         return html;
     }
@@ -464,7 +464,7 @@ define(function (require, exports, module) {
 
             var pos = aceEditorPosition.getAcePositionFromChars(t.position);
             pos.row + 1
-            
+
             var entry = $("<div class='task-entry' data-row='" + pos.row + "' data-col='" + pos.col + "'><div class='lineNr'>" + (pos.row + 1) + "</div><div class='task-content'></div></div>");
             $(entry).find(".task-content").text(t.message);
             $("#txtTasks").append(entry);
@@ -521,8 +521,8 @@ define(function (require, exports, module) {
                 pos.column = 0;
             }
             var coords = editor.renderer.textToScreenCoordinates(pos.row, pos.column);
-            
-            
+
+
             var quickInfoParentOffset = $("#quickInfo").parent().offset();
             var quickInfoParentHeight = $("#quickInfo").parent().height();
 
@@ -534,7 +534,7 @@ define(function (require, exports, module) {
             var cursorPos = editor.getCursorPosition();
             var cursorCoords = editor.renderer.textToScreenCoordinates(cursorPos.row, cursorPos.column);
             var cursorY = cursorCoords.pageY - quickInfoParentOffset.top;
-            if (cursorY+20 > quickInfoTop) {
+            if (cursorY + 20 > quickInfoTop) {
                 // the row where the cursor is on falls below the quick info
                 quickInfoTop = cursorY + 20; // move it below the cursor
             }
@@ -671,8 +671,9 @@ define(function (require, exports, module) {
         }
     }
 
-    function applyCodeFix() {
+    function getTypescriptContextMenu() {
 
+        var fixes = [];
         var curPos = aceEditorPosition.getCurrentCharPosition();
         var annotations = editor.getSession().getAnnotations();
         for (var i = 0; i < annotations.length; i++) {
@@ -683,14 +684,35 @@ define(function (require, exports, module) {
             if (curPos >= start && curPos < start + end && typeof code !== "undefined") {
                 var codeFixes = languageService.getCodeFixesAtPosition(selectFileName + ".ts", start, end, [code]);
                 if (codeFixes.length > 0) {
-                    applyCodeFixWith(codeFixes[0]);
-                }
 
-                break; // TODO have a nice context menu where the user selects the fix instead of applying it directly
+                    for (var j = 0; j < codeFixes.length; j++) {
+                        fixes.push(codeFixes[j]);
+                    }
+                }
             }
         }
-       // alert("Apply code fix, TODO");
+
+        var items = {};
+
+        if (fixes.length > 0) {
+            for (var i = 0; i < fixes.length; i++) {
+                items["item" + i] = {
+                    name: fixes[i].description,
+                    codefix: fixes[i]
+                };
+            }
+        }
+
+        return {
+            callback: function (key, options) {
+                applyCodeFixWith(items[key].codefix);
+            },
+            items: items
+        };
     }
+
+
+
     function applyCodeFixWith(codeFix) {
         // sort by start position ? // TODO
         for (var i = 0; i < codeFix.changes.length; i++) {
@@ -702,7 +724,7 @@ define(function (require, exports, module) {
                 if (change.textChanges[j].span.length == 0) {
                     // insert
                     var pos = aceEditorPosition.getAcePositionFromChars(change.textChanges[j].span.start);
-                    editor.getSession().getDocument().insert(pos, change.textChanges[j].newText);
+                    editor.getSession().getDocument().insert(pos, "\n" + change.textChanges[j].newText);
                 }
                 else {
                     // replace
@@ -874,15 +896,15 @@ define(function (require, exports, module) {
             });
             errorMarkers = [];
 
-            
+
             e.data.forEach(function (error) {
                 var getpos = aceEditorPosition.getAcePositionFromChars;
                 var start = getpos(error.minChar);
                 var end = getpos(error.limChar);
                 var range = new AceRange(start.row, start.column, end.row, end.column);
 
-                errorMarkers.push(session.addMarker(range,"typescript-error", "text", true));
-               
+                errorMarkers.push(session.addMarker(range, "typescript-error", "text", true));
+
                 // remove the runtime errors
                 runtimeErrorMarkers.forEach(function (id) {
                     session.removeMarker(id);
@@ -946,8 +968,8 @@ define(function (require, exports, module) {
         $(document).on("click", ".task-entry", function (ev) {
             var row = parseInt($(this).attr("data-row"));
             var col = parseInt($(this).attr("data-col"));
-            editor.gotoLine(row+1, col, true);
-        });    
+            editor.gotoLine(row + 1, col, true);
+        });
 
         $("#lnkToggleTheme").click(function (ev) {
             if ($(document.body).hasClass("dark"))
@@ -1018,7 +1040,7 @@ define(function (require, exports, module) {
             $("#elementParking").append($("#txtErrors"));
             $("#elementParking").append($("#navigationTree"));
             $("#elementParking").append($("#taskContainer"));
-            
+
             $('#goldenLayoutContainer').empty();
 
             initializeLayout();
@@ -1026,6 +1048,49 @@ define(function (require, exports, module) {
             ev.preventDefault();
             return true;
         });
+
+
+        var contextMenuShown = false;
+        $.contextMenu({
+            selector: '#editorTypescript',
+            build: function ($trigger, e) {
+                // this callback is executed every time the menu is to be shown
+                // its results are destroyed every time the menu is hidden
+                // e is the original contextmenu event, containing e.pageX and e.pageY (amongst other data)
+                return getTypescriptContextMenu();
+            },
+            position: function (opt, x, y) {
+                var cursorPos = editor.getCursorPosition();
+                var cursorCoords = editor.renderer.textToScreenCoordinates(cursorPos.row, cursorPos.column);
+
+                opt.$menu.css({ top: cursorCoords.pageY, left: cursorCoords.pageX });
+            },
+            events: {
+                show: function (options) {
+                    contextMenuShown = true;
+                    window.setTimeout(function () {
+                        options.$menu.trigger("nextcommand");
+                    }, 10);
+                },
+                hide: function (options) {
+                    contextMenuShown = false;
+                }
+            }
+        });
+
+        editor.keyBinding.origOnCommandKey = editor.keyBinding.onCommandKey;
+        editor.keyBinding.onCommandKey = function (e, hashId, keyCode) {
+            if (!contextMenuShown) {
+                this.origOnCommandKey(e, hashId, keyCode);
+            }
+        };
+
+        editor.keyBinding.origOnTextInput = editor.keyBinding.onTextInput;
+        editor.keyBinding.onTextInput = function (text) {
+            if (!contextMenuShown) {
+                this.origOnTextInput(text);
+            }
+        };
 
         filterNavTree();
 
@@ -1095,7 +1160,7 @@ define(function (require, exports, module) {
             name: "applyCodeFix",
             bindKey: "Ctrl-;",
             exec: function (editor) {
-                applyCodeFix();
+                $("#editorTypescript").trigger("contextmenu");
             }
         }]);
         // for qwerty
@@ -1103,7 +1168,7 @@ define(function (require, exports, module) {
             name: "applyCodeFix",
             bindKey: "Ctrl-.",
             exec: function (editor) {
-                applyCodeFix();
+                $("#editorTypescript").trigger("contextmenu");
             }
         }]);
 
@@ -1324,15 +1389,15 @@ define(function (require, exports, module) {
                         type: 'column',
                         width: 30,
                         content: [
-                                componentOutputDef,
-                              {
-                                  type: 'stack',
-                                  content: [
-                                      componentErrorsDef,
-                                      componentConsoleDef,
-                                      componentTasksDef,
-                                  ]
-                              }
+                            componentOutputDef,
+                            {
+                                type: 'stack',
+                                content: [
+                                    componentErrorsDef,
+                                    componentConsoleDef,
+                                    componentTasksDef,
+                                ]
+                            }
                         ]
                     }
                 ]
@@ -1400,7 +1465,7 @@ define(function (require, exports, module) {
                 $("#elementParking").append($("#taskContainer"));
             });
         });
-        
+
         myLayout.registerComponent('componentNavigationTree', function (container, componentState) {
             container.getElement().append($("#navigationTree"));
             container.on("destroy", function (ev) { // return to parking
@@ -1444,7 +1509,7 @@ define(function (require, exports, module) {
         myLayout.init();
 
         var scrollbars = $('.ace_scrollbar')
-         .css('overflow', 'hidden');
+            .css('overflow', 'hidden');
 
 
         var scrollbarSettings = { suppressScrollX: false, includePadding: true, minScrollbarLength: 12 };
@@ -1532,7 +1597,7 @@ define(function (require, exports, module) {
             ev.preventDefault();
             return true;
         });
-        
+
         $("#lnkViewNavigationTree").click(function (ev) {
             if (myLayout.root.getItemsById("componentNavigationTree").length == 0)
                 myLayout.root.getItemsById("mainstack")[0].addChild(componentNavigationTreeDef);
@@ -2166,10 +2231,14 @@ define(function (require, exports, module) {
                 else
                     char = String.fromCharCode(event.which).toLowerCase();
 
-                var elements = $("*[data-shortcut='ctrl+" + char + "']");
-                if (elements.length > 0) {
-                    elements.click();
-                    event.preventDefault();
+                if (char == ';')
+                    $("#editorTypescript").trigger("contextmenu"); // for some reason ace doesn't want to do ctrl-; in azerty :/
+                else {
+                    var elements = $("*[data-shortcut='ctrl+" + char + "']");
+                    if (elements.length > 0) {
+                        elements.click();
+                        event.preventDefault();
+                    }
                 }
             }
         });
@@ -2279,15 +2348,15 @@ define(function (require, exports, module) {
                     var items = [];
                     for (var i = 0; i < resp.Result.length; i++) {
                         items.push($("<li class='list-group-item item' data-name='" + resp.Result[i].Name + "'>" +
-                                     "<a href='#'>" +
-                                     resp.Result[i].Name +
-                                     "<span class='lnkDelete pull-right' data-name='" + resp.Result[i].Name + "'><i class='icon-remove'></i></span>" +
-                                     "<span class='badge pull-right'>" + resp.Result[i].Milestone + "</span>" +
-                                     "<span class='date pull-right'>" + resp.Result[i].LastUpdated + "</span>" +
-                                     "<br/>" +
-                                     "<span class='description'>" + resp.Result[i].Description + "</span>" +
-                                     "</a>" +
-                                     "</li>"));
+                            "<a href='#'>" +
+                            resp.Result[i].Name +
+                            "<span class='lnkDelete pull-right' data-name='" + resp.Result[i].Name + "'><i class='icon-remove'></i></span>" +
+                            "<span class='badge pull-right'>" + resp.Result[i].Milestone + "</span>" +
+                            "<span class='date pull-right'>" + resp.Result[i].LastUpdated + "</span>" +
+                            "<br/>" +
+                            "<span class='description'>" + resp.Result[i].Description + "</span>" +
+                            "</a>" +
+                            "</li>"));
                     }
                     $("#lstFiles").append(items);
                 }
@@ -2513,25 +2582,25 @@ define(function (require, exports, module) {
 
         function getDefaultHTML() {
             return "<html>\n" +
-                    "    <head>\n" +
-                    "       <title>Typescript Editor - Hello</title>\n" +
-                    "       <!--%CSS%-->\n" +
-                    "    </head>\n" +
-                    "    <body>\n" +
-                    "        <h1>Hello</h1>\n" +
-                    "        <!--%Javascript%-->\n" +
-                    "    </body>\n" +
-                    "</html>";
+                "    <head>\n" +
+                "       <title>Typescript Editor - Hello</title>\n" +
+                "       <!--%CSS%-->\n" +
+                "    </head>\n" +
+                "    <body>\n" +
+                "        <h1>Hello</h1>\n" +
+                "        <!--%Javascript%-->\n" +
+                "    </body>\n" +
+                "</html>";
         }
         function getDefaultCSS() {
             return "body {\n" +
-                   "\n" +
-                   "}"
+                "\n" +
+                "}"
         }
         function getDefaultTypescript() {
             return "class Hello {\n" +
-                   "\n" +
-                   "}";
+                "\n" +
+                "}";
         }
 
         function newFile() {
@@ -2599,14 +2668,14 @@ define(function (require, exports, module) {
             for (var key in entries) {
                 var e = entries[key];
                 items.push($("<li class='list-group-item item' data-name='" + e.Name + "'>" +
-                                "<a href='#'>" +
-                                e.Name +
-                                "<span class='lnkDelete pull-right' data-name='" + e.Name + "'><i class='icon-remove'></i></span>" +
-                                "<span class='badge pull-right'>" + e.LastMilestone + "</span>" +
-                                "<br/>" +
-                                "<span class='description'>" + e.Description + "</span>" +
-                                "</a>" +
-                                "</li>"));
+                    "<a href='#'>" +
+                    e.Name +
+                    "<span class='lnkDelete pull-right' data-name='" + e.Name + "'><i class='icon-remove'></i></span>" +
+                    "<span class='badge pull-right'>" + e.LastMilestone + "</span>" +
+                    "<br/>" +
+                    "<span class='description'>" + e.Description + "</span>" +
+                    "</a>" +
+                    "</li>"));
             }
             $("#lstFiles").append(items);
         }
