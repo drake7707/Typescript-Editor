@@ -692,20 +692,57 @@ define(function (require, exports, module) {
             }
         }
 
+
+        var selectionRange = editor.getSelectionRange();
+        var startPos = aceEditorPosition.getChars(editor.session.doc, selectionRange.start);
+        var endPos = aceEditorPosition.getChars(editor.session.doc, selectionRange.end);
+
+        var refactorOptions = languageService.getApplicableRefactors(selectFileName + ".ts", {
+            pos: startPos,
+            end: endPos
+        });
+
+
         var items = {};
 
+        var cnt = 0;
         if (fixes.length > 0) {
             for (var i = 0; i < fixes.length; i++) {
-                items["item" + i] = {
+                items["item" + cnt] = {
                     name: fixes[i].description,
-                    codefix: fixes[i]
+                    codefix: fixes[i],
+                    sourceType: "codefix"
                 };
+                cnt++;
+            }
+        }
+
+        if (refactorOptions.length > 0) {
+            for (var i = 0; i < refactorOptions.length; i++) {
+
+                for (var j = 0; j < refactorOptions[i].actions.length; j++) {
+                    items["item" + cnt] = {
+                        name: refactorOptions[i].actions[j].description,
+                        refactor: {
+                            refactorName: refactorOptions[i].name,
+                            actionName: refactorOptions[i].actions[j].name
+                        },
+                        sourceType: "refactor"
+                    };
+                    cnt++;
+                }
+                
             }
         }
 
         return {
             callback: function (key, options) {
-                applyCodeFixWith(items[key].codefix);
+
+                if (items[key].sourceType == "codefix")
+                    applyCodeFixWith(items[key].codefix);
+                else if (items[key].sourceType == "refactor") {
+                    applyRefactorWith(items[key].refactor, startPos, endPos);
+                }
             },
             items: items
         };
@@ -715,29 +752,77 @@ define(function (require, exports, module) {
 
     function applyCodeFixWith(codeFix) {
         // sort by start position ? // TODO
+        var minmaxEditCharPos = {
+            min: Number.MAX_VALUE,
+            max: Number.MIN_VALUE
+        };
+
         for (var i = 0; i < codeFix.changes.length; i++) {
 
             var change = codeFix.changes[i];
+            applyTextChange(change, minmaxEditCharPos);
+        }
+        formatDocumentRange(minmaxEditCharPos.min, minmaxEditCharPos.max);
+    }
 
-            for (var j = 0; j < change.textChanges.length; j++) {
+    function applyRefactorWith(refactorData, startPos, endPos) {
 
-                if (change.textChanges[j].span.length == 0) {
-                    // insert
-                    var pos = aceEditorPosition.getAcePositionFromChars(change.textChanges[j].span.start);
-                    editor.getSession().getDocument().insert(pos, "\n" + change.textChanges[j].newText);
-                }
-                else {
-                    // replace
-                    var getpos = aceEditorPosition.getAcePositionFromChars;
-                    var start = aceEditorPosition.getAcePositionFromChars(change.textChanges[j].span.start);
-                    var end = aceEditorPosition.getAcePositionFromChars(change.textChanges[j].span.start + change.textChanges[j].span.length);
-                    var range = new AceRange(start.row, start.column, end.row, end.column);
-                    editor.session.replace(range, change.textChanges[j].newText);
+        var editInfo = languageService.getEditsForRefactor(selectFileName + ".ts", defaultFormatCodeOptions(), {
+            pos: startPos,
+            end: endPos
+        }, refactorData.refactorName, refactorData.actionName);
 
-                }
+        var minmaxEditCharPos = {
+            min: Number.MAX_VALUE,
+            max: Number.MIN_VALUE
+        };
+
+        for (var i = 0; i < editInfo.edits.length; i++) {
+
+            var change = editInfo.edits[i];
+            applyTextChange(change, minmaxEditCharPos);
+        }
+        formatDocumentRange(minmaxEditCharPos.min, minmaxEditCharPos.max);
+    }
+
+    function applyTextChange(change, minmaxEditCharPos) {
+
+        for (var j = change.textChanges.length - 1; j >= 0; j--) {
+
+            if (change.textChanges[j].span.length == 0) {
+                // insert
+                var pos = aceEditorPosition.getAcePositionFromChars(change.textChanges[j].span.start);
+                editor.getSession().getDocument().insert(pos, change.textChanges[j].newText);
             }
+            else {
+                // replace
+                var start = aceEditorPosition.getAcePositionFromChars(change.textChanges[j].span.start);
+                var end = aceEditorPosition.getAcePositionFromChars(change.textChanges[j].span.start + change.textChanges[j].span.length);
+                var range = new AceRange(start.row, start.column, end.row, end.column);
+                editor.session.replace(range, change.textChanges[j].newText);
+            }
+
+            if (minmaxEditCharPos.min > change.textChanges[j].span.start) minmaxEditCharPos.min = change.textChanges[j].span.start;
+            if (minmaxEditCharPos.max < change.textChanges[j].span.start) minmaxEditCharPos.max = change.textChanges[j].span.start;
+
+            if (minmaxEditCharPos.min > change.textChanges[j].span.start + Math.min(change.textChanges[j].span.length, change.textChanges[j].newText.length)) minmaxEditCharPos.min = change.textChanges[j].span.start + Math.min(change.textChanges[j].span.length, change.textChanges[j].newText.length);
+            if (minmaxEditCharPos.max < change.textChanges[j].span.start + Math.max(change.textChanges[j].span.length, change.textChanges[j].newText.length)) minmaxEditCharPos.max = change.textChanges[j].span.start + Math.max(change.textChanges[j].span.length, change.textChanges[j].newText.length);
         }
     }
+
+    function formatDocumentRange(minEditCharPos, maxEditCharPos) {
+        var textChanges = languageService.getFormattingEditsForRange(selectFileName + ".ts", minEditCharPos, maxEditCharPos, defaultFormatCodeOptions());
+        for (var i = textChanges.length - 1; i >= 0; i--) {
+
+            var textChange = textChanges[i];
+
+            var startPos = editor.getSession().getDocument().indexToPosition(textChange.span.start);
+            var endPos = editor.getSession().getDocument().indexToPosition(textChange.span.start + textChange.span.length);
+            var range = new AceRange(startPos.row, startPos.column, endPos.row, endPos.column);
+            editor.getSession().getDocument().replace(range, textChange.newText);
+        }
+    }
+
 
     function getPositionInTypescriptFromJavascript(linenr, col, sourcemap) {
         var lines = sourcemap.mappings.split(';');
