@@ -2,7 +2,6 @@
 ///   Just the ScriptInfo and the
 ///  TypeScriptLS classes.
 /// Notice the manual require calls for ./typescriptServices.
-///<reference path="typescriptServices.d.ts"/>
 
 define(function (require, exports, module) {
 
@@ -153,6 +152,15 @@ define(function (require, exports, module) {
                     return this.scripts[i].version;
                 }
             }
+        };
+
+        TypeScriptLS.prototype.fileExists = function (name) {
+            for (var i = 0; i < this.scripts.length; i++) {
+                if (this.scripts[i].name == name) {
+                    return true;
+                }
+            }
+            return false;
         };
 
 
