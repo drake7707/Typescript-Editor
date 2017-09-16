@@ -1,5 +1,5 @@
 # Typescript-Editor
-Scratchpad for testing out typescript 2.1.4 snippets
+Scratchpad for testing out typescript 2.5.2 snippets
 
 Test it out on: http://drake7707.github.io/Typescript-Editor/ (it will download an example if it's not available in the local storage)
 
