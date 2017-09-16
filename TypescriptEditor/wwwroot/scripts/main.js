@@ -2073,10 +2073,8 @@ define(function (require, exports, module) {
         Business logic to start from a new document, load, save and create a milestone.
         All the REST interactions are grouped together in the RestServices class.
     */
-
-
-
-    var restService = new LocalRestServices();
+    // use local storage if it's loaded from github.io
+    var restService = window.location.host.indexOf("github") == -1 ? new RestServices() : new LocalRestServices();
 
     var ignoreHash = false;
     var oldHash;
@@ -2364,7 +2362,7 @@ define(function (require, exports, module) {
     }
 
     function saveFile() {
-        restService.saveFile(selectFileName, editorHTML.getValue(), editorCSS.getValue(), editor.getValue(), function onSucces() {
+        restService.saveFile(selectFileName, selectMilestone, editorHTML.getValue(), editorCSS.getValue(), editor.getValue(), function onSucces() {
             editor.session.getUndoManager().markClean();
             editorHTML.session.getUndoManager().markClean();
             editorCSS.session.getUndoManager().markClean();
@@ -2390,14 +2388,14 @@ define(function (require, exports, module) {
 
     function RestServices() {
         var self = this;
-        var restBaseUrl = "/typescripteditorapi/";
+        var restBaseUrl = "api/repo/";
 
         function newFile() {
             $.post(restBaseUrl + "newFile", function (resp) {
-                if (resp.Success) {
+                if (resp.success) {
                     //resp.Result.Name
-                    loadInEditors(resp.Result.Name, resp.Result.Milestone, resp.Result.HTML, resp.Result.CSS, resp.Result.Typescript);
-                    setHash(resp.Result.Name + "-" + resp.Result.Milestone);
+                    loadInEditors(resp.result.name, resp.result.milestone, resp.result.html, resp.result.css, resp.result.typescript);
+                    setHash(resp.result.name + "-" + resp.result.milestone);
                 }
                 else {
                     showNotification("Unable to create new file", "error");
@@ -2412,12 +2410,12 @@ define(function (require, exports, module) {
             if (typeof (milestone) == "undefined")
                 milestone = -1;
 
-            $.post(restBaseUrl + "loadFile", { file: file, milestone: milestone }, function (resp) {
-                if (resp.Success) {
+            $.get(restBaseUrl + "loadFile", { file: file, milestone: milestone }, function (resp) {
+                if (resp.success) {
 
-                    loadInEditors(resp.Result.Name, resp.Result.Milestone, resp.Result.HTML, resp.Result.CSS, resp.Result.Typescript, resp.Result.Description);
-                    setHash(resp.Result.Name + "-" + resp.Result.Milestone);
-                    showNotification("Loaded " + resp.Result.Name + " successfully", "info");
+                    loadInEditors(resp.result.name, resp.result.milestone, resp.result.html, resp.result.css, resp.result.typescript, resp.result.description);
+                    setHash(resp.result.name + "-" + resp.result.milestone);
+                    showNotification("Loaded " + resp.result.name + " successfully", "info");
                 }
                 else {
                     showNotification("Unable to load file", "error");
@@ -2427,19 +2425,19 @@ define(function (require, exports, module) {
         self.loadFile = loadFile;
 
         function listFiles() {
-            $.post(restBaseUrl + "listFiles", function (resp) {
-                if (resp.Success) {
+            $.get(restBaseUrl + "listFiles", function (resp) {
+                if (resp.success) {
                     $("#lstFiles").empty();
                     var items = [];
-                    for (var i = 0; i < resp.Result.length; i++) {
-                        items.push($("<li class='list-group-item item' data-name='" + resp.Result[i].Name + "'>" +
+                    for (var i = 0; i < resp.result.length; i++) {
+                        items.push($("<li class='list-group-item item' data-name='" + resp.result[i].name + "'>" +
                             "<a href='#'>" +
-                            resp.Result[i].Name +
-                            "<span class='lnkDelete pull-right' data-name='" + resp.Result[i].Name + "'><i class='icon-remove'></i></span>" +
-                            "<span class='badge pull-right'>" + resp.Result[i].Milestone + "</span>" +
-                            "<span class='date pull-right'>" + resp.Result[i].LastUpdated + "</span>" +
+                            resp.result[i].name +
+                            "<span class='lnkDelete pull-right' data-name='" + resp.result[i].name + "'><i class='icon-remove'></i></span>" +
+                            "<span class='badge pull-right'>" + resp.result[i].milestone + "</span>" +
+                            "<span class='date pull-right'>" + resp.result[i].lastUpdated + "</span>" +
                             "<br/>" +
-                            "<span class='description'>" + resp.Result[i].Description + "</span>" +
+                            "<span class='description'>" + resp.result[i].description + "</span>" +
                             "</a>" +
                             "</li>"));
                     }
@@ -2452,22 +2450,23 @@ define(function (require, exports, module) {
         }
         self.listFiles = listFiles;
 
-        function saveFile(name, html, css, typescript, onSuccess) {
+        function saveFile(name, milestone, html, css, typescript, onSuccess) {
             var file = {
                 name: name,
+                milestone:milestone,
                 html: html,
                 css: css,
                 typescript: typescript,
                 output: getOutputHTML(true)
             };
             $.post(restBaseUrl + "saveFile", file, function (resp) {
-                if (resp.Success) {
+                if (resp.success) {
                     // show notification saved
                     showNotification("Saved successfully", "info");
                     onSuccess();
                 }
                 else {
-                    showNotification("Unable to save", "error");
+                    showNotification("Unable to save, " + resp.message, "error");
                 }
             }).fail(function () {
                 showNotification("Unable to save", "error");
@@ -2478,9 +2477,9 @@ define(function (require, exports, module) {
 
         function deleteFile(name, onsuccess) {
             $.post(restBaseUrl + "deleteMilestone", { name: name }, function (resp) {
-                if (resp.Success) {
+                if (resp.success) {
                     if (typeof onsuccess !== "undefined") {
-                        onsuccess(resp.Result);
+                        onsuccess(resp.result);
                     }
                 }
                 else {
@@ -2502,11 +2501,12 @@ define(function (require, exports, module) {
                 comments: comments
             };
             $.post(restBaseUrl + "createMilestone", file, function (resp) {
-                if (resp.Success) {
+                if (resp.success) {
                     // resp.Result.Milestone
-                    updateHeader(resp.Result.Name, resp.Result.Milestone, resp.Result.Description);
-                    setHash(resp.Result.Name + "-" + resp.Result.Milestone);
-                    showNotification("Milestone " + resp.Result.Milestone + " created", "info");
+                    updateHeader(resp.result.name, resp.result.milestone, resp.result.description);
+                    selectMilestone = resp.result.milestone;
+                    setHash(resp.result.name + "-" + resp.result.milestone);
+                    showNotification("Milestone " + resp.result.milestone + " created", "info");
                 }
                 else {
                     showNotification("Unable to create milestone", "error");
@@ -2519,7 +2519,7 @@ define(function (require, exports, module) {
 
         function updateDescription(name, description) {
             $.post(restBaseUrl + "updateDescription", { name: name, description: description }, function (resp) {
-                if (resp.Success) {
+                if (resp.success) {
 
                     showNotification("Description updated", "info");
                     $("#txtHeaderDescription").text(description);
@@ -2787,7 +2787,7 @@ define(function (require, exports, module) {
             }
         }
 
-        function saveFile(name, html, css, typescript, onSuccess) {
+        function saveFile(name, milestone, html, css, typescript, onSuccess) {
             try {
                 createEntryIfNotExists(name);
                 var entries = loadObj("entries");

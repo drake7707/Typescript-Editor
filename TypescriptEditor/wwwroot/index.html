@@ -1,0 +1,361 @@
+﻿<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Typescript editor</title>
+    <meta name="description" content="Typescript editor" />
+    <meta>
+
+    <link id="cssBootstrap" type="text/css" rel="stylesheet" href="stylesheets/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="stylesheets/style.css" />
+
+    <link type="text/css" rel="stylesheet" href="stylesheets/goldenlayout-base.css" />
+    <link type="text/css" rel="stylesheet" id="goldenLayoutTheme" href="stylesheets/goldenlayout-light-theme.css" />
+    <link type="text/css" rel="stylesheet" href="stylesheets/perfect-scrollbar.css" />
+    <link type="text/css" rel="stylesheet" href="stylesheets/jquery.contextMenu.css" />
+
+</head>
+<body>
+    <div class="notification">
+        <span id="lblNotification"></span>
+    </div>
+
+    <div class="ltable fluid-container stretch">
+        <div class="lrow">
+            <div class="lcell">
+                <div class="btn-toolbar">
+
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="icon-home"></i> File
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="" href="" id="lnkNew" data-shortcut="ctrl+n">
+                                    <i class="icon-star"></i> New
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkOpen" data-shortcut="ctrl+o">
+                                    <i class="icon-folder-open"></i> Open
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkSave" data-shortcut="ctrl+s">
+                                    <i class="icon-hdd"></i> Save
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkCreateMilestone" data-shortcut="ctrl+m">
+                                    <i class="icon-tag"></i> New milestone
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkDownload">
+                                    <i class="icon-download-alt"></i>Download
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkExportToProject">
+                                    <i class="icon-download-alt"></i>Export to project
+                                </a>
+                            </li>
+                            <!--<li>
+                                <a class="" href="" id="lnkCreateGist">
+                                    <i class="icon-share"></i>Create gist on github
+                                </a>
+                            </li>-->
+                        </ul>
+                    </div>
+
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="icon-th"></i> View
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="" href="" id="lnkViewHTML" data-shortcut="ctrl+0">
+                                    <i class="icon-list-alt"></i> HTML
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkViewCSS" data-shortcut="ctrl+1">
+                                    <i class="icon-list-alt"></i> CSS
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkViewTypescript" data-shortcut="ctrl+2">
+                                    <i class="icon-list-alt"></i> Typescript
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkViewJavascript" data-shortcut="ctrl+3">
+                                    <i class="icon-list-alt"></i> Javascript
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkViewConsole" data-shortcut="ctrl+4">
+                                    <i class="icon-list-alt"></i> Console
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkViewErrors" data-shortcut="ctrl+5">
+                                    <i class="icon-list-alt"></i> Errors
+                                </a>
+                            </li>
+                            <li>
+                                <a class="" href="" id="lnkViewTasks" data-shortcut="ctrl+8">
+                                    <i class="icon-list-alt"></i> Tasks
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkViewOutput" data-shortcut="ctrl+6">
+                                    <i class="icon-list-alt"></i> Output
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkViewNavigationTree" data-shortcut="ctrl+7">
+                                    <i class="icon-list-alt"></i> Navigation Tree
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="" href="" id="lnkResetLayoutToDefault">
+                                    <i class="icon-list-alt"></i> Reset layout to default
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!--
+                    <div class="btn-group">
+                        <a class="btn" href="" id="lnkNew">
+                            <i class="icon-star"></i> New
+                        </a>
+                        <a class="btn" href="" id="lnkOpen">
+                            <i class="icon-folder-open"></i> Open
+                        </a>
+                        <a class="btn" href="" id="lnkSave">
+                            <i class="icon-hdd"></i> Save
+                        </a>
+                        <a class="btn" href="" id="lnkCreateMilestone">
+                            <i class="icon-tag"></i> New milestone
+                        </a>
+                        <a class="btn" href="" id="lnkDownload">
+                            <i class="icon-download-alt"></i>Download
+                        </a>
+                    </div>
+                        -->
+                    <div class="btn-group">
+                        <a class="btn" href="#" id="lnkShortcuts" data-toggle="modal" data-target="#modalShortcuts">
+                            <i class="icon-info-sign"></i> Shortcuts
+                        </a>
+                    </div>
+
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="icon-book"></i> Libraries
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a tabindex="-1" class="libLink" href="#" data-js="http://code.jquery.com/jquery-1.11.0.min.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/jquery/index.d.ts">JQuery</a></li>
+                            <li><a tabindex="-1" class="libLink" href="#" data-js="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js" data-css="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.min.css" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/jqueryui/index.d.ts">JQuery UI</a></li>
+                            <!--<li><a tabindex="-1" class="libLink" href="#" data-js="https://cdnjs.cloudflare.com/ajax/libs/linq.js/2.2.0.2/jquery.linq.min.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/linq/linq.jquery.d.ts">LINQJS</a></li>-->
+                            <li class="divider"></li>
+                            <li><a tabindex="-1" class="libLink" href="#" data-js="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js" data-css="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/bootstrap/index.d.ts">Bootstrap</a></li>
+                            <li class="divider"></li>
+                            <li><a tabindex="-1" class="libLink" href="#" data-js="http://ajaxorg.github.io/ace-builds/src-noconflict/ace.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/ace/index.d.ts">Ace editor</a></li>
+                        </ul>
+                    </div>
+                    <div class="btn-group">
+                        <a class="btn" href="#" id="lnkToggleTheme">
+                            <i class="icon-adjust"></i> &nbsp;
+                        </a>
+                    </div>
+                    <div class="btn-group">
+                        <h4>TypeScript Editor <span id="lblFilename"></span></h4>
+                        <p><span id="txtHeaderDescription"></span><a id="lnkUpdateDescription" href="#" title="Edit description of current file"><i class="icon-pencil"></i></a></p>
+                    </div>
+                    <div class="btn-group pull-right">
+                        <!--<label><input type="checkbox" id="chkRunJavascript" />Run javascript in output pane</label>-->
+                        <button type="button" class="btn" data-toggle="button" id="chkMoveCursorToError">
+                            <i class="icon-arrow-right"></i> Jump to line on error
+                        </button>
+                        <button type="button" class="btn" data-toggle="button" id="chkRunJavascript">
+                            <i class="icon-cog"></i> Enable js in output pane
+                        </button>
+                        <a class="btn" href="#" id="lnkRunExternalWindow">
+                            <i class="icon-play"></i> Open seperate window
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="lrow stretch-v">
+            <div id="elementParking" style="display:none">
+                <!-- parking for unusued elements -->
+                <div id="editorHTML"></div>
+                <div id="editorCSS"></div>
+                <div id="navigationTree" class="typescript-navigation">
+                    <div>
+                        <div style="margin-left:40px">
+                            <input type="text" id="txtNavTreeFilter" placeholder="Filter..." />
+                        </div>
+
+                        <div class="button-icon" id="btnExpandAllNavTree"></div>
+                        <div class="button-icon" id="btnCollapseAllNavTree"></div>
+
+                    </div>
+                    <div style="position:relative;clear:both">
+                        <ul class="css-treeview" id="navTree" style="position:absolute"></ul>
+                        <ul class="css-treeview" id="navTreeSearch" style="position:absolute"></ul>
+                    </div>
+                </div>
+                <div id="typescriptContainer" style="height:100%">
+                    <div id="quickInfo"></div>
+                    <div id="editorTypescript">
+                    </div>
+                </div>
+                
+                <div id="editorJavascript">
+                </div>
+                <div id="outputFrame">
+                    <iframe id="outputIFrame"></iframe>
+                </div>
+                <div id="consoleContainer">
+                    <div id="btnClearConsole"><i class="icon-trash" title="Clear console log"></i></div>
+                    <div class="console" id="txtConsole">
+                    </div>
+                </div>
+                <div id="taskContainer">
+                    <div class="tasks" id="txtTasks">
+                    </div>
+                </div>
+
+                <div class="errors" id="txtErrors">
+                    <div class="error-bar" id="errorsTypescript">
+                    </div>
+                </div>
+            </div>
+
+            <div class="lcell" id="goldenLayoutContainer">
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="modalFiles" class="modal fade" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Available files</h4>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs nav-stacked" id="lstFiles"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <!--<button type="button" id="btnLoadFile"class="btn btn-primary"></button>-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="modalUpdateDescription" class="modal fade" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Update description</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="txtDescription" style="width:100%" placeholder=" description..">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="btnUpdateDescription" class="btn btn-primary">Update description</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalCreateMilestone" class="modal fade" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Create a new milestone</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="txtMilestoneComments" style="width:100%" placeholder="Comments..">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="btnCreateMilestone" class="btn btn-primary">Create milestone</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="modalShortcuts" class="modal fade" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Available shortcuts</h4>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        <li>[Ctrl-Space] : AutoComplete</li>
+                        <li>[Ctrl-.] or [Ctrl-;] : Apply code fix if available</li>
+                        <li>[F2] : Rename (TS only)</li>
+                        <li>[Ctrl-D] : Format document</li>
+                        <li>[F12] : Go to definition (TS only)</li>
+                        <li>[Shift-F12] : Go back to previous position (TS only)</li>
+                        <li>[Alt-0] : Fold all</li>
+                        <li>[Alt-Shift-0] : Unfold all</li>
+                        <li>[Ctrl-/] : Comment/uncomment line</li>
+                        <li>[Ctrl-Alt-Up/Down] : Multiple cursors</li>
+                        <hr />
+                        <li>[Ctrl-N] : New</li>
+                        <li>[Ctrl-O] : Open</li>
+                        <li>[Ctrl-S] : Save</li>
+                        <li>[Ctrl-M] : New milestone</li>                        
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var require = {
+            // The base path for all require calls. If this is absent it is assumed to be same as the location of require.js
+            baseUrl: window.location.protocol + "//" + window.location.host + window.location.pathname.split("/").slice(0, -1).join("/") + '/scripts',
+            paths: {
+                ace: "./lib/ace" // path of ace relative to baseUrl
+            }
+        };
+    </script>
+    <script type="text/javascript" src="./scripts/lib/jquery.js"></script>
+    <script type="text/javascript" src="./scripts/lib/jquery.contextMenu.js"></script>
+    <script type="text/javascript" src="./scripts/lib/bootstrap.js"></script>
+    <script type="text/javascript" src="./scripts/lib/goldenlayout.js"></script>
+    <script type="text/javascript" src="./scripts/lib/perfect-scrollbar.js"></script>
+    <script type="text/javascript" src="./scripts/lib/perfect-scrollbar.jquery.js"></script>
+
+    <script type="text/javascript" src="./scripts/lib/require.js" data-main="main"></script>
+</body>
+</html>
