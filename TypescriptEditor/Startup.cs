@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace TypescriptEditor
 {
@@ -37,7 +38,14 @@ namespace TypescriptEditor
                 app.UseDeveloperExceptionPage();
             }
             app.UseDefaultFiles();
-            app.UseStaticFiles();
+
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings[".snippets"] = "text/plain";
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                ContentTypeProvider = provider
+            });
+            
             app.UseMvc();
         }
     }
