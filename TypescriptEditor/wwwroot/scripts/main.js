@@ -1194,6 +1194,16 @@ define(function (require, exports, module) {
         });
     }
 
+    function setCompilerOptions(compilerOptions) {
+        var params = {
+            data: {
+                compilerOptions: JSON.stringify(compilerOptions),
+            }
+        };
+        editor.getSession().$worker.emit("setCompilerOptions", params);
+        typeScriptLS.setCompilerOptions(compilerOptions);
+    }
+
     function initEditorShortcuts() {
         editor.commands.addCommands([{
             name: "autoComplete",
@@ -2301,6 +2311,35 @@ define(function (require, exports, module) {
 
         $("#btnClearConsole").click(function (ev) {
             clearConsoleLog();
+        });
+
+        $("#lnkEditCompilerOptions").click(function (ev) {
+
+            var compilerOptions = typeScriptLS.getCompilationSettings();
+            var chks = $("#pnlCompilerOptions input");
+            for (var i = 0; i < chks.length; i++) {
+                var propName = $(chks[i]).attr("data-property");
+                $(chks[i]).prop("checked", compilerOptions[propName]);
+            }
+
+            typeScriptLS.setCompilerOptions(compilerOptions);
+
+            $('#modalCompilerOptions').modal();
+            ev.preventDefault();
+            return true;
+        });
+
+        $("#btnApplyCompilerOptions").click(function (ev) {
+            $('#modalCompilerOptions').modal('hide');
+
+            var compilerOptions = typeScriptLS.getCompilationSettings();
+            var chks = $("#pnlCompilerOptions input");
+            for (var i = 0; i < chks.length; i++) {
+                var propName = $(chks[i]).attr("data-property");
+                var val = $(chks[i]).prop("checked");
+                compilerOptions[propName] = val;
+            }
+            setCompilerOptions(compilerOptions);
         });
 
         $(window).bind('keydown', function (event) {

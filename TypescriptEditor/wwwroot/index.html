@@ -25,7 +25,7 @@
                 <div class="btn-toolbar">
 
                     <div class="btn-group">
-                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="">
                             <i class="icon-home"></i> File
                             <span class="caret"></span>
                         </a>
@@ -71,11 +71,17 @@
                     </div>
 
                     <div class="btn-group">
-                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="">
                             <i class="icon-th"></i> View
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
+                            <li>
+                                <a class="btn" href="" id="lnkToggleTheme">
+                                    <i class="icon-adjust"></i> Toggle dark/light theme
+                                </a>
+                            </li>
+                            <li class="divider"></li>
                             <li>
                                 <a class="" href="" id="lnkViewHTML" data-shortcut="ctrl+0">
                                     <i class="icon-list-alt"></i> HTML
@@ -153,34 +159,34 @@
                     </div>
                         -->
                     <div class="btn-group">
-                        <a class="btn" href="#" id="lnkShortcuts" data-toggle="modal" data-target="#modalShortcuts">
+                        <a class="btn" href="" id="lnkShortcuts" data-toggle="modal" data-target="#modalShortcuts">
                             <i class="icon-info-sign"></i> Shortcuts
                         </a>
                     </div>
 
                     <div class="btn-group">
-                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="">
                             <i class="icon-book"></i> Libraries
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a tabindex="-1" class="libLink" href="#" data-js="http://code.jquery.com/jquery-1.11.0.min.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/jquery/index.d.ts">JQuery</a></li>
-                            <li><a tabindex="-1" class="libLink" href="#" data-js="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js" data-css="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.min.css" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/jqueryui/index.d.ts">JQuery UI</a></li>
-                            <!--<li><a tabindex="-1" class="libLink" href="#" data-js="https://cdnjs.cloudflare.com/ajax/libs/linq.js/2.2.0.2/jquery.linq.min.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/linq/linq.jquery.d.ts">LINQJS</a></li>-->
+                            <li><a tabindex="-1" class="libLink" href="" data-js="https://code.jquery.com/jquery-1.11.0.min.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/jquery/index.d.ts">JQuery</a></li>
+                            <li><a tabindex="-1" class="libLink" href="" data-js="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js" data-css="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.min.css" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/jqueryui/index.d.ts">JQuery UI</a></li>
+                            <!--<li><a tabindex="-1" class="libLink" href="" data-js="https://cdnjs.cloudflare.com/ajax/libs/linq.js/2.2.0.2/jquery.linq.min.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/linq/linq.jquery.d.ts">LINQJS</a></li>-->
                             <li class="divider"></li>
-                            <li><a tabindex="-1" class="libLink" href="#" data-js="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js" data-css="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/bootstrap/index.d.ts">Bootstrap</a></li>
+                            <li><a tabindex="-1" class="libLink" href="" data-js="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js" data-css="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/bootstrap/index.d.ts">Bootstrap</a></li>
                             <li class="divider"></li>
-                            <li><a tabindex="-1" class="libLink" href="#" data-js="http://ajaxorg.github.io/ace-builds/src-noconflict/ace.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/ace/index.d.ts">Ace editor</a></li>
+                            <li><a tabindex="-1" class="libLink" href="" data-js="https://ajaxorg.github.io/ace-builds/src-noconflict/ace.js" data-css="" data-ts="https://cdn.rawgit.com/borisyankov/DefinitelyTyped/master/types/ace/index.d.ts">Ace editor</a></li>
                         </ul>
                     </div>
                     <div class="btn-group">
-                        <a class="btn" href="#" id="lnkToggleTheme">
-                            <i class="icon-adjust"></i> &nbsp;
+                        <a class="btn" href="" id="lnkEditCompilerOptions">
+                            <i class="icon-wrench"></i> Settings
                         </a>
                     </div>
                     <div class="btn-group">
                         <h4>TypeScript Editor <span id="lblFilename"></span></h4>
-                        <p><span id="txtHeaderDescription"></span><a id="lnkUpdateDescription" href="#" title="Edit description of current file"><i class="icon-pencil"></i></a></p>
+                        <p><span id="txtHeaderDescription"></span><a id="lnkUpdateDescription" href="" title="Edit description of current file"><i class="icon-pencil"></i></a></p>
                     </div>
                     <div class="btn-group pull-right">
                         <!--<label><input type="checkbox" id="chkRunJavascript" />Run javascript in output pane</label>-->
@@ -190,7 +196,7 @@
                         <button type="button" class="btn" data-toggle="button" id="chkRunJavascript">
                             <i class="icon-cog"></i> Enable js in output pane
                         </button>
-                        <a class="btn" href="#" id="lnkRunExternalWindow">
+                        <a class="btn" href="" id="lnkRunExternalWindow">
                             <i class="icon-play"></i> Open seperate window
                         </a>
                     </div>
@@ -339,6 +345,44 @@
             </div>
         </div>
     </div>
+
+    <div id="modalCompilerOptions" class="modal fade"> <!--style="display: none;">-->
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Compiler options</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group" id="pnlCompilerOptions">
+                        <div class="checkbox">
+                            <label><input type="checkbox" data-property="noImplicitReturns">No implicit returns</label>
+                        </div>
+                        <div class="checkbox">
+                            <label><input type="checkbox" data-property="allowUnreachableCode">Allow unreachable code</label>
+                        </div>
+                        <div class="checkbox">
+                            <label><input type="checkbox" data-property="noFallthroughCasesInSwitch">No falltrough cases in switch</label>
+                        </div>
+                        <div class="checkbox">
+                            <label><input type="checkbox" data-property="noImplicitAny">No implicit any</label>
+                        </div>
+                        <div class="checkbox">
+                            <label><input type="checkbox" data-property="strictNullChecks">Strict null checks</label>
+                        </div>
+                        <div class="checkbox">
+                            <label><input type="checkbox" data-property="strictFunctionTypes">Strict function types</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" id="btnApplyCompilerOptions" class="btn btn-primary" data-dismiss="modal">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script type="text/javascript">
         var require = {

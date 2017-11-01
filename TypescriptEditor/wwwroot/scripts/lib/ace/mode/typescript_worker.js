@@ -62,6 +62,12 @@ define(function (require, exports, module) {
             self.addlibrary(e.data.name, e.data.content);
         });
 
+        sender.on("setCompilerOptions", function (e) {
+            var options = JSON.parse(e.data.compilerOptions);
+            self.setCompilerOptions(options);
+        });
+
+
         this.setOptions();
         sender.emit("initAfter");
     };
@@ -81,6 +87,11 @@ define(function (require, exports, module) {
 
         this.addlibrary = function (name, content) {
             this.typeScriptLS.addScript(name, content.replace(/\r\n?/g, "\n"), true);
+        };
+
+        this.setCompilerOptions = function (compilerOptions) {
+            this.typeScriptLS.setCompilerOptions(compilerOptions);
+            this.onUpdate();
         };
 
         this.getCompletionsAtPosition = function (fileName, pos, isMemberCompletion, id) {

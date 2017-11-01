@@ -53,7 +53,25 @@ define(function (require, exports, module) {
             this.scripts = [];
             this.maxScriptVersions = 100;
             this.resolvedUrls = {};
+
+            this.compilerOptions = this.getDefaultCompilerOptions();
         }
+
+        TypeScriptLS.prototype.getDefaultCompilerOptions = function () {
+            var settings = ts.getDefaultCompilerOptions();
+            settings.removeComments = false;
+            settings.noImplicitReturns = true;
+            settings.noFallthroughCasesInSwitch = true;
+            settings.allowUnreachableCode = true;
+            settings.sourceMap = true;
+            settings.preserveConstEnums = true;
+            settings.emitDecoratorMetadata = true;
+            settings.experimentalDecorators = true;
+            settings.noImplicitAny = true;
+            //settings.strictNullChecks = true;
+            settings.lib = ["dom", "es15", "es2015.promise"];
+            return settings;
+        };
 
         TypeScriptLS.prototype.addFile = function (name, isResident) {
             if (typeof isResident === "undefined") { isResident = false; }
@@ -237,17 +255,11 @@ define(function (require, exports, module) {
         };
 
         TypeScriptLS.prototype.getCompilationSettings = function () {
-            var settings = ts.getDefaultCompilerOptions();
-            settings.removeComments = false;
-            settings.noImplicitReturns = true;
-            settings.noFallthroughCasesInSwitch = true;
-            settings.allowUnreachableCode = true;
-            settings.sourceMap = true;
-            settings.preserveConstEnums = true;
-            settings.emitDecoratorMetadata = true;
-            settings.experimentalDecorators = true;
-            settings.lib = ["dom", "es15", "es2015.promise"];
-            return settings;
+            return this.compilerOptions;
+        };
+
+        TypeScriptLS.prototype.setCompilerOptions = function (compilerOptions) {
+            this.compilerOptions = compilerOptions;
         };
 
         return TypeScriptLS;
