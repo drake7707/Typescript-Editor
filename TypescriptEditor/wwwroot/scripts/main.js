@@ -216,43 +216,10 @@ define(function (require, exports, module) {
         for (var i = 0; i < checkedNavs.length; i++)
             expandedItems[checkedNavs[i].id] = true;
 
-        var nodes = languageService.getNavigationBarItems(selectFileName + ".ts");
+        var rootNode = languageService.getNavigationTree(selectFileName + ".ts");
 
         var html = "";
-
-        var moduleNodes = [];
-
-        var hierarchicalNodes = [];
-        for (var i = 0; i < nodes.length; i++) {
-
-            if (nodes[i].kind == "module" || nodes[i].kind == "script") {
-                moduleNodes[nodes[i].indent] = nodes[i];
-            }
-
-            if (nodes[i].indent > 0) {
-                var m = moduleNodes[nodes[i].indent - 1];
-                if (typeof m !== "undefined") {
-
-                    var pos = m.childItems.length;
-                    for (var k = 0; k < m.childItems.length; k++) {
-                        if (m.childItems[k].text == nodes[i].text) {
-                            pos = k;
-                            break;
-                        }
-                    }
-                    m.childItems[pos] = nodes[i];
-                }
-            }
-            else
-                hierarchicalNodes.push(nodes[i]);
-        }
-
-        for (var i = 0; i < hierarchicalNodes.length; i++) {
-            var node = hierarchicalNodes[i];
-            html += getNavigationListItemsFromNode(node, node.text, expandedItems);
-        }
-
-
+        html += getNavigationListItemsFromNode(rootNode, rootNode.text, expandedItems, undefined, 0);
 
         $("#navTree").empty().html(html);
 
@@ -341,13 +308,20 @@ define(function (require, exports, module) {
         }
     }
 
-    function getNavigationListItemsFromNode(node, path, expandedItems, appendChildrenHtml) {
+    function getNavigationListItemsFromNode(node, path, expandedItems, appendChildrenHtml, depth) {
+        if (depth > 20) {
+            // stop recursion to prevent hang
+            return "";
+        }
+
         var id = encodeURI(path + "." + node.text);
 
         var childrenHtml = "";
 
-        for (var i = 0; i < node.childItems.length; i++) {
-            childrenHtml += getNavigationListItemsFromNode(node.childItems[i], id, expandedItems);
+        if (typeof node.childItems !== "undefined") {
+            for (var i = 0; i < node.childItems.length; i++) {
+                childrenHtml += getNavigationListItemsFromNode(node.childItems[i], id, expandedItems, undefined, depth + 1);
+            }
         }
 
         if (typeof appendChildrenHtml !== "undefined")
