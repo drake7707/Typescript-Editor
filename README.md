@@ -1,12 +1,12 @@
 # Typescript-Editor
-Scratchpad for testing out typescript 2.5.2 snippets
+Scratchpad for testing out typescript 2.6.1 snippets
 
 Test it out on: http://drake7707.github.io/Typescript-Editor/ (it will download an example if it's not available in the local storage)
 
 The entries are currently saved to window.localStorage (HTML5 storage) so it's completely client side. 
 I initially wrote a server side to run on my rpi and save the entries in a database and store the output of the seperate editors milestone per milestone in a repo directory, which is why you'll find the RestServices class in main.js
 
-If you want to persist things more safely you should probably create a small serverside REST api that handles the new, save, load, etc. but for demonstration purposes localStorage works fine.
+If you want to persist things more safely and have everything accessible cross browser you can host the dotnetcore server project to save entries to a folder/sqlite database.
 
 --
 
