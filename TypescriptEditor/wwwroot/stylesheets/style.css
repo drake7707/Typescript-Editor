@@ -417,7 +417,7 @@ body {
     background-image: url('./icons/field.png');
 }
 
-.label-kind-snippet {
+.label-kind-script, .label-kind-snippet {
     background-image: url('./icons/snippet.png');
 }
 
@@ -531,6 +531,9 @@ body {
     cursor: pointer;
 }
 
+#navTree {
+    width:100%;
+}
 .navItem {
     background-repeat: no-repeat;
     background-position: 0px 3px;
@@ -542,8 +545,7 @@ body {
     }
 
     .navItem.selected {
-        font-weight: bold;
-        background-color: rgb(240,240,240);
+        font-weight: 600;
     }
 
 .dark .navItem.selected {

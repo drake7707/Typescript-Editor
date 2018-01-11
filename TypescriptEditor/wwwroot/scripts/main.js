@@ -53,6 +53,7 @@ define(function (require, exports, module) {
     var libnames = [
         "typescripts/lib.d.ts",
         "typescripts/lib.es2015.promise.d.ts",
+        "typescripts/lib.es2015.iterable.d.ts",
         "typescripts/jquery.d.ts"
     ];
 
@@ -268,6 +269,7 @@ define(function (require, exports, module) {
         _oldNavItemPos = curPos;
         var navItems = $("#navTree .navItem");
         navItems.removeClass("selected");
+        $("#navTree .navListItem").removeClass("selected");
 
         var smallestLengthNavItem = null;
         var smallestLength = Number.MAX_VALUE;
@@ -279,8 +281,15 @@ define(function (require, exports, module) {
                     smallestLengthNavItem = i;
             }
         }
-        if (smallestLengthNavItem != null)
+        if (smallestLengthNavItem != null) {
             $(navItems[smallestLengthNavItem]).addClass("selected");
+
+            // select all navItems on the path to the root as well
+            var parentItems = $(navItems[smallestLengthNavItem]).parents(".navListItem");
+            for (var i = 0; i < parentItems.length; i++) {
+                $(parentItems[i]).children("label").children(".navItem").addClass("selected");
+            }
+        }
         //   else
         //       console.log("Nav tree item not found for current position");
     }
@@ -356,7 +365,7 @@ define(function (require, exports, module) {
 
         var padding = node.indent * 20;
         if (childrenHtml.length > 0) {
-            html = '<li data-start="' + start + '" data-length="' + length + '">' +
+            html = '<li class="navListItem" data-start="' + start + '" data-length="' + length + '">' +
                 '<input type="checkbox" class="navCheck" id="' + id + '" ' + checked + ' />' +
                 '<label for="' + id + '">' +
                 span + overlay +
@@ -365,7 +374,7 @@ define(function (require, exports, module) {
                 '</li>';
         }
         else {
-            html = '<li class="leaf" data-start="' + start + '" data-length="' + length + '">' +
+            html = '<li class="navListItem leaf" data-start="' + start + '" data-length="' + length + '">' +
                 '<input type="checkbox" class="navCheck" style="visbility:hidden" id="' + id + '" ' + checked + ' />' +
                 '<label for="' + id + '">' +
                 span + overlay +

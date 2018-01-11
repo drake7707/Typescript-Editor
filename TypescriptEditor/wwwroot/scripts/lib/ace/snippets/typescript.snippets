@@ -59,12 +59,8 @@ snippet ptfunc
 #property with get and set
 snippet prop
 	private _${1:field_name}: ${2:field_type};
-	get $1(): $2 {
-		return this._$1;
-	}
-	set $2(value: $2) {
-		this._$1 = value;
-	}
+	get $1(): $2 { return this._$1;	}
+	set $1(value: $2) {	this._$1 = value; }
 #
 #
 ################# LOGIC CONSTRUCTS
