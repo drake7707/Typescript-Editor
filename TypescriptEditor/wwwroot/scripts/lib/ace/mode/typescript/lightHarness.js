@@ -193,9 +193,7 @@ define(function (require, exports, module) {
         TypeScriptLS.prototype.getScriptIsOpen = function () {
             return true;
         };
-        TypeScriptLS.prototype.getDefaultLibFileName = function (options) {
-            return "lib";
-        };
+     
 
 
 
@@ -230,7 +228,6 @@ define(function (require, exports, module) {
             return "\n";
         };
 
-
         TypeScriptLS.prototype.getScriptContent = function (scriptIndex) {
             return this.scripts[scriptIndex].content;
         };
@@ -261,6 +258,17 @@ define(function (require, exports, module) {
         TypeScriptLS.prototype.setCompilerOptions = function (compilerOptions) {
             this.compilerOptions = compilerOptions;
         };
+
+
+        TypeScriptLS.prototype.getDefaultLibLocation = function () {
+            return "typescripts";
+        }
+
+        TypeScriptLS.prototype.getDefaultLibFileName = function (options) {
+            return "typescripts/lib.d.ts";
+        }
+        
+
 
         return TypeScriptLS;
     })();

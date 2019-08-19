@@ -52,8 +52,20 @@ define(function (require, exports, module) {
 
     var libnames = [
         "typescripts/lib.d.ts",
+        "typescripts/lib.es5.d.ts",
+        "typescripts/lib.dom.d.ts",
+        "typescripts/lib.webworker.importscripts.d.ts",
+        "typescripts/lib.es2015.d.ts",
+        "typescripts/lib.es2015.core.d.ts",
+        "typescripts/lib.es2015.collection.d.ts",
+        "typescripts/lib.es2015.generator.d.ts",
+        "typescripts/lib.es2015.proxy.d.ts",
+        "typescripts/lib.es2015.reflect.d.ts",
+        "typescripts/lib.es2015.symbol.d.ts",
+        "typescripts/lib.es2015.symbol.wellknown.d.ts",
         "typescripts/lib.es2015.promise.d.ts",
         "typescripts/lib.es2015.iterable.d.ts",
+        "typescripts/lib.scripthost.d.ts",
         "typescripts/jquery.d.ts"
     ];
 
