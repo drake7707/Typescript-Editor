@@ -677,7 +677,8 @@ define(function (require, exports, module) {
             var code = annotations[i].code;
 
             if (curPos >= start && curPos < start + end && typeof code !== "undefined") {
-                var codeFixes = languageService.getCodeFixesAtPosition(selectFileName + ".ts", start, end, [code]);
+                var formatSettings = typeScriptLS.getFormatCodeSettings();
+                var codeFixes = languageService.getCodeFixesAtPosition(selectFileName + ".ts", start, end, [code], formatSettings);
                 if (codeFixes.length > 0) {
 
                     for (var j = 0; j < codeFixes.length; j++) {

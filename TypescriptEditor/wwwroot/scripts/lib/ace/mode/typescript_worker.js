@@ -139,8 +139,8 @@ define(function (require, exports, module) {
 
             var outputFile = this.languageService.getEmitOutput("temp.ts");
             var errors = this.languageService.getCompilerOptionsDiagnostics()
-                                        .concat(this.languageService.getSyntacticDiagnostics("temp.ts"))
-                                        .concat(this.languageService.getSemanticDiagnostics("temp.ts"));
+                .concat(this.languageService.getSyntacticDiagnostics("temp.ts"))
+                .concat(this.languageService.getSemanticDiagnostics("temp.ts"));
 
             var annotations = [];
             var self = this;
@@ -149,8 +149,16 @@ define(function (require, exports, module) {
             errors.forEach(function (error) {
                 var pos = DocumentPositionUtil.getPosition(self.doc, error.start);
 
-                var hasCodeFixesAvailable = self.languageService.getCodeFixesAtPosition("temp.ts", error.start, error.start + error.length, [error.code]).length > 0;
-
+                var hasCodeFixesAvailable = false;
+                try {
+                    var formatSettings = self.typeScriptLS.getFormatCodeSettings();
+                    var codefixes = self.languageService.getCodeFixesAtPosition("temp.ts", error.start, error.start + error.length, [error.code], formatSettings);
+                    hasCodeFixesAvailable = codefixes.length > 0;
+                }
+                catch (err) {
+                    console.warn("Unable to fetch code fixes");
+                    console.error(err);
+                }
                 annotations.push({
                     row: pos.row,
                     column: pos.column,
@@ -161,6 +169,8 @@ define(function (require, exports, module) {
                     type: hasCodeFixesAvailable ? "errorfix" : "error",
                     raw: typeof error.messageText === "string" ? error.messageText : error.messageText.messageText
                 });
+
+
             });
 
             this.sender.emit("compileErrors", annotations);
