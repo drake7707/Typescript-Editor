@@ -113,15 +113,15 @@ define(function (require, exports, module) {
 
 
             for (var i = 0; i < emitResult.sourceMaps.length; i++) {
-                if (emitResult.sourceMaps[i].sourceMapFile == "temp.js") {
+                if (emitResult.sourceMaps[i].inputSourceFileNames.indexOf("temp.ts") >= 0) {
 
                     var sourceMapObj = {
-                        file: emitResult.sourceMaps[i].sourceMapFile,
+                        file: emitResult.sourceMaps[i].inputSourceFileNames,
                         version: 1,
-                        mappings: emitResult.sourceMaps[i].sourceMapMappings,
-                        names: emitResult.sourceMaps[i].sourceMapNames,
-                        sourceRoot: emitResult.sourceMaps[i].sourceMapSourceRoot,
-                        sources: emitResult.sourceMaps[i].sourceMapSources
+                        mappings: emitResult.sourceMaps[i].sourceMap.mappings,
+                        names: emitResult.sourceMaps[i].sourceMap.names,
+                        sourceRoot: emitResult.sourceMaps[i].sourceMap.sourceRoot,
+                        sources: emitResult.sourceMaps[i].sourceMap.sources
                     };
                     sourceMap = JSON.stringify(sourceMapObj);
                     break;
