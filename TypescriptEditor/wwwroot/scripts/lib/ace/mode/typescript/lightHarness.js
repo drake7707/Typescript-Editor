@@ -251,6 +251,10 @@ define(function (require, exports, module) {
 
         };
 
+        TypeScriptLS.prototype.getFormatCodeSettings = function () {
+            return this.getDefaultFormatCodeSettings();
+        };
+
         TypeScriptLS.prototype.getCompilationSettings = function () {
             return this.compilerOptions;
         };
